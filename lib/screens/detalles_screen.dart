@@ -55,7 +55,7 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
           ),
           SliverToBoxAdapter(
             child: Container(
-              color: Color(0xFFFFF0F0),
+              color: Color.fromARGB(255, 255, 255, 255),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
