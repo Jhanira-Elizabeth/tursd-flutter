@@ -5,13 +5,18 @@ import 'api_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/detalles_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 
 Future<void> main() async {
-  await dotenv.load(); // Carga el .env
-  runApp(MyApp());
-}
+  if (kIsWeb) {
+    await dotenv.load(fileName: "assets/.env");
+  } else {
+    await dotenv.load(); // usa el real en raíz
+  }
 
+  runApp(const MyApp());
+}
 
 
 class MyApp extends StatelessWidget {
