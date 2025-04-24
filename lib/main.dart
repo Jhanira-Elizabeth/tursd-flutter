@@ -4,10 +4,15 @@ import 'punto_turistico.dart';
 import 'api_service.dart';
 import 'screens/home_screen.dart';
 import 'screens/detalles_screen.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  runApp(const MyApp());
+
+Future<void> main() async {
+  await dotenv.load(); // Carga el .env
+  runApp(MyApp());
 }
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
