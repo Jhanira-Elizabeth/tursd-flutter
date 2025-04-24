@@ -24,6 +24,10 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: FutureBuilder<List<PuntoTuristico>>(
         future: _futurePuntos,
@@ -38,12 +42,12 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
 
           final puntos = snapshot.data!;
           return GridView.builder(
-            padding: EdgeInsets.all(16),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            padding: const EdgeInsets.all(12),
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-              childAspectRatio: 0.8,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.75,
             ),
             itemCount: puntos.length,
             itemBuilder: (context, index) {
@@ -51,53 +55,85 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
               return InkWell(
                 onTap: () {
                   Navigator.pushNamed(
-                    context, 
+                    context,
                     '/detalles',
                     arguments: punto,
                   );
                 },
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(15),
-                          topRight: Radius.circular(15),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(15),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 4,
+                          spreadRadius: 1,
+                          offset: Offset(0, 2),
                         ),
-                        child: Container(
-                          height: 100,
-                          width: double.infinity,
-                          color: Colors.grey.shade300,
-                          child: Icon(Icons.image),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: Text(
-                          punto.nombre,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 14,
-                            color: Color(0xFF9DAF3A),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Container(
+                            width: double.infinity,
+                            child: punto.imagenUrl != null && punto.imagenUrl!.isNotEmpty
+                                ? Image.network(
+                                    punto.imagenUrl!,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Center(child: Icon(Icons.broken_image)),
+                                    loadingBuilder: (context, child, loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(child: CircularProgressIndicator());
+                                    },
+                                  )
+                                : Container(
+                                    color: Colors.grey.shade200,
+                                    child: Icon(Icons.image, size: 50),
+                                  ),
                           ),
-                          textAlign: TextAlign.center,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                        Expanded(
+                          flex: 2,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  punto.nombre,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: Color(0xFF9DAF3A),
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (punto.descripcion != null && punto.descripcion!.isNotEmpty)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4),
+                                    child: Text(
+                                      punto.descripcion!,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: Colors.grey.shade600,
+                                      ),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               );
@@ -121,11 +157,14 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
           ),
         ],
         currentIndex: 0,
+        selectedItemColor: Color(0xFF9DAF3A),
         onTap: (index) {
           if (index == 0) {
             Navigator.pop(context);
           } else if (index == 1) {
             Navigator.pushReplacementNamed(context, '/mapa');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/chatbot');
           }
         },
       ),
