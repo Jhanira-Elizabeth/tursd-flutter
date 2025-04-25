@@ -3,7 +3,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'punto_turistico.dart';
 import 'api_service.dart';
 import 'categoria.dart';
-import 'screens/categorias_screen.dart';
+// import 'screens/categorias_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/detalles_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -16,7 +16,7 @@ Future<void> main() async {
     await dotenv.load(); // usa el real en raíz
   }
 
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         '/detalles': (context) => DetallesScreen(),
         '/mapa': (context) => const MapaPage(),
         '/recomendados': (context) => const RecomendadosPage(),
-        '/categorias': (context) => const CategoriasScreen(), // Usa la CategoriasScreen manual
+        '/categorias': (context) =>  CategoriasScreen(), // Usa la CategoriasScreen manual
         '/etniatsachila': (context) => const PlaceholderScreen(title: 'Etnia Tsáchila'),
         '/parroquias': (context) => const PlaceholderScreen(title: 'Parroquias'),
         '/alojamiento': (context) => const PlaceholderScreen(title: 'Alojamiento'),
@@ -206,100 +206,56 @@ class _MapaPageState extends State<MapaPage> {
   }
 }
 
-class CategoriasScreen extends StatefulWidget {
-  const CategoriasScreen({super.key});
-
-  @override
-  State<CategoriasScreen> createState() => _CategoriasScreenState();
-}
-
-class _CategoriasScreenState extends State<CategoriasScreen> {
-  final ApiService _apiService = ApiService();
-  late Future<List<Categoria>> _categoriasFuture;
-
-  @override
-  void initState() {
-    super.initState();
-    _categoriasFuture = _apiService.fetchCategorias();
-  }
+// ¡Asegúrate de que SOLO esta clase CategoriasScreen esté presente en main.dart!
+class CategoriasScreen extends StatelessWidget {
+  final List<Map<String, dynamic>> categorias = [
+    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
+    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
+    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
+    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
+    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorías'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-      body: FutureBuilder<List<Categoria>>(
-        future: _categoriasFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay categorías disponibles'));
-          } else {
-            final categorias = snapshot.data!;
+      appBar: AppBar(title: const Text('Categorías'), backgroundColor: Colors.white, foregroundColor: Colors.black),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 1.5,
+        ),
+        itemCount: categorias.length,
+        itemBuilder: (context, index) {
+          final categoria = categorias[index];
+          final ruta = '/${categoria['nombre'].toLowerCase().replaceAll(' ', '')}';
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: categorias.length,
-              itemBuilder: (context, index) {
-                final categoria = categorias[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                      ),
-                    ],
+          return InkWell(
+            onTap: () {
+              Navigator.pushNamed(context, ruta);
+            },
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(15),
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  Image.network(categoria['imagen'], fit: BoxFit.cover),
+                  Container(color: Colors.black.withOpacity(0.4)),
+                  Center(
+                    child: Text(
+                      categoria['nombre'],
+                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
                   ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16.0),
-                    leading: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Center(child: Icon(Icons.category)),
-                    ),
-                    title: Text(
-                      categoria.nombre,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    subtitle: Text(
-                      categoria.descripcion.length > 100
-                          ? '${categoria.descripcion.substring(0, 97)}...'
-                          : categoria.descripcion,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onTap: () {
-                      // Aquí agregas la navegación a la página de detalles de categoría
-                      print('Categoría ${categoria.nombre} tocada');
-                    },
-                  ),
-                );
-              },
-            );
-          }
+                ],
+              ),
+            ),
+          );
         },
       ),
     );

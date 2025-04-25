@@ -12,13 +12,13 @@ class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
 
   final List<Map<String, String>> manualCategorias = [
-    {'nombre': 'Etnia Tsachila', 'imagen': 'https://via.placeholder.com/100/FFC107/000000?Text=Tsachila'},
-    {'nombre': 'Atracciones', 'imagen': 'https://via.placeholder.com/100/4CAF50/FFFFFF?Text=Atracciones'},
-    {'nombre': 'Gastronomía', 'imagen': 'https://via.placeholder.com/100/F44336/FFFFFF?Text=Comida'},
-    {'nombre': 'Hoteles', 'imagen': 'https://via.placeholder.com/100/2196F3/FFFFFF?Text=Hotel'},
-    {'nombre': 'Parroquias', 'imagen': 'https://via.placeholder.com/100/9C27B0/FFFFFF?Text=Parroquia'},
-    {'nombre': 'Parques', 'imagen': 'https://via.placeholder.com/100/009688/FFFFFF?Text=Parque'},
-    {'nombre': 'Ríos', 'imagen': 'https://via.placeholder.com/100/3F51B5/FFFFFF?Text=Rio'},
+    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
+    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
+    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
+    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
+    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
+    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
   ];
 
   @override
@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Turismo IA'),
+        title: const Text('Turismo IA'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -48,7 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Navigator.pushNamed(context, '/mapa');
           }
         },
-        items: [
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Inicio',
@@ -68,29 +68,29 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildBody() {
     return ListView(
-      padding: EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0),
       children: [
         // Barra de búsqueda
         TextField(
           decoration: InputDecoration(
             hintText: 'Búsqueda',
-            prefixIcon: Icon(Icons.search),
+            prefixIcon: const Icon(Icons.search),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(30),
               borderSide: BorderSide.none,
             ),
             filled: true,
             fillColor: Colors.white,
-            contentPadding: EdgeInsets.symmetric(vertical: 0),
+            contentPadding: const EdgeInsets.symmetric(vertical: 0),
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         // Sección de Recomendados
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
+            const Text(
               'Recomendados',
               style: TextStyle(
                 fontSize: 20,
@@ -102,24 +102,24 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 Navigator.pushNamed(context, '/recomendados');
               },
-              child: Text('Ver Todos'),
+              child: const Text('Ver Todos'),
             ),
           ],
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
 
         // Lista horizontal de recomendados (desde API)
-        Container(
+        SizedBox(
           height: 150,
           child: FutureBuilder<List<PuntoTuristico>>(
             future: _futurePuntos,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(child: CircularProgressIndicator());
+                return const Center(child: CircularProgressIndicator());
               } else if (snapshot.hasError) {
                 return Center(child: Text('Error: ${snapshot.error}'));
               } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return Center(child: Text('No hay puntos turísticos.'));
+                return const Center(child: Text('No hay puntos turísticos.'));
               }
 
               final puntos = snapshot.data!;
@@ -130,7 +130,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   final punto = puntos[index];
                   return Container(
                     width: 150,
-                    margin: EdgeInsets.only(right: 10),
+                    margin: const EdgeInsets.only(right: 10),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(15),
@@ -154,21 +154,21 @@ class _HomeScreenState extends State<HomeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                               topLeft: Radius.circular(15),
                               topRight: Radius.circular(15),
                             ),
                             child: Container(
                               height: 100,
                               color: Colors.grey.shade300,
-                              child: Center(child: Icon(Icons.image)),
+                              child: const Center(child: Icon(Icons.image)),
                             ),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.all(8.0),
                             child: Text(
                               punto.nombre,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -186,7 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
-        SizedBox(height: 20),
+        const SizedBox(height: 20),
 
         // Sección de Categorías (Nuevo diseño con scroll horizontal)
         Row(
@@ -207,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        SizedBox(height: 10),
+        const SizedBox(height: 10),
 
         // Lista horizontal de categorías manuales
         SizedBox(
@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Text(
                         categoria['nombre']!,
                         textAlign: TextAlign.center,
-                        style: TextStyle(fontSize: 12),
+                        style: const TextStyle(fontSize: 12),
                       ),
                     ],
                   ),
@@ -258,30 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ),
-
-        SizedBox(height: 20),
-
-        // El GridView de categorías anterior lo puedes eliminar o comentar
-        // GridView.count(
-        //   crossAxisCount: 2,
-        //   crossAxisSpacing: 10,
-        //   mainAxisSpacing: 10,
-        //   shrinkWrap: true,
-        //   physics: NeverScrollableScrollPhysics(),
-        //   children: [
-        //     _buildCategoryCard('Etnia Tsáchila', Icons.people),
-        //     _buildCategoryCard('Atracciones', Icons.attractions),
-        //     _buildCategoryCard('Gastronomía', Icons.restaurant),
-        //     _buildCategoryCard('Hoteles', Icons.hotel),
-        //   ],
-        // ),
       ],
     );
   }
-
-  // Widget _buildCategoryCard(String title, IconData icon) {
-  //   return Container(
-  //     // Tu código del CategoryCard anterior
-  //   );
-  // }
 }

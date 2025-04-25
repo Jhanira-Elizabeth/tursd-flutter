@@ -1,25 +1,64 @@
 import 'package:flutter/material.dart';
 
-class CategoriasScreen extends StatelessWidget {
+class CategoriasScreen extends StatefulWidget {
+  @override
+  _CategoriasScreenState createState() => _CategoriasScreenState();
+}
+
+class _CategoriasScreenState extends State<CategoriasScreen> {
+  int _currentIndex = 2; // Asumiendo que Categorías es el tercer ítem (índice 2)
+
   final List<Map<String, dynamic>> categorias = [
-    {'nombre': 'Etnia Tsáchila', 'imagen': 'https://ruta.com/etnia.jpg'},
-    {'nombre': 'Parroquias', 'imagen': 'https://ruta.com/parroquias.jpg'},
-    {'nombre': 'Alojamiento', 'imagen': 'https://ruta.com/alojamiento.jpg'},
-    {'nombre': 'Alimentación', 'imagen': 'https://ruta.com/alimentacion.jpg'},
-    {'nombre': 'Parques', 'imagen': 'https://ruta.com/parques.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'https://ruta.com/rios.jpg'},
+    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
+    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
+    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
+    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
+    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
+    {'nombre': 'Atractivos', 'imagen': 'assets/images/Atractivo1.jpg'}, // Añade más si es necesario
   ];
 
-  
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+    });
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2:
+        // Ya estamos en la pantalla de Categorías, no necesitamos navegar.
+        break;
+      case 3:
+        // Navegar al Chatbot (si tienes una ruta definida para él)
+        // Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Categorías'), backgroundColor: Colors.white, foregroundColor: Colors.black),
+      appBar: AppBar(
+        title: const Text(
+          'Categorías',
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+        centerTitle: true, // Centra el título
+      ),
       body: GridView.builder(
         padding: const EdgeInsets.all(12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1,
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 0.85, // Ajusta la relación de aspecto para más espacio vertical
         ),
         itemCount: categorias.length,
         itemBuilder: (context, index) {
@@ -28,28 +67,69 @@ class CategoriasScreen extends StatelessWidget {
 
           return InkWell(
             onTap: () {
-              // Ruta según categoría
               Navigator.pushNamed(context, ruta);
             },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Stack(
-                fit: StackFit.expand,
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: Colors.grey[200],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Image.network(categoria['imagen'], fit: BoxFit.cover),
-                  Container(color: Colors.black.withOpacity(0.4)),
-                  Center(
-                    child: Text(
-                      categoria['nombre'],
-                      style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          categoria['imagen'],
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return const Center(child: Icon(Icons.image_not_supported));
+                          },
+                        ),
+                      ),
                     ),
                   ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      categoria['nombre'],
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Aumenta el tamaño del texto
+                    ),
+                  ),
+                  const SizedBox(height: 8), // Añade un poco de espacio debajo del texto
                 ],
               ),
             ),
           );
         },
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Inicio',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.map),
+            label: 'Mapa',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.list), // Puedes usar otro icono más representativo para categorías
+            label: 'Categorías',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.chat),
+            label: 'Chatbot',
+          ),
+        ],
+        currentIndex: _currentIndex,
+        selectedItemColor: Colors.blue,
+        unselectedItemColor: Colors.grey,
+        onTap: _onTabTapped,
       ),
     );
   }
