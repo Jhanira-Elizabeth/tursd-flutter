@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 
+// Primero tu pantalla principal
 class CategoriasScreen extends StatefulWidget {
+  const CategoriasScreen({Key? key}) : super(key: key);
+
   @override
   _CategoriasScreenState createState() => _CategoriasScreenState();
 }
 
 class _CategoriasScreenState extends State<CategoriasScreen> {
-  int _currentIndex = 2; // Asumiendo que Categorías es el tercer ítem (índice 2)
+  int _currentIndex = 0;
 
   final List<Map<String, dynamic>> categorias = [
     {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
@@ -22,114 +25,97 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     setState(() {
       _currentIndex = index;
     });
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/mapa');
-        break;
-      case 2:
-        // Ya estamos en la pantalla de Categorías, no necesitamos navegar.
-        break;
-      case 3:
-        // Navegar al Chatbot (si tienes una ruta definida para él)
-        // Navigator.pushReplacementNamed(context, '/chatbot');
-        break;
-    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Categorías',
-          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black),
-        centerTitle: true, // Centra el título
+        title: const Text('Categorías'),
       ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 0.85, // Ajusta la relación de aspecto para más espacio vertical
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: GridView.builder(
+          itemCount: categorias.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2, // Dos columnas
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+            childAspectRatio: 3 / 4,
+          ),
+          itemBuilder: (context, index) {
+            final categoria = categorias[index];
+            return CategoriaCard(
+              nombre: categoria['nombre']!,
+              imagen: categoria['imagen']!,
+            );
+          },
         ),
-        itemCount: categorias.length,
-        itemBuilder: (context, index) {
-          final categoria = categorias[index];
-          final ruta = '/${categoria['nombre'].toLowerCase().replaceAll(' ', '')}';
-
-          return InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, ruta);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(15),
-                color: Colors.grey[200],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          categoria['imagen'],
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return const Center(child: Icon(Icons.image_not_supported));
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      categoria['nombre'],
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), // Aumenta el tamaño del texto
-                    ),
-                  ),
-                  const SizedBox(height: 8), // Añade un poco de espacio debajo del texto
-                ],
-              ),
-            ),
-          );
-        },
       ),
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        currentIndex: _currentIndex,
+        onTap: _onTabTapped,
+        items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Inicio',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.list), // Puedes usar otro icono más representativo para categorías
+            icon: Icon(Icons.category),
             label: 'Categorías',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chatbot',
+            icon: Icon(Icons.person),
+            label: 'Perfil',
           ),
         ],
-        currentIndex: _currentIndex,
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.grey,
-        onTap: _onTabTapped,
+      ),
+    );
+  }
+}
+
+// Ahora tu widget CategoriaCard aparte
+class CategoriaCard extends StatelessWidget {
+  final String nombre;
+  final String imagen;
+
+  const CategoriaCard({
+    Key? key,
+    required this.nombre,
+    required this.imagen,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              child: Image.asset(
+                imagen,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Center(
+              child: Text(
+                nombre,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.teal[800],
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

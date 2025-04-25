@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../api_service.dart';
 import '../punto_turistico.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class MapaScreen extends StatefulWidget {
   @override
@@ -10,47 +9,101 @@ class MapaScreen extends StatefulWidget {
 }
 
 class _MapaScreenState extends State<MapaScreen> {
+  late GoogleMapController _mapController;
   late Future<List<PuntoTuristico>> _futurePuntos;
-  Set<Marker> _markers = {};
-  GoogleMapController? _mapController;
-  bool _mapReady = false;
+  late Future<List<LocalTuristico>> _futureLocales;
+  final Set<Marker> _markers = {};
+  bool _isLoading = true;
+  bool _showPuntos = true;
+  bool _showLocales = true;
+  
+  final LatLng _santoDom1ngo = LatLng(-0.254167, -79.175);
 
   @override
   void initState() {
     super.initState();
     _futurePuntos = ApiService().fetchPuntosTuristicos();
+    _futureLocales = ApiService().fetchLocalesTuristicos();
     _loadMarkers();
   }
 
-  void _loadMarkers() async {
+  Future<void> _loadMarkers() async {
     try {
       final puntos = await _futurePuntos;
-      if (mounted) {
-        setState(() {
-          _markers = puntos.map((punto) => 
-            Marker(
-              markerId: MarkerId(punto.id.toString()),
-              position: LatLng(punto.latitud, punto.longitud),
-              infoWindow: InfoWindow(
-                title: punto.nombre,
-                snippet: punto.descripcion != null && punto.descripcion.length > 30 
-                  ? '${punto.descripcion.substring(0, 30)}...'
-                  : punto.descripcion ?? '',
+      final locales = await _futureLocales;
+
+      setState(() {
+        if (_showPuntos) {
+          for (var punto in puntos) {
+            _markers.add(
+              Marker(
+                markerId: MarkerId('punto_${punto.id}'),
+                position: LatLng(punto.latitud, punto.longitud),
+                infoWindow: InfoWindow(
+                  title: punto.nombre,
+                  snippet: 'Punto Turístico',
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detalles',
+                      arguments: punto,
+                    );
+                  },
+                ),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueGreen,
+                ),
               ),
-              onTap: () {
-                Navigator.pushNamed(
-                  context, 
-                  '/detalles',
-                  arguments: punto,
-                );
-              },
-            )
-          ).toSet();
-        });
-      }
+            );
+          }
+        }
+
+        if (_showLocales) {
+          for (var local in locales) {
+            _markers.add(
+              Marker(
+                markerId: MarkerId('local_${local.id}'),
+                position: LatLng(local.latitud, local.longitud),
+                infoWindow: InfoWindow(
+                  title: local.nombre,
+                  snippet: 'Local: ${local.descripcion.length > 20 ? local.descripcion.substring(0, 20) + '...' : local.descripcion}',
+                ),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueAzure,
+                ),
+              ),
+            );
+          }
+        }
+        
+        _isLoading = false;
+      });
     } catch (e) {
       print('Error cargando marcadores: $e');
+      setState(() {
+        _isLoading = false;
+      });
     }
+  }
+
+  void _onMapCreated(GoogleMapController controller) {
+    _mapController = controller;
+  }
+
+  void _togglePuntosTuristicos() {
+    setState(() {
+      _showPuntos = !_showPuntos;
+      _markers.clear();
+      _loadMarkers();
+    });
+  }
+
+  void _toggleLocalesTuristicos() {
+    setState(() {
+      _showLocales = !_showLocales;
+      _markers.clear();
+      _loadMarkers();
+    });
   }
 
   @override
@@ -61,69 +114,94 @@ class _MapaScreenState extends State<MapaScreen> {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              Icons.place,
+              color: _showPuntos ? Color(0xFF9DAF3A) : Colors.grey,
+            ),
+            onPressed: _togglePuntosTuristicos,
+            tooltip: 'Mostrar/Ocultar Puntos Turísticos',
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.store,
+              color: _showLocales ? Color(0xFF9DAF3A) : Colors.grey,
+            ),
+            onPressed: _toggleLocalesTuristicos,
+            tooltip: 'Mostrar/Ocultar Locales',
+          ),
+        ],
       ),
-      body: FutureBuilder<List<PuntoTuristico>>(
-        future: _futurePuntos,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Error cargando el mapa: ${snapshot.error}'),
-                  if (kIsWeb)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        'El mapa puede no funcionar correctamente en modo web de desarrollo. ' +
-                        'Asegúrate de haber configurado correctamente la API key de Google Maps.',
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _futurePuntos = ApiService().fetchPuntosTuristicos();
-                        _loadMarkers();
-                      });
-                    },
-                    child: Text('Reintentar'),
-                  ),
-                ],
+      body: Stack(
+        children: [
+          GoogleMap(
+            onMapCreated: _onMapCreated,
+            initialCameraPosition: CameraPosition(
+              target: _santoDom1ngo,
+              zoom: 12.0,
+            ),
+            markers: _markers,
+            myLocationButtonEnabled: true,
+            myLocationEnabled: true,
+            mapToolbarEnabled: true,
+            zoomControlsEnabled: true,
+          ),
+          if (_isLoading)
+            Center(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9DAF3A)),
               ),
-            );
-          }
-          
-          // Solución alternativa si estamos en web y hay problemas con el mapa
-          if (kIsWeb && snapshot.hasData) {
-            return _buildMapAlternative(snapshot.data!);
-          }
-          
-          // Cálculo de la posición central
-          LatLng center = const LatLng(-0.253, -79.175); // Santo Domingo, Ecuador por defecto
-          if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-            double sumLat = 0;
-            double sumLng = 0;
-            
-            for (var punto in snapshot.data!) {
-              sumLat += punto.latitud;
-              sumLng += punto.longitud;
-            }
-            
-            center = LatLng(
-              sumLat / snapshot.data!.length,
-              sumLng / snapshot.data!.length,
-            );
-          }
-          
-          return _buildGoogleMap(center);
-        },
+            ),
+          Positioned(
+            bottom: 16.0,
+            left: 16.0,
+            child: Card(
+              elevation: 4.0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text('Puntos Turísticos'),
+                      ],
+                    ),
+                    SizedBox(height: 4),
+                    Row(
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        SizedBox(width: 8),
+                        Text('Locales Turísticos'),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
       bottomNavigationBar: BottomNavigationBar(
         items: [
@@ -152,76 +230,3 @@ class _MapaScreenState extends State<MapaScreen> {
       ),
     );
   }
-  
-  Widget _buildGoogleMap(LatLng center) {
-    try {
-      return GoogleMap(
-        initialCameraPosition: CameraPosition(
-          target: center,
-          zoom: 12.0,
-        ),
-        markers: _markers,
-        myLocationButtonEnabled: true,
-        myLocationEnabled: true,
-        onMapCreated: (controller) {
-          setState(() {
-            _mapController = controller;
-            _mapReady = true;
-          });
-        },
-      );
-    } catch (e) {
-      print('Error al crear el mapa: $e');
-      return _buildMapAlternative(null);
-    }
-  }
-  
-  // Vista alternativa para mostrar cuando el mapa no funciona
-  Widget _buildMapAlternative(List<PuntoTuristico>? puntos) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.map_outlined, size: 64, color: Colors.grey),
-          SizedBox(height: 16),
-          Text(
-            'No se pudo cargar el mapa',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          SizedBox(height: 16),
-          if (puntos != null && puntos.isNotEmpty)
-            Expanded(
-              child: ListView.builder(
-                itemCount: puntos.length,
-                itemBuilder: (context, index) {
-                  final punto = puntos[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: ListTile(
-                      leading: Icon(Icons.location_on, color: Color(0xFF9DAF3A)),
-                      title: Text(punto.nombre),
-                      subtitle: Text(
-                        'Lat: ${punto.latitud.toStringAsFixed(4)}, Lng: ${punto.longitud.toStringAsFixed(4)}',
-                      ),
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context, 
-                          '/detalles',
-                          arguments: punto,
-                        );
-                      },
-                    ),
-                  );
-                },
-              ),
-            ),
-          if (puntos == null || puntos.isEmpty)
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Text('No hay puntos turísticos disponibles'),
-            ),
-        ],
-      ),
-    );
-  }
-}

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../punto_turistico.dart';
+import '../api_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class DetallesScreen extends StatefulWidget {
@@ -9,11 +10,20 @@ class DetallesScreen extends StatefulWidget {
 
 class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late Future<List<Actividad>> _futureActividades;
+  final ApiService _apiService = ApiService();
   
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+  }
+  
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final punto = ModalRoute.of(context)!.settings.arguments as PuntoTuristico;
+    _futureActividades = _apiService.fetchActividadesByPunto(punto.id);
   }
   
   @override
@@ -47,10 +57,19 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
                   ],
                 ),
               ),
-              background: Container(
-                color: Colors.grey.shade400,
-                child: Center(child: Icon(Icons.image, size: 50, color: Colors.white)),
-              ),
+              background: punto.imagenUrl != null && punto.imagenUrl!.isNotEmpty
+                ? Image.network(
+                    punto.imagenUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      color: Colors.grey.shade400,
+                      child: Center(child: Icon(Icons.image, size: 50, color: Colors.white)),
+                    ),
+                  )
+                : Container(
+                    color: Colors.grey.shade400,
+                    child: Center(child: Icon(Icons.image, size: 50, color: Colors.white)),
+                  ),
             ),
           ),
           SliverToBoxAdapter(
@@ -59,6 +78,20 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Etiquetas
+                  if (punto.etiquetas.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Wrap(
+                        spacing: 8.0,
+                        children: punto.etiquetas.map((etiqueta) => Chip(
+                          label: Text(etiqueta.nombre),
+                          backgroundColor: Color(0xFFE0E6B8),
+                          labelStyle: TextStyle(color: Color(0xFF9DAF3A)),
+                        )).toList(),
+                      ),
+                    ),
+                  
                   TabBar(
                     controller: _tabController,
                     labelColor: Colors.black,
@@ -86,6 +119,32 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
                                 style: TextStyle(fontSize: 14),
                               ),
                               SizedBox(height: 24),
+                              // Información de la Parroquia si está disponible
+                              if (punto.parroquia != null) ...[
+                                Text(
+                                  'Parroquia: ${punto.parroquia!.nombre}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  punto.parroquia!.descripcion,
+                                  style: TextStyle(fontSize: 14),
+                                ),
+                                if (punto.parroquia!.poblacion > 0)
+                                  Text(
+                                    'Población: ${punto.parroquia!.poblacion} habitantes',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                if (punto.parroquia!.temperaturaPromedio > 0)
+                                  Text(
+                                    'Temperatura promedio: ${punto.parroquia!.temperaturaPromedio} °C',
+                                    style: TextStyle(fontSize: 14),
+                                  ),
+                                SizedBox(height: 16),
+                              ],
                               Text(
                                 'Más Información',
                                 style: TextStyle(
@@ -109,6 +168,7 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
                                 title: Text('Av. 9 de Octubre'),
                                 contentPadding: EdgeInsets.zero,
                               ),
+                              SizedBox(height: 16),
                             ],
                           ),
                         ),
@@ -116,33 +176,97 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
                         // Actividades
                         Padding(
                           padding: EdgeInsets.all(16.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Horarios de atención',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              _buildScheduleRow('Lunes a Viernes', '08:00 a 18:00'),
-                              _buildScheduleRow('Sábados y Domingos', '08:00 a 16:00'),
-                              SizedBox(height: 24),
-                              Text(
-                                'Experiencias',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              SizedBox(height: 8),
-                              _buildActivityRow(Icons.camera_alt, 'Fotografía'),
-                              _buildActivityRow(Icons.hiking, 'Caminatas'),
-                              _buildActivityRow(Icons.spa, 'Artesanías'),
-                              _buildActivityRow(Icons.restaurant, 'Gastronomía local'),
-                            ],
+                          child: FutureBuilder<List<Actividad>>(
+                            future: _futureActividades,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return Center(child: CircularProgressIndicator());
+                              } else if (snapshot.hasError) {
+                                return Center(child: Text('Error: ${snapshot.error}'));
+                              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Horarios de atención',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    _buildScheduleRow('Lunes a Viernes', '08:00 a 18:00'),
+                                    _buildScheduleRow('Sábados y Domingos', '08:00 a 16:00'),
+                                    SizedBox(height: 24),
+                                    Text(
+                                      'Experiencias',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    _buildActivityRow(Icons.camera_alt, 'Fotografía'),
+                                    _buildActivityRow(Icons.hiking, 'Caminatas'),
+                                    _buildActivityRow(Icons.spa, 'Artesanías'),
+                                    _buildActivityRow(Icons.restaurant, 'Gastronomía local'),
+                                  ],
+                                );
+                              } else {
+                                final actividades = snapshot.data!;
+                                return Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Actividades disponibles',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 12),
+                                    ...actividades.map((actividad) => Card(
+                                      margin: EdgeInsets.only(bottom: 12),
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              actividad.nombre,
+                                              style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 15,
+                                                color: Color(0xFF9DAF3A),
+                                              ),
+                                            ),
+                                            SizedBox(height: 6),
+                                            if (actividad.precio > 0)
+                                              Text(
+                                                'Precio: \$${actividad.precio.toStringAsFixed(2)}',
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                          ],
+                                        ),
+                                      ),
+                                    )).toList(),
+                                    SizedBox(height: 24),
+                                    Text(
+                                      'Horarios de atención',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    _buildScheduleRow('Lunes a Viernes', '08:00 a 18:00'),
+                                    _buildScheduleRow('Sábados y Domingos', '08:00 a 16:00'),
+                                  ],
+                                );
+                              }
+                            },
                           ),
                         ),
                         
@@ -198,11 +322,14 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
           ),
         ],
         currentIndex: 0,
+        selectedItemColor: Color(0xFF9DAF3A),
         onTap: (index) {
           if (index == 0) {
             Navigator.popUntil(context, (route) => route.isFirst);
           } else if (index == 1) {
             Navigator.pushReplacementNamed(context, '/mapa');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/chatbot');
           }
         },
       ),
@@ -210,42 +337,4 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
   }
   
   Widget _buildScheduleRow(String days, String hours) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              days,
-              style: TextStyle(fontSize: 14),
-            ),
-          ),
-          Expanded(
-            flex: 1,
-            child: Text(
-              hours,
-              style: TextStyle(fontSize: 14),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget _buildActivityRow(IconData icon, String activity) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 20),
-          SizedBox(width: 12),
-          Text(
-            activity,
-            style: TextStyle(fontSize: 14),
-          ),
-        ],
-      ),
-    );
-  }
-}
+    return

@@ -6,6 +6,9 @@ import 'categoria.dart';
 // import 'screens/categorias_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/detalles_screen.dart';
+import 'screens/recomendados_screen.dart';
+import 'screens/chatbot_screen.dart';
+import 'screens/mapa_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
@@ -20,17 +23,19 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Turismo IA',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        appBarTheme: const AppBarTheme(
+        primaryColor: Color(0xFF9DAF3A),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Color(0xFF9DAF3A),
+          primary: Color(0xFF9DAF3A),
+        ),
+        scaffoldBackgroundColor: Colors.grey[50],
+        appBarTheme: AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
@@ -39,18 +44,12 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => HomeScreen(),
+        '/categorias': (context) => CategoriasScreen(),
+        '/recomendados': (context) => RecomendadosScreen(),
         '/detalles': (context) => DetallesScreen(),
-        '/mapa': (context) => const MapaPage(),
-        '/recomendados': (context) => const RecomendadosPage(),
-        '/categorias': (context) =>  CategoriasScreen(), // Usa la CategoriasScreen manual
-        '/etniatsachila': (context) => const PlaceholderScreen(title: 'Etnia Tsáchila'),
-        '/parroquias': (context) => const PlaceholderScreen(title: 'Parroquias'),
-        '/alojamiento': (context) => const PlaceholderScreen(title: 'Alojamiento'),
-        '/alimentacion': (context) => const PlaceholderScreen(title: 'Alimentación'),
-        '/parques': (context) => const PlaceholderScreen(title: 'Parques'),
-        '/rios': (context) => const PlaceholderScreen(title: 'Ríos'),
+        '/mapa': (context) => MapaScreen(),
+        '/chatbot': (context) => ChatbotScreen(),
       },
-      debugShowCheckedModeBanner: false,
     );
   }
 }
