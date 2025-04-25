@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'punto_turistico.dart';
 import 'api_service.dart';
+import 'categoria.dart';
+import 'screens/categorias_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/detalles_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-
 
 Future<void> main() async {
   if (kIsWeb) {
@@ -18,9 +19,8 @@ Future<void> main() async {
   runApp(const MyApp());
 }
 
-
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +42,13 @@ class MyApp extends StatelessWidget {
         '/detalles': (context) => DetallesScreen(),
         '/mapa': (context) => const MapaPage(),
         '/recomendados': (context) => const RecomendadosPage(),
+        '/categorias': (context) => const CategoriasScreen(), // Usa la CategoriasScreen manual
+        '/etniatsachila': (context) => const PlaceholderScreen(title: 'Etnia Tsáchila'),
+        '/parroquias': (context) => const PlaceholderScreen(title: 'Parroquias'),
+        '/alojamiento': (context) => const PlaceholderScreen(title: 'Alojamiento'),
+        '/alimentacion': (context) => const PlaceholderScreen(title: 'Alimentación'),
+        '/parques': (context) => const PlaceholderScreen(title: 'Parques'),
+        '/rios': (context) => const PlaceholderScreen(title: 'Ríos'),
       },
       debugShowCheckedModeBanner: false,
     );
@@ -49,17 +56,17 @@ class MyApp extends StatelessWidget {
 }
 
 class MapaPage extends StatefulWidget {
-  const MapaPage({Key? key}) : super(key: key);
+  const MapaPage({super.key});
 
   @override
-  _MapaPageState createState() => _MapaPageState();
+  State<MapaPage> createState() => _MapaPageState();
 }
 
 class _MapaPageState extends State<MapaPage> {
   final ApiService _apiService = ApiService();
   late Future<List<PuntoTuristico>> _puntosFuture;
   int _currentIndex = 1; // Inicialmente en el índice 1 (Mapa)
-  
+
   @override
   void initState() {
     super.initState();
@@ -86,21 +93,21 @@ class _MapaPageState extends State<MapaPage> {
             return const Center(child: Text('No hay puntos turísticos disponibles'));
           } else {
             final puntos = snapshot.data!;
-            
+
             // Calculate center position based on all points
             double sumLat = 0;
             double sumLng = 0;
-            
+
             for (var punto in puntos) {
               sumLat += punto.latitud;
               sumLng += punto.longitud;
             }
-            
+
             final centerLat = sumLat / puntos.length;
             final centerLng = sumLng / puntos.length;
-            
+
             final Set<Marker> markers = {};
-            
+
             for (var punto in puntos) {
               markers.add(
                 Marker(
@@ -108,8 +115,8 @@ class _MapaPageState extends State<MapaPage> {
                   position: LatLng(punto.latitud, punto.longitud),
                   infoWindow: InfoWindow(
                     title: punto.nombre,
-                    snippet: punto.descripcion.length > 50 
-                        ? '${punto.descripcion.substring(0, 47)}...' 
+                    snippet: punto.descripcion.length > 50
+                        ? '${punto.descripcion.substring(0, 47)}...'
                         : punto.descripcion,
                     onTap: () {
                       Navigator.pushNamed(
@@ -122,7 +129,7 @@ class _MapaPageState extends State<MapaPage> {
                 ),
               );
             }
-            
+
             return Stack(
               children: [
                 GoogleMap(
@@ -173,7 +180,7 @@ class _MapaPageState extends State<MapaPage> {
           setState(() {
             _currentIndex = index;
           });
-          
+
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/');
           } else if (index == 2) {
@@ -199,17 +206,117 @@ class _MapaPageState extends State<MapaPage> {
   }
 }
 
-class RecomendadosPage extends StatefulWidget {
-  const RecomendadosPage({Key? key}) : super(key: key);
+class CategoriasScreen extends StatefulWidget {
+  const CategoriasScreen({super.key});
 
   @override
-  _RecomendadosPageState createState() => _RecomendadosPageState();
+  State<CategoriasScreen> createState() => _CategoriasScreenState();
+}
+
+class _CategoriasScreenState extends State<CategoriasScreen> {
+  final ApiService _apiService = ApiService();
+  late Future<List<Categoria>> _categoriasFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _categoriasFuture = _apiService.fetchCategorias();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Categorías'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: FutureBuilder<List<Categoria>>(
+        future: _categoriasFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('No hay categorías disponibles'));
+          } else {
+            final categorias = snapshot.data!;
+
+            return ListView.builder(
+              padding: const EdgeInsets.all(16.0),
+              itemCount: categorias.length,
+              itemBuilder: (context, index) {
+                final categoria = categorias[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(15),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.2),
+                        spreadRadius: 1,
+                        blurRadius: 3,
+                      ),
+                    ],
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.all(16.0),
+                    leading: Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Center(child: Icon(Icons.category)),
+                    ),
+                    title: Text(
+                      categoria.nombre,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    subtitle: Text(
+                      categoria.descripcion.length > 100
+                          ? '${categoria.descripcion.substring(0, 97)}...'
+                          : categoria.descripcion,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    onTap: () {
+                      // Aquí agregas la navegación a la página de detalles de categoría
+                      print('Categoría ${categoria.nombre} tocada');
+                    },
+                  ),
+                );
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+class RecomendadosPage extends StatefulWidget {
+  const RecomendadosPage({super.key});
+
+  @override
+  State<RecomendadosPage> createState() => _RecomendadosPageState();
 }
 
 class _RecomendadosPageState extends State<RecomendadosPage> {
   final ApiService _apiService = ApiService();
   late Future<List<PuntoTuristico>> _puntosFuture;
-  
+
   @override
   void initState() {
     super.initState();
@@ -236,7 +343,7 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
             return const Center(child: Text('No hay puntos turísticos disponibles'));
           } else {
             final puntos = snapshot.data!;
-            
+
             return ListView.builder(
               padding: const EdgeInsets.all(16.0),
               itemCount: puntos.length,
@@ -297,6 +404,25 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
             );
           }
         },
+      ),
+    );
+  }
+}
+
+class PlaceholderScreen extends StatelessWidget {
+  final String title;
+  const PlaceholderScreen({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(title),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
+      body: Center(
+        child: Text('Contenido para $title en construcción'),
       ),
     );
   }

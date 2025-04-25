@@ -11,6 +11,16 @@ class _HomeScreenState extends State<HomeScreen> {
   late Future<List<PuntoTuristico>> _futurePuntos;
   int _currentIndex = 0;
 
+  final List<Map<String, String>> manualCategorias = [
+    {'nombre': 'Etnia Tsachila', 'imagen': 'https://via.placeholder.com/100/FFC107/000000?Text=Tsachila'},
+    {'nombre': 'Atracciones', 'imagen': 'https://via.placeholder.com/100/4CAF50/FFFFFF?Text=Atracciones'},
+    {'nombre': 'Gastronomía', 'imagen': 'https://via.placeholder.com/100/F44336/FFFFFF?Text=Comida'},
+    {'nombre': 'Hoteles', 'imagen': 'https://via.placeholder.com/100/2196F3/FFFFFF?Text=Hotel'},
+    {'nombre': 'Parroquias', 'imagen': 'https://via.placeholder.com/100/9C27B0/FFFFFF?Text=Parroquia'},
+    {'nombre': 'Parques', 'imagen': 'https://via.placeholder.com/100/009688/FFFFFF?Text=Parque'},
+    {'nombre': 'Ríos', 'imagen': 'https://via.placeholder.com/100/3F51B5/FFFFFF?Text=Rio'},
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
           setState(() {
             _currentIndex = index;
           });
-          
+
           if (index == 1) {
             Navigator.pushNamed(context, '/mapa');
           }
@@ -75,7 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: 20),
-        
+
         // Sección de Recomendados
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -83,7 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
             Text(
               'Recomendados',
               style: TextStyle(
-                fontSize: 20, 
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF9DAF3A),
               ),
@@ -97,7 +107,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         SizedBox(height: 10),
-        
+
         // Lista horizontal de recomendados (desde API)
         Container(
           height: 150,
@@ -135,7 +145,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: InkWell(
                       onTap: () {
                         Navigator.pushNamed(
-                          context, 
+                          context,
                           '/detalles',
                           arguments: punto,
                         );
@@ -152,7 +162,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               height: 100,
                               color: Colors.grey.shade300,
                               child: Center(child: Icon(Icons.image)),
-                              // Aquí podrías cargar una imagen si tu API la proporciona
                             ),
                           ),
                           Padding(
@@ -178,69 +187,101 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: 20),
-        
-        // Sección de Categorías
-        Text(
-          'Categorías',
-          style: TextStyle(
-            fontSize: 20, 
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF9DAF3A),
-          ),
-        ),
-        SizedBox(height: 10),
-        
-        // Grid de categorías
-        GridView.count(
-          crossAxisCount: 2,
-          crossAxisSpacing: 10,
-          mainAxisSpacing: 10,
-          shrinkWrap: true,
-          physics: NeverScrollableScrollPhysics(),
+
+        // Sección de Categorías (Nuevo diseño con scroll horizontal)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            _buildCategoryCard('Etnia Tsáchila', Icons.people),
-            _buildCategoryCard('Atracciones', Icons.attractions),
-            _buildCategoryCard('Gastronomía', Icons.restaurant),
-            _buildCategoryCard('Hoteles', Icons.hotel),
+            const Text(
+              'Categorías',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(context, '/categorias');
+              },
+              child: const Text('Ver todos'),
+            ),
           ],
         ),
+        SizedBox(height: 10),
+
+        // Lista horizontal de categorías manuales
+        SizedBox(
+          height: 120, // Ajusta la altura según necesites
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: manualCategorias.length,
+            itemBuilder: (context, index) {
+              final categoria = manualCategorias[index];
+              return Padding(
+                padding: const EdgeInsets.only(left: 16.0),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
+                    );
+                  },
+                  child: Column(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          categoria['imagen']!,
+                          width: 80,
+                          height: 80,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              width: 80,
+                              height: 80,
+                              color: Colors.grey[300],
+                              child: const Icon(Icons.broken_image),
+                            );
+                          },
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        categoria['nombre']!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+
+        SizedBox(height: 20),
+
+        // El GridView de categorías anterior lo puedes eliminar o comentar
+        // GridView.count(
+        //   crossAxisCount: 2,
+        //   crossAxisSpacing: 10,
+        //   mainAxisSpacing: 10,
+        //   shrinkWrap: true,
+        //   physics: NeverScrollableScrollPhysics(),
+        //   children: [
+        //     _buildCategoryCard('Etnia Tsáchila', Icons.people),
+        //     _buildCategoryCard('Atracciones', Icons.attractions),
+        //     _buildCategoryCard('Gastronomía', Icons.restaurant),
+        //     _buildCategoryCard('Hoteles', Icons.hotel),
+        //   ],
+        // ),
       ],
     );
   }
 
-  Widget _buildCategoryCard(String title, IconData icon) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.2),
-            spreadRadius: 1,
-            blurRadius: 3,
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 50,
-            color: Color(0xFF9DAF3A),
-          ),
-          SizedBox(height: 10),
-          Text(
-            title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-              color: Color(0xFF9DAF3A),
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
+  // Widget _buildCategoryCard(String title, IconData icon) {
+  //   return Container(
+  //     // Tu código del CategoryCard anterior
+  //   );
+  // }
 }
