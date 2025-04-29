@@ -201,7 +201,11 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 const Text(
                   'Categorías',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF9DAF3A),
+                  ),
                 ),
                 TextButton(
                   onPressed: () {
@@ -213,16 +217,28 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             const SizedBox(height: 10),
 
-            // Lista horizontal de categorías manuales
+            // Lista horizontal de categorías en tarjetas
             SizedBox(
-              height: 120, // Ajusta la altura según necesites
+              height: 150, // Ajusta la altura según necesites
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 itemCount: manualCategorias.length,
                 itemBuilder: (context, index) {
                   final categoria = manualCategorias[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
+                  return Container(
+                    width: 150,
+                    margin: const EdgeInsets.only(right: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.2),
+                          spreadRadius: 1,
+                          blurRadius: 3,
+                        ),
+                      ],
+                    ),
                     child: InkWell(
                       onTap: () {
                         Navigator.pushNamed(
@@ -231,21 +247,32 @@ class _HomeScreenState extends State<HomeScreen> {
                         );
                       },
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           ClipRRect(
-                            borderRadius: BorderRadius.circular(10),
+                            borderRadius: const BorderRadius.only(
+                              topLeft: Radius.circular(15),
+                              topRight: Radius.circular(15),
+                            ),
                             child: Image.asset(
-                              categoria['imagen']!, // Usa la imagen desde assets
-                              width: 80,
-                              height: 80,
+                              categoria['imagen']!,
+                              height: 100,
+                              width: double.infinity,
                               fit: BoxFit.cover,
                             ),
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            categoria['nombre']!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(fontSize: 12),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              categoria['nombre']!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                            ),
                           ),
                         ],
                       ),

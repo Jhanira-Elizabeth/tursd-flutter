@@ -62,6 +62,9 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final puntos = ModalRoute.of(context)!.settings.arguments as List<PuntoTuristico>;
+  print('Puntos recibidos en recomendados: ${puntos.length}');
+  
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recomendados'),

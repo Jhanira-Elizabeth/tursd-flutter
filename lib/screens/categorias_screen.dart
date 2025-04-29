@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-// Primero tu pantalla principal
 class CategoriasScreen extends StatefulWidget {
   const CategoriasScreen({Key? key}) : super(key: key);
 
@@ -18,7 +17,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
     {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
     {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'}, // Añade más si es necesario
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
   ];
 
   void _onTabTapped(int index) {
@@ -32,6 +31,9 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Categorías'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -41,7 +43,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             crossAxisCount: 2, // Dos columnas
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 3 / 4,
+            childAspectRatio: 3 / 4, // Relación de aspecto para las tarjetas
           ),
           itemBuilder: (context, index) {
             final categoria = categorias[index];
@@ -74,7 +76,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   }
 }
 
-// Ahora tu widget CategoriaCard aparte
+// Widget para las tarjetas de categorías
 class CategoriaCard extends StatelessWidget {
   final String nombre;
   final String imagen;
@@ -87,35 +89,63 @@ class CategoriaCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      elevation: 4,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: Image.asset(
-                imagen,
-                fit: BoxFit.cover,
+    return InkWell(
+      onTap: () {
+        // Navegación o acción al hacer clic en la tarjeta
+        Navigator.pushNamed(
+          context,
+          '/${nombre.toLowerCase().replaceAll(' ', '')}',
+        );
+      },
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(15),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.2),
+                blurRadius: 4,
+                spreadRadius: 1,
+                offset: const Offset(0, 2),
               ),
-            ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Center(
-              child: Text(
-                nombre,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.teal[800],
-                  fontSize: 16,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: 3,
+                child: ClipRRect(
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
+                  child: Image.asset(
+                    imagen,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            ),
+              Expanded(
+                flex: 1,
+                child: Container(
+                  padding: const EdgeInsets.all(8.0),
+                  alignment: Alignment.center,
+                  child: Text(
+                    nombre,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: Color(0xFF9DAF3A),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
