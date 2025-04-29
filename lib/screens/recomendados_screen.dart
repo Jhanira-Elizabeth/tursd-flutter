@@ -19,33 +19,35 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
   }
 
   Future<List<PuntoTuristico>> _fetchData() async {
-  try {
-    // Obtén todos los puntos turísticos
-    final puntos = await ApiService().fetchPuntosTuristicos();
+    try {
+      // Obtén todos los puntos turísticos
+      final puntos = await ApiService().fetchPuntosTuristicos();
 
-    // Filtra los puntos turísticos que son recomendados
-    return puntos.where((punto) => punto.esRecomendado).toList();
-  } catch (e) {
-    print('Error fetching data: $e');
-    if (!mounted) return [];
-    
-    // Muestra un mensaje de error
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Error al cargar datos: ${e.toString().substring(0, math.min(50, e.toString().length))}...'),
-        action: SnackBarAction(
-          label: 'Reintentar',
-          onPressed: _refreshData,
+      // Filtra los puntos turísticos que son recomendados
+      return puntos.where((punto) => punto.esRecomendado).toList();
+    } catch (e) {
+      print('Error fetching data: $e');
+      if (!mounted) return [];
+
+      // Muestra un mensaje de error
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Error al cargar datos: ${e.toString().substring(0, math.min(50, e.toString().length))}...',
+          ),
+          action: SnackBarAction(
+            label: 'Reintentar',
+            onPressed: _refreshData,
+          ),
         ),
-      ),
-    );
-    return [];
-  }
+      );
+      return [];
+    }
   }
 
   void _refreshData() {
     if (_isRefreshing) return;
-    
+
     setState(() {
       _isRefreshing = true;
       _futurePuntos = _fetchData().whenComplete(() {
@@ -186,7 +188,7 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
 // Extracted card widget for better maintainability
 class PuntoTuristicoCard extends StatelessWidget {
   final PuntoTuristico punto;
-  
+
   const PuntoTuristicoCard({Key? key, required this.punto}) : super(key: key);
 
   @override

@@ -27,14 +27,6 @@ class _HomeScreenState extends State<HomeScreen> {
     _futurePuntos = ApiService().fetchPuntosTuristicos();
   }
 
-
-
-
-
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,89 +49,80 @@ class _HomeScreenState extends State<HomeScreen> {
           }
         },
         items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chatbot',
-          ),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chatbot'),
         ],
       ),
     );
   }
 
-
-
-
-
-
-
   Widget _buildBody() {
-    return ListView(
-      padding: const EdgeInsets.all(16.0),
-      children: [
-        // Barra de búsqueda
-        TextField(
-          decoration: InputDecoration(
-            hintText: 'Búsqueda',
-            prefixIcon: const Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(30),
-              borderSide: BorderSide.none,
-            ),
-            filled: true,
-            fillColor: Colors.white,
-            contentPadding: const EdgeInsets.symmetric(vertical: 0),
-          ),
-        ),
-        const SizedBox(height: 20),
+    return FutureBuilder<List<PuntoTuristico>>(
+      future: _futurePuntos,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        } else if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text('No hay puntos turísticos.'));
+        }
 
-        // Sección de Recomendados
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        final puntos = snapshot.data!;
+        return ListView(
+          padding: const EdgeInsets.all(16.0),
           children: [
-            const Text(
-              'Recomendados',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF9DAF3A),
+            // Barra de búsqueda
+            TextField(
+              decoration: InputDecoration(
+                hintText: 'Búsqueda',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0),
               ),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/recomendados');
-              },
-              child: const Text('Ver Todos'),
+            const SizedBox(height: 20),
+
+            // Sección de Recomendados
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Recomendados',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF9DAF3A),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/recomendados',
+                      arguments:
+                          puntos, // Pasa los puntos turísticos como argumentos
+                    );
+                  },
+                  child: const Text('Ver Todos'),
+                ),
+              ],
             ),
-          ],
-        ),
-        const SizedBox(height: 10),
+            const SizedBox(height: 10),
 
-        // Lista horizontal de recomendados (desde API)
-        SizedBox(
-          height: 150,
-          child: FutureBuilder<List<PuntoTuristico>>(
-            future: _futurePuntos,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return Center(child: Text('Error: ${snapshot.error}'));
-              } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                return const Center(child: Text('No hay puntos turísticos.'));
-              }
-
-              final puntos = snapshot.data!;
-              return ListView.builder(
+            // Lista horizontal de recomendados
+            SizedBox(
+              height: 150,
+              child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: puntos.length > 5 ? 5 : puntos.length, // Limitar a 5 ítems
+                itemCount:
+                    puntos.length > 5 ? 5 : puntos.length, // Limitar a 5 ítems
                 itemBuilder: (context, index) {
                   final punto = puntos[index];
                   return Container(
@@ -172,11 +155,23 @@ class _HomeScreenState extends State<HomeScreen> {
                               topLeft: Radius.circular(15),
                               topRight: Radius.circular(15),
                             ),
-                            child: Container(
-                              height: 100,
-                              color: Colors.grey.shade300,
-                              child: const Center(child: Icon(Icons.image)),
-                            ),
+                            child:
+                                punto.imagenUrl != null &&
+                                        punto.imagenUrl!.isNotEmpty
+                                    ? Image.asset(
+                                      punto
+                                          .imagenUrl!, // Usa la imagen desde assets
+                                      height: 100,
+                                      width: double.infinity,
+                                      fit: BoxFit.cover,
+                                    )
+                                    : Container(
+                                      height: 100,
+                                      color: Colors.grey.shade300,
+                                      child: const Center(
+                                        child: Icon(Icons.image),
+                                      ),
+                                    ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -196,83 +191,72 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   );
                 },
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-
-        // Sección de Categorías 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              'Categorías',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
               ),
             ),
-            TextButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/categorias');
-              },
-              child: const Text('Ver todos'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 10),
+            const SizedBox(height: 20),
 
-        // Lista horizontal de categorías manuales
-        SizedBox(
-          height: 120, // Ajusta la altura según necesites
-          child: ListView.builder(
-            scrollDirection: Axis.horizontal,
-            itemCount: manualCategorias.length,
-            itemBuilder: (context, index) {
-              final categoria = manualCategorias[index];
-              return Padding(
-                padding: const EdgeInsets.only(left: 16.0),
-                child: InkWell(
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
-                    );
+            // Sección de Categorías
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Categorías',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/categorias');
                   },
-                  child: Column(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.network(
-                          categoria['imagen']!,
-                          width: 80,
-                          height: 80,
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
+                  child: const Text('Ver todos'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+
+            // Lista horizontal de categorías manuales
+            SizedBox(
+              height: 120, // Ajusta la altura según necesites
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: manualCategorias.length,
+                itemBuilder: (context, index) {
+                  final categoria = manualCategorias[index];
+                  return Padding(
+                    padding: const EdgeInsets.only(left: 16.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
+                        );
+                      },
+                      child: Column(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(10),
+                            child: Image.asset(
+                              categoria['imagen']!, // Usa la imagen desde assets
                               width: 80,
                               height: 80,
-                              color: Colors.grey[300],
-                              child: const Icon(Icons.broken_image),
-                            );
-                          },
-                        ),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            categoria['nombre']!,
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        categoria['nombre']!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-      ],
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }
