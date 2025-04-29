@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../api_service.dart';
-import '../punto_turistico.dart';
+import '../models/punto_turistico.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -26,6 +26,14 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _futurePuntos = ApiService().fetchPuntosTuristicos();
   }
+
+
+
+
+
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
+
+
+
+
+
+
 
   Widget _buildBody() {
     return ListView(
@@ -188,7 +202,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         const SizedBox(height: 20),
 
-        // Sección de Categorías (Nuevo diseño con scroll horizontal)
+        // Sección de Categorías 
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

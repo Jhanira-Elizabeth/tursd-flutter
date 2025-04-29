@@ -13,12 +13,12 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
 
   final List<Map<String, dynamic>> categorias = [
     {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
+    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
     {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
     {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
     {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
     {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
-    {'nombre': 'Atractivos', 'imagen': 'assets/images/Atractivo1.jpg'}, // Añade más si es necesario
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'}, // Añade más si es necesario
   ];
 
   void _onTabTapped(int index) {

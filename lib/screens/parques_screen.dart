@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../punto_turistico.dart';
+import '../models/punto_turistico.dart';
 
 class ParquesScreen extends StatelessWidget {
   final List<PuntoTuristico> parques;

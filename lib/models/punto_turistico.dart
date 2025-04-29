@@ -14,6 +14,7 @@ class PuntoTuristico {
   final List<Actividad> actividades;
   final List<Etiqueta> etiquetas;
   final Parroquia? parroquia;
+  final bool esRecomendado;
 
   PuntoTuristico({
     required this.id,
@@ -31,6 +32,7 @@ class PuntoTuristico {
     this.actividades = const [],
     this.etiquetas = const [],
     this.parroquia,
+    required this.esRecomendado,
   });
 
   factory PuntoTuristico.fromJson(Map<String, dynamic> json) {
@@ -69,6 +71,7 @@ class PuntoTuristico {
       actividades: actividades,
       etiquetas: etiquetas,
       parroquia: parroquia,
+      esRecomendado: json['esRecomendado'] ?? false, 
     );
   }
 }

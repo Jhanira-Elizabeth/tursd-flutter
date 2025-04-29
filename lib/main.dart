@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'punto_turistico.dart';
+import 'models/punto_turistico.dart';
 import 'api_service.dart';
-import 'categoria.dart';
+import 'models/categoria.dart';
 // import 'screens/categorias_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/detalles_screen.dart';
@@ -11,14 +11,11 @@ import 'screens/chatbot_screen.dart';
 import 'screens/mapa_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
+import 'screens/test_screen.dart';
+import 'dart:io';
+
 
 Future<void> main() async {
-  if (kIsWeb) {
-    await dotenv.load(fileName: "assets/.env");
-  } else {
-    await dotenv.load(); // usa el real en raíz
-  }
-
   runApp(MyApp());
 }
 
@@ -49,6 +46,7 @@ class MyApp extends StatelessWidget {
         '/detalles': (context) => DetallesScreen(),
         '/mapa': (context) => MapaScreen(),
         '/chatbot': (context) => ChatbotScreen(),
+        '/test': (context) => TestScreen(),
       },
     );
   }

@@ -1,19 +1,18 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'punto_turistico.dart';
-
+import 'models/punto_turistico.dart';
 class ApiService {
-  final String baseUrl = "https://tursd.onrender.com";
+  final String baseUrl = 'https://tursd.onrender.com/api/v1'; // URL fija
 
   // Fetch Puntos Turísticos
   Future<List<PuntoTuristico>> fetchPuntosTuristicos() async {
     final response = await http.get(Uri.parse('$baseUrl/puntos'));
 
     if (response.statusCode == 200) {
-      final List<dynamic> jsonData = json.decode(response.body);
-      return jsonData.map((item) => PuntoTuristico.fromJson(item)).toList();
+      final List<dynamic> data = json.decode(response.body);
+      return data.map((json) => PuntoTuristico.fromJson(json)).toList();
     } else {
-      throw Exception('Error al cargar los puntos turísticos');
+      throw Exception('Failed to load puntos turísticos');
     }
   }
 

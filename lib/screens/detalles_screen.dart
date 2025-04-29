@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../punto_turistico.dart';
+import '../models/punto_turistico.dart';
 import '../api_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
@@ -337,4 +337,31 @@ class _DetallesScreenState extends State<DetallesScreen> with SingleTickerProvid
   }
   
   Widget _buildScheduleRow(String days, String hours) {
-    return
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: 4.0),
+    child: Row(
+      children: [
+        Text(
+          days,
+          style: TextStyle(fontWeight: FontWeight.w500),
+        ),
+        Spacer(),
+        Text(hours),
+      ],
+    ),
+  );
+}
+
+Widget _buildActivityRow(IconData icon, String activity) {
+  return Padding(
+    padding: EdgeInsets.symmetric(vertical: 8.0),
+    child: Row(
+      children: [
+        Icon(icon, color: Color(0xFF9DAF3A), size: 20),
+        SizedBox(width: 12),
+        Text(activity),
+      ],
+    ),
+  );
+}
+}
