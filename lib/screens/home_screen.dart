@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import '../api_service.dart';
 import '../models/punto_turistico.dart';
+import '../widgets/bottom_navigation_bar_turistico.dart';
+import '../widgets/custom_card.dart'; // Asegúrate de tener este widget creado
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -27,53 +31,75 @@ class _HomeScreenState extends State<HomeScreen> {
     _futurePuntos = ApiService().fetchPuntosTuristicos();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Turismo IA'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
-      ),
-      body: _buildBody(),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
+  void _onTabTapped(int index) {
+    setState(() {
+      _currentIndex = index;
+      if (index == 1) {
+        Navigator.pushNamed(context, '/mapa');
+      } else if (index == 2) {
+        Navigator.pushNamed(context, '/chatbot');
+      }
+      // Lógica para el índice 0 (Inicio) si es necesario
+    });
+  }
 
-          if (index == 1) {
-            Navigator.pushNamed(context, '/mapa');
-          }
+ Widget _buildRecomendados(List<PuntoTuristico> puntos) {
+    final recomendados = puntos.where((p) => p.esRecomendado).toList();
+    return SizedBox(
+      height: 181 + 12 + 16, // Ajustar altura para que quepa el contenido del CustomCard
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: recomendados.length > 5 ? 5 : recomendados.length,
+        itemBuilder: (context, index) {
+          final punto = recomendados[index];
+          return CustomCard(
+            imageUrl: punto.imagenUrl ?? 'https://via.placeholder.com/181x147', // Proporciona una URL por defecto
+            title: punto.nombre,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/detalles',
+                arguments: punto,
+              );
+            },
+          );
         },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'Chatbot'),
-        ],
       ),
     );
   }
 
-  Widget _buildBody() {
-    return FutureBuilder<List<PuntoTuristico>>(
-      future: _futurePuntos,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        } else if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return const Center(child: Text('No hay puntos turísticos.'));
-        }
+  Widget _buildCategorias() {
+    return SizedBox(
+      height: 181 + 12 + 16, // Ajustar altura para que quepa el contenido del CustomCard
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: manualCategorias.length,
+        itemBuilder: (context, index) {
+          final categoria = manualCategorias[index];
+          return CustomCard(
+            imageUrl: categoria['imagen']!,
+            title: categoria['nombre']!,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
+              );
+            },
+          );
+        },
+      ),
+    );
+  }
 
-        final puntos = snapshot.data!;
-        return ListView(
-          padding: const EdgeInsets.all(16.0),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('Inicio')),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Barra de búsqueda
             TextField(
               decoration: InputDecoration(
                 hintText: 'Búsqueda',
@@ -88,8 +114,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Sección de Recomendados
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -101,101 +125,41 @@ class _HomeScreenState extends State<HomeScreen> {
                     color: Color(0xFF9DAF3A),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/recomendados',
-                      arguments:
-                          puntos, // Pasa los puntos turísticos como argumentos
-                    );
+                FutureBuilder<List<PuntoTuristico>>(
+                  future: _futurePuntos,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      return TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(
+                            context,
+                            '/recomendados',
+                            arguments: snapshot.data!,
+                          );
+                        },
+                        child: const Text('Ver Todos'),
+                      );
+                    }
+                    return const SizedBox.shrink(); // Evita errores si no hay datos aún
                   },
-                  child: const Text('Ver Todos'),
                 ),
               ],
             ),
             const SizedBox(height: 10),
-
-            // Lista horizontal de recomendados
-            SizedBox(
-              height: 150,
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount:
-                    puntos.length > 5 ? 5 : puntos.length, // Limitar a 5 ítems
-                itemBuilder: (context, index) {
-                  final punto = puntos[index];
-                  return Container(
-                    width: 150,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 3,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/detalles',
-                          arguments: punto,
-                        );
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                            child:
-                                punto.imagenUrl != null &&
-                                        punto.imagenUrl!.isNotEmpty
-                                    ? Image.asset(
-                                      punto
-                                          .imagenUrl!, // Usa la imagen desde assets
-                                      height: 100,
-                                      width: double.infinity,
-                                      fit: BoxFit.cover,
-                                    )
-                                    : Container(
-                                      height: 100,
-                                      color: Colors.grey.shade300,
-                                      child: const Center(
-                                        child: Icon(Icons.image),
-                                      ),
-                                    ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              punto.nombre,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
+            FutureBuilder<List<PuntoTuristico>>(
+              future: _futurePuntos,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text('No hay puntos turísticos recomendados.'));
+                }
+                return _buildRecomendados(snapshot.data!);
+              },
             ),
             const SizedBox(height: 20),
-
-            // Sección de Categorías
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -216,74 +180,14 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
             const SizedBox(height: 10),
-
-            // Lista horizontal de categorías en tarjetas
-            SizedBox(
-              height: 150, // Ajusta la altura según necesites
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: manualCategorias.length,
-                itemBuilder: (context, index) {
-                  final categoria = manualCategorias[index];
-                  return Container(
-                    width: 150,
-                    margin: const EdgeInsets.only(right: 10),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(15),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.2),
-                          spreadRadius: 1,
-                          blurRadius: 3,
-                        ),
-                      ],
-                    ),
-                    child: InkWell(
-                      onTap: () {
-                        Navigator.pushNamed(
-                          context,
-                          '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
-                        );
-                      },
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          ClipRRect(
-                            borderRadius: const BorderRadius.only(
-                              topLeft: Radius.circular(15),
-                              topRight: Radius.circular(15),
-                            ),
-                            child: Image.asset(
-                              categoria['imagen']!,
-                              height: 100,
-                              width: double.infinity,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              categoria['nombre']!,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 14,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
+            _buildCategorias(),
           ],
-        );
-      },
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: _currentIndex,
+        onTabChange: _onTabTapped,
+      ),
     );
   }
 }

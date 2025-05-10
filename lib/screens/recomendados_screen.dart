@@ -41,7 +41,6 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
                 return CustomCard(
                   imageUrl: punto.imagenUrl ?? 'https://via.placeholder.com/181x147', // URL de la imagen
                   title: punto.nombre, // Nombre del punto turístico
-                  subtitle: punto.descripcion, // Descripción opcional
                   onTap: () {
                     Navigator.pushNamed(
                       context,

@@ -109,7 +109,7 @@ class _CustomCardState extends State<CustomCard> with SingleTickerProviderStateM
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF2F855A), // Color verde similar al de tu diseño
+                              color: Color(0xFFA3CF3D), // Color verde similar al de tu diseño
                             ),
                           ),
                           if (widget.subtitle != null)
@@ -158,7 +158,7 @@ class CardExampleScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2F855A),
+                  color: Color(0xFFA3CF3D),
                 ),
               ),
               const SizedBox(height: 16),
@@ -191,7 +191,7 @@ class CardExampleScreen extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF2F855A),
+                  color: Color(0xFFA3CF3D),
                 ),
               ),
               const SizedBox(height: 16),

@@ -3,9 +3,9 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'models/punto_turistico.dart';
 import 'api_service.dart';
 import 'models/categoria.dart';
-// import 'screens/categorias_screen.dart';
+import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget de la barra de navegación
 import 'screens/home_screen.dart';
-import 'screens/detalles_screen.dart';
+import 'screens/punto_turistico_lista_screen.dart';
 import 'screens/recomendados_screen.dart';
 import 'screens/chatbot_screen.dart';
 import 'screens/mapa_screen.dart';
@@ -13,7 +13,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'screens/test_screen.dart';
 import 'dart:io';
-
 
 Future<void> main() async {
   runApp(MyApp());
@@ -43,7 +42,7 @@ class MyApp extends StatelessWidget {
         '/': (context) => HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
         '/recomendados': (context) => RecomendadosScreen(),
-        '/detalles': (context) => DetallesScreen(),
+        '/detalles': (context) => PuntoTuristicoListaScreen(),
         '/mapa': (context) => MapaScreen(),
         '/chatbot': (context) => ChatbotScreen(),
         '/test': (context) => TestScreen(),
@@ -87,7 +86,9 @@ class _MapaPageState extends State<MapaPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay puntos turísticos disponibles'));
+            return const Center(
+              child: Text('No hay puntos turísticos disponibles'),
+            );
           } else {
             final puntos = snapshot.data!;
 
@@ -112,9 +113,10 @@ class _MapaPageState extends State<MapaPage> {
                   position: LatLng(punto.latitud, punto.longitud),
                   infoWindow: InfoWindow(
                     title: punto.nombre,
-                    snippet: punto.descripcion.length > 50
-                        ? '${punto.descripcion.substring(0, 47)}...'
-                        : punto.descripcion,
+                    snippet:
+                        punto.descripcion.length > 50
+                            ? '${punto.descripcion.substring(0, 47)}...'
+                            : punto.descripcion,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
@@ -171,33 +173,19 @@ class _MapaPageState extends State<MapaPage> {
           }
         },
       ),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
-        onTap: (index) {
+        onTabChange: (index) {
+          // Cambia onTap a onTabChange
           setState(() {
             _currentIndex = index;
           });
-
           if (index == 0) {
             Navigator.pushReplacementNamed(context, '/');
           } else if (index == 2) {
             // Implementar navegación al chatbot cuando esté disponible
           }
         },
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chatbot',
-          ),
-        ],
       ),
     );
   }
@@ -217,7 +205,11 @@ class CategoriasScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Categorías'), backgroundColor: Colors.white, foregroundColor: Colors.black),
+      appBar: AppBar(
+        title: const Text('Categorías'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+      ),
       body: GridView.builder(
         padding: const EdgeInsets.all(12),
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -229,7 +221,8 @@ class CategoriasScreen extends StatelessWidget {
         itemCount: categorias.length,
         itemBuilder: (context, index) {
           final categoria = categorias[index];
-          final ruta = '/${categoria['nombre'].toLowerCase().replaceAll(' ', '')}';
+          final ruta =
+              '/${categoria['nombre'].toLowerCase().replaceAll(' ', '')}';
 
           return InkWell(
             onTap: () {
@@ -245,7 +238,11 @@ class CategoriasScreen extends StatelessWidget {
                   Center(
                     child: Text(
                       categoria['nombre'],
-                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -293,7 +290,9 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay puntos turísticos disponibles'));
+            return const Center(
+              child: Text('No hay puntos turísticos disponibles'),
+            );
           } else {
             final puntos = snapshot.data!;
 
@@ -337,10 +336,7 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
                       punto.descripcion.length > 100
                           ? '${punto.descripcion.substring(0, 97)}...'
                           : punto.descripcion,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey[600],
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -374,9 +370,7 @@ class PlaceholderScreen extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
       ),
-      body: Center(
-        child: Text('Contenido para $title en construcción'),
-      ),
+      body: Center(child: Text('Contenido para $title en construcción')),
     );
   }
 }

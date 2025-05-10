@@ -43,13 +43,61 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             crossAxisCount: 2, // Dos columnas
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
-            childAspectRatio: 3 / 4, // Relación de aspecto para las tarjetas
+            childAspectRatio: 3 / 4, // Relación de aspecto ajustada
           ),
           itemBuilder: (context, index) {
             final categoria = categorias[index];
-            return CategoriaCard(
-              nombre: categoria['nombre']!,
-              imagen: categoria['imagen']!,
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(15),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.2),
+                    spreadRadius: 1,
+                    blurRadius: 3,
+                  ),
+                ],
+              ),
+              child: InkWell(
+                onTap: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
+                  );
+                },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    ClipRRect(
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(15),
+                        topRight: Radius.circular(15),
+                      ),
+                      child: Image.asset(
+                        categoria['imagen']!,
+                        height: 120,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    const SizedBox(height: 8), // Espaciado entre imagen y texto
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                      child: Text(
+                        categoria['nombre']!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             );
           },
         ),
@@ -71,81 +119,6 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             label: 'Perfil',
           ),
         ],
-      ),
-    );
-  }
-}
-
-// Widget para las tarjetas de categorías
-class CategoriaCard extends StatelessWidget {
-  final String nombre;
-  final String imagen;
-
-  const CategoriaCard({
-    Key? key,
-    required this.nombre,
-    required this.imagen,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        // Navegación o acción al hacer clic en la tarjeta
-        Navigator.pushNamed(
-          context,
-          '/${nombre.toLowerCase().replaceAll(' ', '')}',
-        );
-      },
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(15),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                blurRadius: 4,
-                spreadRadius: 1,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 3,
-                child: ClipRRect(
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(15)),
-                  child: Image.asset(
-                    imagen,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-              Expanded(
-                flex: 1,
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  alignment: Alignment.center,
-                  child: Text(
-                    nombre,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                      color: Color(0xFF9DAF3A),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
