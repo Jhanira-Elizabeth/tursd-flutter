@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'models/punto_turistico.dart';
-import 'api_service.dart';
-import 'models/categoria.dart';
+import 'services/api_service.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget de la barra de navegación
 import 'screens/home_screen.dart';
 import 'screens/punto_turistico_lista_screen.dart';

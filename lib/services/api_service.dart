@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'models/punto_turistico.dart';
+import '../models/punto_turistico.dart';
 class ApiService {
   final String baseUrl = 'https://tursd-grhzehh6hta4e9en.eastus-01.azurewebsites.net/api/v1'; // URL fija
 

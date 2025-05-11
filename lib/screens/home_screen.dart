@@ -1,192 +1,283 @@
 import 'package:flutter/material.dart';
-import '../api_service.dart';
 import '../models/punto_turistico.dart';
-import '../widgets/bottom_navigation_bar_turistico.dart';
-import '../widgets/custom_card.dart'; // Asegúrate de tener este widget creado
+import '../widgets/custom_card.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late Future<List<PuntoTuristico>> _futurePuntos;
-  int _currentIndex = 0;
-
-  final List<Map<String, String>> manualCategorias = [
-    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
-    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
-    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
-    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
-    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
-    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
+  // Example data - replace with your actual data source
+  final List<PuntoTuristico> puntosRecomendados = [];
+  final List<Map<String, dynamic>> categorias = [
+    {'nombre': 'Alojamiento', 'imagen': 'https://via.placeholder.com/200x150'},
+    {'nombre': 'Atracciones', 'imagen': 'https://via.placeholder.com/200x150'},
+    // Add more categories as needed
   ];
 
   @override
   void initState() {
     super.initState();
-    _futurePuntos = ApiService().fetchPuntosTuristicos();
+    // Here you would typically load your data
+    _cargarPuntosTuristicos();
   }
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-      if (index == 1) {
-        Navigator.pushNamed(context, '/mapa');
-      } else if (index == 2) {
-        Navigator.pushNamed(context, '/chatbot');
-      }
-      // Lógica para el índice 0 (Inicio) si es necesario
-    });
-  }
-
- Widget _buildRecomendados(List<PuntoTuristico> puntos) {
-    final recomendados = puntos.where((p) => p.esRecomendado).toList();
-    return SizedBox(
-      height: 181 + 12 + 16, // Ajustar altura para que quepa el contenido del CustomCard
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: recomendados.length > 5 ? 5 : recomendados.length,
-        itemBuilder: (context, index) {
-          final punto = recomendados[index];
-          return CustomCard(
-            imageUrl: punto.imagenUrl ?? 'https://via.placeholder.com/181x147', // Proporciona una URL por defecto
-            title: punto.nombre,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/detalles',
-                arguments: punto,
-              );
-            },
-          );
-        },
+  void _cargarPuntosTuristicos() {
+  // Mock data for demonstration
+  setState(() {
+    puntosRecomendados.addAll([
+      PuntoTuristico(
+        id: 1, // Los IDs deberían ser enteros, no Strings
+        nombre: 'Hotel Cariamanga',
+        imagenUrl: 'https://via.placeholder.com/181x147',
+        descripcion: 'Un cómodo hotel en Cariamanga.', // Añade la descripción
+        latitud: -4.7833, // Ejemplo de latitud
+        longitud: -79.6167, // Ejemplo de longitud
+        idParroquia: 1, // Ejemplo de idParroquia
+        estado: 'activo', // Ejemplo de estado
+        esRecomendado: true,
       ),
-    );
-  }
-
-  Widget _buildCategorias() {
-    return SizedBox(
-      height: 181 + 12 + 16, // Ajustar altura para que quepa el contenido del CustomCard
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: manualCategorias.length,
-        itemBuilder: (context, index) {
-          final categoria = manualCategorias[index];
-          return CustomCard(
-            imageUrl: categoria['imagen']!,
-            title: categoria['nombre']!,
-            onTap: () {
-              Navigator.pushNamed(
-                context,
-                '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
-              );
-            },
-          );
-        },
+      PuntoTuristico(
+        id: 2,
+        nombre: 'Balneario Turístico Apcaolii',
+        imagenUrl: 'https://via.placeholder.com/181x147',
+        descripcion: 'Un hermoso balneario turístico.', // Añade la descripción
+        latitud: -4.8000, // Ejemplo de latitud
+        longitud: -79.6500, // Ejemplo de longitud
+        idParroquia: 1, // Ejemplo de idParroquia
+        estado: 'activo', // Ejemplo de estado
+        esRecomendado: true,
       ),
-    );
-  }
+      PuntoTuristico(
+        id: 3,
+        nombre: 'La Piedra del Gorila',
+        imagenUrl: 'https://via.placeholder.com/181x147',
+        descripcion: 'Una formación rocosa única.', // Añade la descripción
+        latitud: -4.7500, // Ejemplo de latitud
+        longitud: -79.5833, // Ejemplo de longitud
+        idParroquia: 1, // Ejemplo de idParroquia
+        estado: 'activo', // Ejemplo de estado
+        esRecomendado: false,
+      ),
+      // Add more points as needed, asegurándote de incluir 'descripcion' y 'longitud'
+    ]);
+  });
+}
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Inicio')),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                hintText: 'Búsqueda',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-              ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Recomendados',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF9DAF3A),
-                  ),
-                ),
-                FutureBuilder<List<PuntoTuristico>>(
-                  future: _futurePuntos,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasData) {
-                      return TextButton(
-                        onPressed: () {
-                          Navigator.pushNamed(
-                            context,
-                            '/recomendados',
-                            arguments: snapshot.data!,
-                          );
-                        },
-                        child: const Text('Ver Todos'),
-                      );
-                    }
-                    return const SizedBox.shrink(); // Evita errores si no hay datos aún
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            FutureBuilder<List<PuntoTuristico>>(
-              future: _futurePuntos,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return const Center(child: Text('No hay puntos turísticos recomendados.'));
-                }
-                return _buildRecomendados(snapshot.data!);
-              },
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Categorías',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF9DAF3A),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    Navigator.pushNamed(context, '/categorias');
-                  },
-                  child: const Text('Ver todos'),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _buildCategorias(),
-          ],
+      appBar: AppBar(
+        title: const Text('Inicio'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search bar
+              Container(
+  height: 48,
+  decoration: BoxDecoration(
+    color: Colors.grey.shade100, // Fondo más claro
+    borderRadius: BorderRadius.circular(24),
+  ),
+  padding: const EdgeInsets.symmetric(horizontal: 16),
+  child: Row(
+    children: [
+      Icon(Icons.search, color: Colors.grey.shade400), // Ícono más claro
+      const SizedBox(width: 8),
+      Text(
+        'Búsqueda',
+        style: TextStyle(
+          color: Colors.grey.shade400, // Texto más claro
+          fontSize: 16,
         ),
       ),
-      bottomNavigationBar: BottomNavigationBarTuristico(
-        currentIndex: _currentIndex,
-        onTabChange: _onTabTapped,
+    ],
+  ),
+),
+
+              const SizedBox(height: 24),
+
+              // Recommended section with "Ver Todos" button
+              _buildSectionHeader(
+                'Recomendados',
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    '/recomendados',
+                    arguments: puntosRecomendados,
+                  );
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Recommended cards (horizontal scrolling)
+              SizedBox(
+                height: 220,
+                child:
+                    puntosRecomendados.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: puntosRecomendados.length.clamp(0, 5),
+                          itemExtent: 160,
+                          itemBuilder: (context, index) {
+                            final punto = puntosRecomendados[index];
+                            return Row(
+                              // Wrap each card with a Row to add spacing
+                              children: [
+                                CustomCard(
+                                  imageUrl:
+                                      punto.imagenUrl ??
+                                      'https://via.placeholder.com/181x147',
+                                  title: punto.nombre,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/detalles',
+                                      arguments: punto,
+                                    );
+                                  },
+                                ),
+                                if (index < puntosRecomendados.length - 1)
+                                  const SizedBox(
+                                    width: 12,
+                                  ), // Add spacing between cards
+                              ],
+                            );
+                          },
+                        ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Categories section with "Ver todos" button
+              _buildSectionHeader(
+                'Categorías',
+                onPressed: () {
+                  // Navigate to categories screen
+                  Navigator.pushNamed(context, '/categorias');
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              // Categories grid (2 columns)
+              GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 16,
+                  crossAxisSpacing: 16,
+                  childAspectRatio: 3 / 2, // Width to height ratio
+                ),
+                itemCount: categorias.length,
+                itemBuilder: (context, index) {
+                  final categoria = categorias[index];
+                  return _buildCategoryCard(
+                    categoria['nombre'],
+                    categoria['imagen'],
+                    () {
+                      // Navigate to specific category
+                      Navigator.pushNamed(
+                        context,
+                        '/categoria',
+                        arguments: categoria['nombre'],
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 0, // Home selected
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
+          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
+          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'ChatBot'),
+        ],
+        onTap: (index) {
+          // Handle navigation to different screens
+          switch (index) {
+            case 0:
+              // Already on home
+              break;
+            case 1:
+              Navigator.pushNamed(context, '/mapa');
+              break;
+            case 2:
+              Navigator.pushNamed(context, '/chatbot');
+              break;
+          }
+        },
+      ),
+    );
+  }
+
+  // Helper method to build section headers with "Ver todos" button
+  Widget _buildSectionHeader(String title, {required VoidCallback onPressed}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Color(0xFFA3CF3D), // Green color from your design
+          ),
+        ),
+        TextButton(
+          onPressed: onPressed,
+          child: Text(
+            title == 'Categorías' ? 'Ver todos' : 'Ver Todos',
+            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper method to build category cards
+  Widget _buildCategoryCard(String title, String imageUrl, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          image: DecorationImage(
+            image: NetworkImage(imageUrl),
+            fit: BoxFit.cover,
+            colorFilter: ColorFilter.mode(
+              Colors.black.withOpacity(0.4),
+              BlendMode.darken,
+            ),
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Text(
+          title,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }

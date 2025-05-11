@@ -26,31 +26,31 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
         ),
       ),
       body: puntos.isEmpty
-          ? const Center(child: Text('No hay puntos turísticos disponibles.'))
-          : GridView.builder(
-              padding: const EdgeInsets.all(12),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2, // Dos columnas
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 3 / 4, // Relación de aspecto para las tarjetas
-              ),
-              itemCount: puntos.length,
-              itemBuilder: (context, index) {
-                final punto = puntos[index];
-                return CustomCard(
-                  imageUrl: punto.imagenUrl ?? 'https://via.placeholder.com/181x147', // URL de la imagen
-                  title: punto.nombre, // Nombre del punto turístico
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: punto,
-                    );
-                  },
-                );
-              },
-            ),
+    ? const Center(child: Text('No hay puntos turísticos disponibles.'))
+    : GridView.builder(
+        padding: const EdgeInsets.all(16), // <--- ¡Aquí está el cambio clave!
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 3 / 4,
+        ),
+        itemCount: puntos.length,
+        itemBuilder: (context, index) {
+          final punto = puntos[index];
+          return CustomCard(
+            imageUrl: punto.imagenUrl ?? 'https://via.placeholder.com/181x147',
+            title: punto.nombre,
+            onTap: () {
+              Navigator.pushNamed(
+                context,
+                '/detalles',
+                arguments: punto,
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../api_service.dart';
+import '../services/api_service.dart';
 import '../models/punto_turistico.dart';
 
 class TestScreen extends StatefulWidget {
