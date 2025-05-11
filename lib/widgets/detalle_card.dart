@@ -34,10 +34,10 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
   Widget build(BuildContext context) {
     final PuntoTuristico punto = widget.puntoTuristico;
 
-    return Column( // Usamos Column como contenedor principal de la card
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container( // Encabezado de la card (puede ser un AppBar si es necesario en el contexto)
+        Container(
           padding: EdgeInsets.all(8.0),
           child: Text(
             punto.nombre,
@@ -45,7 +45,7 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
           ),
         ),
         Container(
-          height: 150.0, // Altura fija para la imagen de la card
+          height: 150.0,
           width: double.infinity,
           child: punto.imagenUrl != null && punto.imagenUrl!.isNotEmpty
               ? Image.network(
@@ -71,11 +71,13 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
                   padding: EdgeInsets.only(bottom: 8.0),
                   child: Wrap(
                     spacing: 8.0,
-                    children: punto.etiquetas.map((etiqueta) => Chip(
-                      label: Text(etiqueta.nombre),
-                      backgroundColor: Color(0xFFE0E6B8),
-                      labelStyle: TextStyle(color: Color(0xFF9DAF3A)),
-                    )).toList(),
+                    children: punto.etiquetas
+                        .map((etiqueta) => Chip(
+                              label: Text(etiqueta.nombre),
+                              backgroundColor: Color(0xFFE0E6B8),
+                              labelStyle: TextStyle(color: Color(0xFF9DAF3A)),
+                            ))
+                        .toList(),
                   ),
                 ),
               TabBar(
@@ -89,65 +91,71 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
                   Tab(text: 'Ubicación'),
                 ],
               ),
-              SizedBox(
-                height: 300, // Ajusta o haz flexible según el layout padre
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    // Información
-                    Padding(
-                      padding: EdgeInsets.only(top: 16.0),
-                      child: Text(
-                        punto.descripcion,
-                        style: TextStyle(fontSize: 14),
+              Expanded( // Aquí envuelves el SizedBox
+                child: SizedBox(
+                  // Ya no necesitas la altura fija aquí
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      // Información
+                      Padding(
+                        padding: EdgeInsets.only(top: 16.0),
+                        child: Text(
+                          punto.descripcion,
+                          style: TextStyle(fontSize: 14),
+                        ),
                       ),
-                    ),
-                    // Actividades
-                    Padding(
-                      padding: EdgeInsets.only(top: 16.0),
-                      child: FutureBuilder<List<Actividad>>(
-                        future: _futureActividades,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState == ConnectionState.waiting) {
-                            return Center(child: CircularProgressIndicator());
-                          } else if (snapshot.hasError) {
-                            return Center(child: Text('Error: ${snapshot.error}'));
-                          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                            return Text('No hay actividades disponibles.');
-                          } else {
-                            final actividades = snapshot.data!;
-                            return Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: actividades.map((actividad) => ListTile(
-                                title: Text(actividad.nombre),
-                                subtitle: actividad.precio > 0 ? Text('\$${actividad.precio.toStringAsFixed(2)}') : Text('Gratis'),
-                              )).toList(),
-                            );
-                          }
-                        },
-                      ),
-                    ),
-                    // Ubicación
-                    Container(
-                      padding: EdgeInsets.only(top: 16.0),
-                      child: SizedBox(
-                        height: 200, // Ajusta la altura del mapa según necesites
-                        child: GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: LatLng(punto.latitud, punto.longitud),
-                            zoom: 14.0,
-                          ),
-                          markers: {
-                            Marker(
-                              markerId: MarkerId(punto.id.toString()),
-                              position: LatLng(punto.latitud, punto.longitud),
-                              infoWindow: InfoWindow(title: punto.nombre),
-                            ),
+                      // Actividades
+                      Padding(
+                        padding: EdgeInsets.only(top: 16.0),
+                        child: FutureBuilder<List<Actividad>>(
+                          future: _futureActividades,
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState == ConnectionState.waiting) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (snapshot.hasError) {
+                              return Center(child: Text('Error: ${snapshot.error}'));
+                            } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                              return Text('No hay actividades disponibles.');
+                            } else {
+                              final actividades = snapshot.data!;
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: actividades
+                                    .map((actividad) => ListTile(
+                                          title: Text(actividad.nombre),
+                                          subtitle: actividad.precio > 0
+                                              ? Text('\$${actividad.precio.toStringAsFixed(2)}')
+                                              : Text('Gratis'),
+                                        ))
+                                    .toList(),
+                              );
+                            }
                           },
                         ),
                       ),
-                    ),
-                  ],
+                      // Ubicación
+                      Container(
+                        padding: EdgeInsets.only(top: 16.0),
+                        child: SizedBox(
+                          height: 200, // Puedes mantener una altura inicial o dejar que se ajuste
+                          child: GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(punto.latitud, punto.longitud),
+                              zoom: 14.0,
+                            ),
+                            markers: {
+                              Marker(
+                                markerId: MarkerId(punto.id.toString()),
+                                position: LatLng(punto.latitud, punto.longitud),
+                                infoWindow: InfoWindow(title: punto.nombre),
+                              ),
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ],

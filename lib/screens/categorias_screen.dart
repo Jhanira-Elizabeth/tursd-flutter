@@ -1,30 +1,17 @@
 import 'package:flutter/material.dart';
 
-class CategoriasScreen extends StatefulWidget {
-  const CategoriasScreen({Key? key}) : super(key: key);
-
-  @override
-  _CategoriasScreenState createState() => _CategoriasScreenState();
-}
-
-class _CategoriasScreenState extends State<CategoriasScreen> {
-  int _currentIndex = 0;
+class CategoriasScreen extends StatelessWidget {
+  CategoriasScreen({super.key});
 
   final List<Map<String, dynamic>> categorias = [
     {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
-    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
     {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
+    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
     {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
     {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
     {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
     {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
   ];
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,92 +20,91 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         title: const Text('Categorías'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 0,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          itemCount: categorias.length,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Dos columnas
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            childAspectRatio: 3 / 4, // Relación de aspecto ajustada
-          ),
-          itemBuilder: (context, index) {
-            final categoria = categorias[index];
-            return Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.2),
-                    spreadRadius: 1,
-                    blurRadius: 3,
-                  ),
-                ],
-              ),
-              child: InkWell(
-                onTap: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/${categoria['nombre']!.toLowerCase().replaceAll(' ', '')}',
-                  );
-                },
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ClipRRect(
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(15),
-                        topRight: Radius.circular(15),
-                      ),
-                      child: Image.asset(
-                        categoria['imagen']!,
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    const SizedBox(height: 8), // Espaciado entre imagen y texto
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                      child: Text(
-                        categoria['nombre']!,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 14,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ],
+      body: GridView.builder(
+        padding: const EdgeInsets.all(16),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: 3 / 4,
+        ),
+        itemCount: categorias.length,
+        itemBuilder: (context, index) {
+          final categoria = categorias[index];
+          final ruta =
+              '/${categoria['nombre'].toString().toLowerCase().replaceAll(' ', '')}';
+
+          return _CategoryCard( // Use a custom widget for the category card
+            imageUrl: categoria['imagen'],
+            title: categoria['nombre'],
+            onTap: () {
+              Navigator.pushNamed(context, ruta);
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+// Custom widget for the category card layout
+class _CategoryCard extends StatelessWidget {
+  final String imageUrl;
+  final String title;
+  final VoidCallback onTap;
+
+  const _CategoryCard({
+    required this.imageUrl,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.2),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: ClipRRect(
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                ),
+                child: Image.asset( // Use Image.asset
+                  imageUrl,
+                  fit: BoxFit.cover,
                 ),
               ),
-            );
-          },
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
         ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.category),
-            label: 'Categorías',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
       ),
     );
   }

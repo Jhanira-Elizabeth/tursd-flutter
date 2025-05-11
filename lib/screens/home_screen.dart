@@ -13,9 +13,13 @@ class _HomeScreenState extends State<HomeScreen> {
   // Example data - replace with your actual data source
   final List<PuntoTuristico> puntosRecomendados = [];
   final List<Map<String, dynamic>> categorias = [
-    {'nombre': 'Alojamiento', 'imagen': 'https://via.placeholder.com/200x150'},
-    {'nombre': 'Atracciones', 'imagen': 'https://via.placeholder.com/200x150'},
-    // Add more categories as needed
+    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
+    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
+    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
+    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
+    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
+    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
   ];
 
   @override
@@ -26,46 +30,46 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _cargarPuntosTuristicos() {
-  // Mock data for demonstration
-  setState(() {
-    puntosRecomendados.addAll([
-      PuntoTuristico(
-        id: 1, // Los IDs deberían ser enteros, no Strings
-        nombre: 'Hotel Cariamanga',
-        imagenUrl: 'https://via.placeholder.com/181x147',
-        descripcion: 'Un cómodo hotel en Cariamanga.', // Añade la descripción
-        latitud: -4.7833, // Ejemplo de latitud
-        longitud: -79.6167, // Ejemplo de longitud
-        idParroquia: 1, // Ejemplo de idParroquia
-        estado: 'activo', // Ejemplo de estado
-        esRecomendado: true,
-      ),
-      PuntoTuristico(
-        id: 2,
-        nombre: 'Balneario Turístico Apcaolii',
-        imagenUrl: 'https://via.placeholder.com/181x147',
-        descripcion: 'Un hermoso balneario turístico.', // Añade la descripción
-        latitud: -4.8000, // Ejemplo de latitud
-        longitud: -79.6500, // Ejemplo de longitud
-        idParroquia: 1, // Ejemplo de idParroquia
-        estado: 'activo', // Ejemplo de estado
-        esRecomendado: true,
-      ),
-      PuntoTuristico(
-        id: 3,
-        nombre: 'La Piedra del Gorila',
-        imagenUrl: 'https://via.placeholder.com/181x147',
-        descripcion: 'Una formación rocosa única.', // Añade la descripción
-        latitud: -4.7500, // Ejemplo de latitud
-        longitud: -79.5833, // Ejemplo de longitud
-        idParroquia: 1, // Ejemplo de idParroquia
-        estado: 'activo', // Ejemplo de estado
-        esRecomendado: false,
-      ),
-      // Add more points as needed, asegurándote de incluir 'descripcion' y 'longitud'
-    ]);
-  });
-}
+    // Mock data for demonstration
+    setState(() {
+      puntosRecomendados.addAll([
+        PuntoTuristico(
+          id: 1,
+          nombre: 'Hotel Cariamanga',
+          imagenUrl: 'assets/images/Hotel1.jpg',
+          descripcion: 'Un cómodo hotel en Cariamanga.',
+          latitud: -4.7833,
+          longitud: -79.6167,
+          idParroquia: 1,
+          estado: 'activo',
+          esRecomendado: true,
+        ),
+        PuntoTuristico(
+          id: 2,
+          nombre: 'Balneario Turístico Apcaolii',
+          imagenUrl: 'assets/images/Balneario1.jpg', //  imageUrl from assets
+          descripcion: 'Un hermoso balneario turístico.',
+          latitud: -4.8000,
+          longitud: -79.6500,
+          idParroquia: 1,
+          estado: 'activo',
+          esRecomendado: true,
+        ),
+        PuntoTuristico(
+          id: 3,
+          nombre: 'La Piedra del Gorila',
+          imagenUrl: 'assets/images/GorilaPark2.jpg',
+          descripcion: 'Una formación rocosa única.',
+          latitud: -4.7500,
+          longitud: -79.5833,
+          idParroquia: 1,
+          estado: 'activo',
+          esRecomendado: false,
+        ),
+        // Add more points as needed, asegurándote de incluir 'descripcion' y 'longitud'
+      ]);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,29 +88,27 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               // Search bar
               Container(
-  height: 48,
-  decoration: BoxDecoration(
-    color: Colors.grey.shade100, // Fondo más claro
-    borderRadius: BorderRadius.circular(24),
-  ),
-  padding: const EdgeInsets.symmetric(horizontal: 16),
-  child: Row(
-    children: [
-      Icon(Icons.search, color: Colors.grey.shade400), // Ícono más claro
-      const SizedBox(width: 8),
-      Text(
-        'Búsqueda',
-        style: TextStyle(
-          color: Colors.grey.shade400, // Texto más claro
-          fontSize: 16,
-        ),
-      ),
-    ],
-  ),
-),
-
+                height: 48,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, color: Colors.grey.shade400),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Búsqueda',
+                      style: TextStyle(
+                        color: Colors.grey.shade400,
+                        fontSize: 16,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               const SizedBox(height: 24),
-
               // Recommended section with "Ver Todos" button
               _buildSectionHeader(
                 'Recomendados',
@@ -118,49 +120,41 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 },
               ),
-
               const SizedBox(height: 16),
-
               // Recommended cards (horizontal scrolling)
               SizedBox(
                 height: 220,
-                child:
-                    puntosRecomendados.isEmpty
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: puntosRecomendados.length.clamp(0, 5),
-                          itemExtent: 160,
-                          itemBuilder: (context, index) {
-                            final punto = puntosRecomendados[index];
-                            return Row(
-                              // Wrap each card with a Row to add spacing
-                              children: [
-                                CustomCard(
-                                  imageUrl:
-                                      punto.imagenUrl ??
-                                      'https://via.placeholder.com/181x147',
-                                  title: punto.nombre,
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/detalles',
-                                      arguments: punto,
-                                    );
-                                  },
-                                ),
-                                if (index < puntosRecomendados.length - 1)
-                                  const SizedBox(
-                                    width: 12,
-                                  ), // Add spacing between cards
-                              ],
-                            );
-                          },
-                        ),
+                child: puntosRecomendados.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: puntosRecomendados.length.clamp(0, 5),
+                        itemBuilder: (context, index) {
+                          final punto = puntosRecomendados[index];
+                          return Padding(
+                            padding: EdgeInsets.only(
+                                right: index < puntosRecomendados.length - 1
+                                    ? 12.0
+                                    : 0.0), // Add right padding except the last item
+                            child: SizedBox(
+                              width: 160, // Set the width of the card
+                              child: CustomCard(
+                                imageUrl: _getImageUrl(punto.imagenUrl),
+                                title: punto.nombre,
+                                onTap: () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/detalles',
+                                    arguments: punto,
+                                  );
+                                },
+                              ),
+                            ),
+                          );
+                        },
+                      ),
               ),
-
               const SizedBox(height: 24),
-
               // Categories section with "Ver todos" button
               _buildSectionHeader(
                 'Categorías',
@@ -169,35 +163,32 @@ class _HomeScreenState extends State<HomeScreen> {
                   Navigator.pushNamed(context, '/categorias');
                 },
               ),
-
               const SizedBox(height: 16),
-
-              // Categories grid (2 columns)
-              GridView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 3 / 2, // Width to height ratio
+              // Categories as a horizontal list of CustomCards
+              SizedBox(
+                height: 220, // Adjust as needed
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: categorias.length,
+                  itemBuilder: (context, index) {
+                    final categoria = categorias[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 12.0),
+                      child: SizedBox(
+                        width: 160, // Width of each card
+                        child: CustomCard(
+                          imageUrl: categoria['imagen'],
+                          title: categoria['nombre'],
+                          onTap: () {
+                            // Handle category selection
+                            print('Selected category: ${categoria['nombre']}');
+                            //  Navigator.pushNamed(context, '/categoria', arguments: categoria['nombre']); // Consider adding this
+                          },
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                itemCount: categorias.length,
-                itemBuilder: (context, index) {
-                  final categoria = categorias[index];
-                  return _buildCategoryCard(
-                    categoria['nombre'],
-                    categoria['imagen'],
-                    () {
-                      // Navigate to specific category
-                      Navigator.pushNamed(
-                        context,
-                        '/categoria',
-                        arguments: categoria['nombre'],
-                      );
-                    },
-                  );
-                },
               ),
             ],
           ),
@@ -252,33 +243,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper method to build category cards
-  Widget _buildCategoryCard(String title, String imageUrl, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          image: DecorationImage(
-            image: NetworkImage(imageUrl),
-            fit: BoxFit.cover,
-            colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(0.4),
-              BlendMode.darken,
-            ),
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
+  // Helper function to handle null or empty image URLs
+  String _getImageUrl(String? imageUrl) {
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return 'assets/images/IndioColorado3.jpg'; // Default asset image
+    }
+    // Check if it is an asset path
+    if (imageUrl.startsWith('assets/')) {
+      return imageUrl;
+    }
+    //  handle web URLs if needed.
+    return imageUrl;
   }
 }

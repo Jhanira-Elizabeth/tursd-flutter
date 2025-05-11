@@ -10,7 +10,6 @@ import 'screens/chatbot_screen.dart';
 import 'screens/mapa_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'screens/test_screen.dart';
 import 'dart:io';
 
 Future<void> main() async {
@@ -44,7 +43,12 @@ class MyApp extends StatelessWidget {
         '/detalles': (context) => PuntoTuristicoListaScreen(),
         '/mapa': (context) => MapaScreen(),
         '/chatbot': (context) => ChatbotScreen(),
-        '/test': (context) => TestScreen(),
+        '/etniatsachila': (context) => PlaceholderScreen(title: 'Etnia Tsáchila'),
+        '/parroquias': (context) => PlaceholderScreen(title: 'Parroquias'),
+        '/alojamiento': (context) => PlaceholderScreen(title: 'Alojamiento'),
+        '/alimentacion': (context) => PlaceholderScreen(title: 'Alimentación'),
+        '/parques': (context) => PlaceholderScreen(title: 'Parques'),
+        '/rios': (context) => PlaceholderScreen(title: 'Ríos'),
       },
     );
   }
