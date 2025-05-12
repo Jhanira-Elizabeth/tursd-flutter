@@ -180,34 +180,11 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                 ),
                 const SizedBox(height: 8),
                 Text('Dueño: $_dueno'),
-                if (widget.item.email != null) Text('Email: ${widget.item.email}'),
-                if (widget.item.telefono != null) Text('Teléfono: ${widget.item.telefono}'),
+                if (widget.item is LocalTuristico) ...[
+                  if (widget.item.email != null) Text('Email: ${widget.item.email}'),
+                  if (widget.item.telefono != null) Text('Teléfono: ${widget.item.telefono}'),
+                ],
                 Text('Ubicación: $_barrioSector'),
-                const SizedBox(height: 16),
-                const Text(
-                  'Horarios de atención',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<List<HorarioAtencion>>(
-                  future: _horariosFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error al cargar horarios: ${snapshot.error}');
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('No hay horarios de atención disponibles.');
-                    } else {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: snapshot.data!.map((horario) {
-                          return Text('${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}');
-                        }).toList(),
-                      );
-                    }
-                  },
-                ),
                 const SizedBox(height: 16),
               ],
             ),
@@ -257,6 +234,31 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: serviciosFiltrados.map((servicio) {
                             return Text('- ${servicio.servicio}');
+                          }).toList(),
+                        );
+                      }
+                    },
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Horarios de atención',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<HorarioAtencion>>(
+                    future: _horariosFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text('Error al cargar horarios: ${snapshot.error}');
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No hay horarios de atención disponibles.');
+                      } else {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: snapshot.data!.map((horario) {
+                            return Text('${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}');
                           }).toList(),
                         );
                       }
@@ -351,7 +353,10 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(widget.item.direccion ?? 'Dirección no disponible.'),
+                if (widget.item is LocalTuristico)
+                  Text(widget.item.direccion ?? 'Dirección no disponible.')
+                else if (widget.item is PuntoTuristico)
+                  Text('Dirección no disponible.'),
               ],
             ),
           ),
