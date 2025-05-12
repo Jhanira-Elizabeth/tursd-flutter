@@ -14,7 +14,7 @@ class RiosScreen extends StatefulWidget {
 class _RiosScreenState extends State<RiosScreen> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  late Future<List<PuntoTuristico>> _riosFuture;
+  late Future<List<LocalTuristico>> _riosFuture;
   final List<String> _defaultImageUrls = [
     'assets/images/ValleHermoso1.jpg', // Imagen por defecto para los ríos
   ];
@@ -22,9 +22,21 @@ class _RiosScreenState extends State<RiosScreen> {
   @override
   void initState() {
     super.initState();
-    _riosFuture =
-        _apiService
-            .fetchPuntosTuristicos(); // Obtenemos todos los puntos turísticos
+    _riosFuture = _fetchRiosLocales();
+  }
+
+  Future<List<LocalTuristico>> _fetchRiosLocales() async {
+    final locales = await _apiService.fetchLocalesTuristicos();
+    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
+
+    // Obtener los IDs de los locales que tienen la etiqueta con ID 6 (Rios)
+    final riosLocalIds = localEtiquetas
+        .where((relation) => relation['id_etiqueta'] == 6)
+        .map((relation) => relation['id_local'])
+        .toSet(); // Usar Set para evitar duplicados
+
+    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de ríos
+    return locales.where((local) => riosLocalIds.contains(local.id)).toList();
   }
 
   void _onTabChange(int index) {
@@ -48,7 +60,7 @@ class _RiosScreenState extends State<RiosScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Ríos')),
-      body: FutureBuilder<List<PuntoTuristico>>(
+      body: FutureBuilder<List<LocalTuristico>>(
         future: _riosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -56,40 +68,9 @@ class _RiosScreenState extends State<RiosScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No se encontraron ríos.'));
+            return const Center(child: Text('No se encontraron establecimientos relacionados con ríos.'));
           } else {
-            final puntosTuristicos = snapshot.data!;
-            // Filtrar los puntos turísticos que contengan "río" en su nombre o descripción
-            final rios =
-                puntosTuristicos
-                    .where(
-                      (punto) =>
-                          punto.nombre.toLowerCase().contains('rio') ||
-                          punto.nombre.toLowerCase().contains('rios') ||
-                          punto.descripcion.toLowerCase().contains('rio') ||
-                          punto.descripcion.toLowerCase().contains('rios') ||
-                          punto.nombre.toLowerCase().contains('rio') ||
-                          punto.nombre.toLowerCase().contains('rios') ||
-                          punto.descripcion.toLowerCase().contains('rio') ||
-                          punto.descripcion.toLowerCase().contains('rios') ||
-                          punto.nombre.toLowerCase().contains('río') ||
-                          punto.nombre.toLowerCase().contains('rios') ||
-                          punto.descripcion.toLowerCase().contains('río') ||
-                          punto.descripcion.toLowerCase().contains('rios'),
-                    )
-                    .toList();
-
-            // Buscar el punto turístico "Santo Domingo"
-            PuntoTuristico? santoDomingo;
-            final otrosRios = [];
-            for (final rio in rios) {
-              if (rio.nombre == "Santo Domingo") {
-                santoDomingo = rio;
-              } else {
-                otrosRios.add(rio);
-              }
-            }
-
+            final rios = snapshot.data!;
             return GridView.builder(
               padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -98,28 +79,17 @@ class _RiosScreenState extends State<RiosScreen> {
                 mainAxisSpacing: 12,
                 childAspectRatio: 0.75,
               ),
-              itemCount: otrosRios.length + (santoDomingo != null ? 1 : 0),
+              itemCount: rios.length,
               itemBuilder: (context, index) {
-                PuntoTuristico punto;
-                if (index < otrosRios.length) {
-                  punto = otrosRios[index];
-                } else {
-                  if (santoDomingo != null) {
-                    punto = santoDomingo!;
-                  } else {
-                    return const SizedBox.shrink();
-                  }
-                }
-                final imageUrl =
-                    _defaultImageUrls[index % _defaultImageUrls.length];
+                final rio = rios[index];
+                final imageIndex = index % _defaultImageUrls.length;
+                final imageUrl = _defaultImageUrls[imageIndex];
 
                 return CustomCard(
                   imageUrl: imageUrl,
-                  title: punto.nombre,
-                  onTap: () {
-                    // Navegar a los detalles del río
-                    print('${punto.nombre} tocado');
-                  },
+                  title: rio.nombre,
+                  subtitle: "Santo Domingo",
+                  onTap: () => Navigator.pushNamed(context, '/detalles_local', arguments: rio),
                 );
               },
             );
