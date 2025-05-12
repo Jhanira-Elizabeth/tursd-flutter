@@ -14,7 +14,9 @@ class DetallesScreen extends StatefulWidget {
   _DetallesScreenState createState() => _DetallesScreenState();
 }
 
-class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStateMixin {
+class _DetallesScreenState extends State<DetallesScreen>
+    with TickerProviderStateMixin {
+  int _currentIndex = 0;
   final ApiService _apiService = ApiService();
   late Future<List<HorarioAtencion>> _horariosFuture;
   late Future<List<Servicio>> _serviciosFuture;
@@ -36,7 +38,12 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
 
   Future<List<HorarioAtencion>> _fetchHorarios() async {
     if (widget.item is LocalTuristico) {
-      return _apiService.fetchHorariosByLocal(widget.item.id);
+      final allHorarios = await _apiService.fetchHorariosByLocal(
+        widget.item.id,
+      );
+      return allHorarios
+          .where((horario) => horario.idLocal == widget.item.id)
+          .toList();
     }
     return [];
   }
@@ -68,6 +75,23 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
     });
   }
 
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
+
   _launchURL(String url) async {
     final uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
@@ -80,7 +104,8 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
   }
 
   _openMap(double latitude, double longitude) async {
-    final googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    final googleUrl =
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     final uri = Uri.parse(googleUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
@@ -89,6 +114,18 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
         const SnackBar(content: Text('No se pudo abrir el mapa.')),
       );
     }
+  }
+
+  String _getCategoryName(dynamic item) {
+    if (item is LocalTuristico && item.etiquetas.isNotEmpty) {
+      return item.etiquetas.first.nombre;
+    } else if (item is PuntoTuristico) {
+      // Si los Puntos Turísticos también tienen una lista de etiquetas,
+      // podrías implementar una lógica similar aquí si aplica.
+      // Por ahora, devolvemos 'Punto Turístico'.
+      return 'Punto Turístico';
+    }
+    return 'Desconocida';
   }
 
   @override
@@ -116,12 +153,18 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
               children: [
                 Text(
                   widget.item.nombre ?? '',
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  'Categoría: ${widget.item.categoria ?? 'Desconocida'}', // Necesitarás obtener la categoría
-                  style: TextStyle(color: Colors.green.shade300, fontWeight: FontWeight.bold),
+                  'Categoría: ${_getCategoryName(widget.item)}',
+                  style: TextStyle(
+                    color: Colors.green.shade300,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -129,7 +172,9 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(widget.item.descripcion ?? 'No hay descripción disponible.'),
+                Text(
+                  widget.item.descripcion ?? 'No hay descripción disponible.',
+                ),
                 const SizedBox(height: 16),
                 const Text(
                   'Más Información',
@@ -137,8 +182,10 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                 ),
                 const SizedBox(height: 8),
                 Text('Dueño: $_dueno'),
-                if (widget.item.correo != null) Text('Email: ${widget.item.correo}'),
-                if (widget.item.telefono != null) Text('Teléfono: ${widget.item.telefono}'),
+                if (widget.item.email != null)
+                  Text('Email: ${widget.item.email}'),
+                if (widget.item.telefono != null)
+                  Text('Teléfono: ${widget.item.telefono}'),
                 Text('Ubicación: $_barrioSector'),
                 const SizedBox(height: 16),
                 const Text(
@@ -152,44 +199,27 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                      return Text('Error al cargar horarios: ${snapshot.error}');
+                      return Text(
+                        'Error al cargar horarios: ${snapshot.error}',
+                      );
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('No hay horarios de atención disponibles.');
+                      return const Text(
+                        'No hay horarios de atención disponibles.',
+                      );
                     } else {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: snapshot.data!.map((horario) {
-                          return Text('${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}');
-                        }).toList(),
+                        children:
+                            snapshot.data!.map((horario) {
+                              return Text(
+                                '${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}',
+                              );
+                            }).toList(),
                       );
                     }
                   },
                 ),
                 const SizedBox(height: 16),
-                const Text(
-                  'Servicios',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<List<Servicio>>(
-                  future: _serviciosFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error al cargar servicios: ${snapshot.error}');
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('No hay servicios disponibles.');
-                    } else {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: snapshot.data!.map((servicio) {
-                          return Text('- ${servicio.servicio}');
-                        }).toList(),
-                      );
-                    }
-                  },
-                ),
               ],
             ),
           ),
@@ -199,30 +229,79 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Actividades',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                FutureBuilder<List<Actividad>>(
-                  future: _actividadesFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    } else if (snapshot.hasError) {
-                      return Text('Error al cargar actividades: ${snapshot.error}');
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text('No hay actividades disponibles.');
-                    } else {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: snapshot.data!.map((actividad) {
-                          return Text('- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}');
-                        }).toList(),
-                      );
-                    }
-                  },
-                ),
+                if (widget.item is LocalTuristico) ...[
+                  const Text(
+                    'Servicios',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<Servicio>>(
+                    future: _serviciosFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text(
+                          'Error al cargar servicios: ${snapshot.error}',
+                        );
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No hay servicios disponibles.');
+                      } else {
+                        final serviciosFiltrados =
+                            snapshot.data!
+                                .where(
+                                  (servicio) =>
+                                      servicio.idLocal == widget.item.id,
+                                )
+                                .toList();
+
+                        if (serviciosFiltrados.isEmpty) {
+                          return const Text(
+                            'No hay servicios disponibles para este local.',
+                          );
+                        }
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:
+                              serviciosFiltrados.map((servicio) {
+                                return Text('- ${servicio.servicio}');
+                              }).toList(),
+                        );
+                      }
+                    },
+                  ),
+                ] else if (widget.item is PuntoTuristico) ...[
+                  const Text(
+                    'Actividades',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  FutureBuilder<List<Actividad>>(
+                    future: _actividadesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const CircularProgressIndicator();
+                      } else if (snapshot.hasError) {
+                        return Text(
+                          'Error al cargar actividades: ${snapshot.error}',
+                        );
+                      } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                        return const Text('No hay actividades disponibles.');
+                      } else {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children:
+                              snapshot.data!.map((actividad) {
+                                return Text(
+                                  '- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}',
+                                );
+                              }).toList(),
+                        );
+                      }
+                    },
+                  ),
+                ],
               ],
             ),
           ),
@@ -240,27 +319,42 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
                 SizedBox(
                   height: 200,
                   width: double.infinity,
-                  child: (widget.item.latitud != null && widget.item.longitud != null)
-                      ? GoogleMap(
-                          initialCameraPosition: CameraPosition(
-                            target: LatLng(widget.item.latitud!, widget.item.longitud!),
-                            zoom: 15,
-                          ),
-                          markers: {
-                            Marker(
-                              markerId: MarkerId(widget.item.id.toString()),
-                              position: LatLng(widget.item.latitud!, widget.item.longitud!),
-                              infoWindow: InfoWindow(title: widget.item.nombre),
-                              onTap: () {
-                                _openMap(widget.item.latitud!, widget.item.longitud!);
-                              },
+                  child:
+                      (widget.item.latitud != null &&
+                              widget.item.longitud != null)
+                          ? GoogleMap(
+                            initialCameraPosition: CameraPosition(
+                              target: LatLng(
+                                widget.item.latitud!,
+                                widget.item.longitud!,
+                              ),
+                              zoom: 15,
                             ),
-                          },
-                          onTap: (LatLng latLng) {
-                            _openMap(latLng.latitude, latLng.longitude);
-                          },
-                        )
-                      : const Center(child: Text('Ubicación no disponible.')),
+                            markers: {
+                              Marker(
+                                markerId: MarkerId(widget.item.id.toString()),
+                                position: LatLng(
+                                  widget.item.latitud!,
+                                  widget.item.longitud!,
+                                ),
+                                infoWindow: InfoWindow(
+                                  title: widget.item.nombre,
+                                ),
+                                onTap: () {
+                                  _openMap(
+                                    widget.item.latitud!,
+                                    widget.item.longitud!,
+                                  );
+                                },
+                              ),
+                            },
+                            onTap: (LatLng latLng) {
+                              _openMap(latLng.latitude, latLng.longitude);
+                            },
+                          )
+                          : const Center(
+                            child: Text('Ubicación no disponible.'),
+                          ),
                 ),
                 if (widget.item.latitud != null && widget.item.longitud != null)
                   ElevatedButton(
@@ -282,17 +376,8 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
         ],
       ),
       bottomNavigationBar: BottomNavigationBarTuristico(
-        currentIndex: -1,
-        onTabChange: (index) {
-          // Aquí defines qué hacer cuando se toca un ícono de la barra de navegación
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 1) {
-            Navigator.pushReplacementNamed(context, '/mapa');
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/chatbot');
-          }
-        },
+        currentIndex: _currentIndex,
+        onTabChange: _onTabChange,
       ),
     );
   }

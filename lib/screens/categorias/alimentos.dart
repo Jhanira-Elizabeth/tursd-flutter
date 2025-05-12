@@ -3,6 +3,7 @@ import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
 class AlimentosScreen extends StatefulWidget {
   const AlimentosScreen({super.key});
@@ -96,15 +97,17 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
 
-                return CustomCard(
-                  imageUrl: imageUrl,
-                  title: alimento.nombre,
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles_local',
-                        arguments: alimento,
-                      ),
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles', // Corregido: Usamos '/detalles'
+                    arguments: alimento,
+                  ),
+                  child: CustomCard(
+                    imageUrl: imageUrl,
+                    title: alimento.nombre,
+                    // ... otras propiedades del CustomCard
+                  ),
                 );
               },
             );
