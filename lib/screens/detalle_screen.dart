@@ -1,0 +1,299 @@
+import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../models/punto_turistico.dart';
+import '../../services/api_service.dart';
+import '../../widgets/bottom_navigation_bar_turistico.dart';
+
+class DetallesScreen extends StatefulWidget {
+  final dynamic item;
+
+  const DetallesScreen({Key? key, required this.item}) : super(key: key);
+
+  @override
+  _DetallesScreenState createState() => _DetallesScreenState();
+}
+
+class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStateMixin {
+  final ApiService _apiService = ApiService();
+  late Future<List<HorarioAtencion>> _horariosFuture;
+  late Future<List<Servicio>> _serviciosFuture;
+  late Future<List<Actividad>> _actividadesFuture; // Para puntos turísticos
+  String? _barrioSector;
+  String? _dueno;
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _horariosFuture = _fetchHorarios();
+    _serviciosFuture = _fetchServicios();
+    _actividadesFuture = _fetchActividades();
+    _getBarrioSector();
+    _simulateDueno();
+  }
+
+  Future<List<HorarioAtencion>> _fetchHorarios() async {
+    if (widget.item is LocalTuristico) {
+      return _apiService.fetchHorariosByLocal(widget.item.id);
+    }
+    return [];
+  }
+
+  Future<List<Servicio>> _fetchServicios() async {
+    if (widget.item is LocalTuristico) {
+      return _apiService.fetchServiciosByLocal(widget.item.id);
+    }
+    return [];
+  }
+
+  Future<List<Actividad>> _fetchActividades() async {
+    if (widget.item is PuntoTuristico) {
+      return _apiService.fetchActividadesByPunto(widget.item.id);
+    }
+    return [];
+  }
+
+  Future<void> _getBarrioSector() async {
+    // ... (tu lógica para obtener el barrio/sector)
+    setState(() {
+      _barrioSector = "Barrio Ejemplo";
+    });
+  }
+
+  void _simulateDueno() {
+    setState(() {
+      _dueno = "Dueño ${(widget.item.id % 3) + 1}";
+    });
+  }
+
+  _launchURL(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace.')),
+      );
+    }
+  }
+
+  _openMap(double latitude, double longitude) async {
+    final googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    final uri = Uri.parse(googleUrl);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el mapa.')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(widget.item.nombre ?? 'Detalles'),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: const [
+            Tab(text: 'Información'),
+            Tab(text: 'Actividades'),
+            Tab(text: 'Ubicación'),
+          ],
+        ),
+      ),
+      body: TabBarView(
+        controller: _tabController,
+        children: [
+          // Contenido de la pestaña Información
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.item.nombre ?? '',
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Categoría: ${widget.item.categoria ?? 'Desconocida'}', // Necesitarás obtener la categoría
+                  style: TextStyle(color: Colors.green.shade300, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Descripción',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(widget.item.descripcion ?? 'No hay descripción disponible.'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Más Información',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text('Dueño: $_dueno'),
+                if (widget.item.correo != null) Text('Email: ${widget.item.correo}'),
+                if (widget.item.telefono != null) Text('Teléfono: ${widget.item.telefono}'),
+                Text('Ubicación: $_barrioSector'),
+                const SizedBox(height: 16),
+                const Text(
+                  'Horarios de atención',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<HorarioAtencion>>(
+                  future: _horariosFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error al cargar horarios: ${snapshot.error}');
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Text('No hay horarios de atención disponibles.');
+                    } else {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: snapshot.data!.map((horario) {
+                          return Text('${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}');
+                        }).toList(),
+                      );
+                    }
+                  },
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Servicios',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<Servicio>>(
+                  future: _serviciosFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error al cargar servicios: ${snapshot.error}');
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Text('No hay servicios disponibles.');
+                    } else {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: snapshot.data!.map((servicio) {
+                          return Text('- ${servicio.servicio}');
+                        }).toList(),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          // Contenido de la pestaña Actividades
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Actividades',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                FutureBuilder<List<Actividad>>(
+                  future: _actividadesFuture,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    } else if (snapshot.hasError) {
+                      return Text('Error al cargar actividades: ${snapshot.error}');
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Text('No hay actividades disponibles.');
+                    } else {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: snapshot.data!.map((actividad) {
+                          return Text('- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}');
+                        }).toList(),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          // Contenido de la pestaña Ubicación
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Ubicación en el Mapa',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                SizedBox(
+                  height: 200,
+                  width: double.infinity,
+                  child: (widget.item.latitud != null && widget.item.longitud != null)
+                      ? GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(widget.item.latitud!, widget.item.longitud!),
+                            zoom: 15,
+                          ),
+                          markers: {
+                            Marker(
+                              markerId: MarkerId(widget.item.id.toString()),
+                              position: LatLng(widget.item.latitud!, widget.item.longitud!),
+                              infoWindow: InfoWindow(title: widget.item.nombre),
+                              onTap: () {
+                                _openMap(widget.item.latitud!, widget.item.longitud!);
+                              },
+                            ),
+                          },
+                          onTap: (LatLng latLng) {
+                            _openMap(latLng.latitude, latLng.longitude);
+                          },
+                        )
+                      : const Center(child: Text('Ubicación no disponible.')),
+                ),
+                if (widget.item.latitud != null && widget.item.longitud != null)
+                  ElevatedButton(
+                    onPressed: () {
+                      _openMap(widget.item.latitud!, widget.item.longitud!);
+                    },
+                    child: const Text('Abrir en Google Maps'),
+                  ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Dirección',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(widget.item.direccion ?? 'Dirección no disponible.'),
+              ],
+            ),
+          ),
+        ],
+      ),
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: -1,
+        onTabChange: (index) {
+          // Aquí defines qué hacer cuando se toca un ícono de la barra de navegación
+          if (index == 0) {
+            Navigator.pushReplacementNamed(context, '/home');
+          } else if (index == 1) {
+            Navigator.pushReplacementNamed(context, '/mapa');
+          } else if (index == 2) {
+            Navigator.pushReplacementNamed(context, '/chatbot');
+          }
+        },
+      ),
+    );
+  }
+}

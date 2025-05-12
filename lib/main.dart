@@ -20,6 +20,7 @@ import 'screens/categorias/parroquias.dart';
 import 'screens/categorias/etnia_tsachila.dart';
 import 'screens/categorias/rios.dart';
 import 'screens/categorias/alimentos.dart';
+import 'screens/detalle_screen.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
@@ -62,7 +63,8 @@ class MyApp extends StatelessWidget {
         '/parques': (context) => const ParquesScreen(),
         '/atracciones': (context) => const AtraccionesScreen(), // Changed this line
         '/rios': (context) => const RiosScreen(),
-      },
+        '/detalles': (context) => DetallesScreen(item: ModalRoute.of(context)!.settings.arguments), // Si usas otra ruta para parques
+  },
     );
   }
 }
