@@ -14,7 +14,7 @@ class AlojamientosScreen extends StatefulWidget {
 class _AlojamientosScreenState extends State<AlojamientosScreen> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  late Future<List<PuntoTuristico>> _alojamientosFuture;
+  late Future<List<LocalTuristico>> _alojamientosFuture;
   final List<String> _imageUrls = [
     'assets/images/IndioColorado1.jpg',
     'assets/images/IndioColorado2.jpg',
@@ -28,7 +28,21 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
   @override
   void initState() {
     super.initState();
-    _alojamientosFuture = _apiService.fetchPuntosTuristicosByEtiqueta("Alojamientos");
+    _alojamientosFuture = _fetchAlojamientosLocales();
+  }
+
+  Future<List<LocalTuristico>> _fetchAlojamientosLocales() async {
+    final locales = await _apiService.fetchLocalesTuristicos();
+    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
+
+    // Obtener los IDs de los locales que tienen la etiqueta con ID 3 (Alojamientos)
+    final alojamientosLocalIds = localEtiquetas
+        .where((relation) => relation['id_etiqueta'] == 3)
+        .map((relation) => relation['id_local'])
+        .toSet(); // Usar Set para evitar duplicados
+
+    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alojamientos
+    return locales.where((local) => alojamientosLocalIds.contains(local.id)).toList();
   }
 
   void _onTabChange(int index) {
@@ -52,7 +66,7 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Alojamientos')),
-      body: FutureBuilder<List<PuntoTuristico>>(
+      body: FutureBuilder<List<LocalTuristico>>(
         future: _alojamientosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -74,15 +88,14 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
               itemCount: alojamientos.length,
               itemBuilder: (context, index) {
                 final alojamiento = alojamientos[index];
-                // Usa el índice para rotar a través de la lista de imágenes
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
 
                 return CustomCard(
                   imageUrl: imageUrl,
                   title: alojamiento.nombre,
-                  subtitle: "Santo Domingo", // Subtítulo fijo
-                  onTap: () => Navigator.pushNamed(context, '/detalles', arguments: alojamiento),
+                  subtitle: "Santo Domingo",
+                  onTap: () => Navigator.pushNamed(context, '/detalles_local', arguments: alojamiento),
                 );
               },
             );
