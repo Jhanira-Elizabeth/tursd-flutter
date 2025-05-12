@@ -77,7 +77,7 @@ class _CustomCardState extends State<CustomCard>
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch, // Make children take full width
-                  mainAxisSize: MainAxisSize.min,
+                  mainAxisSize: MainAxisSize.min, // Add this line
                   children: [
                     Expanded( // Make the image expand vertically
                       child: ClipRRect(
