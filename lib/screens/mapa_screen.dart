@@ -1,108 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import '../services/api_service.dart';
 import '../models/punto_turistico.dart';
+import '../services/api_service.dart';
+import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget de la barra de navegación
 
 class MapaScreen extends StatefulWidget {
+  const MapaScreen({super.key});
+
   @override
-  _MapaScreenState createState() => _MapaScreenState();
+  State<MapaScreen> createState() => _MapaScreenState();
 }
 
 class _MapaScreenState extends State<MapaScreen> {
-  late GoogleMapController _mapController;
-  late Future<List<PuntoTuristico>> _futurePuntos;
-  late Future<List<LocalTuristico>> _futureLocales;
-  final Set<Marker> _markers = {};
-  bool _isLoading = true;
-  bool _showPuntos = true;
-  bool _showLocales = true;
-  
-  final LatLng _santoDom1ngo = LatLng(-0.254167, -79.175);
+  final ApiService _apiService = ApiService();
+  late Future<List<PuntoTuristico>> _puntosFuture;
+  int _currentIndex = 1; // Inicialmente en el índice 1 (Mapa)
 
   @override
   void initState() {
     super.initState();
-    _futurePuntos = ApiService().fetchPuntosTuristicos();
-    _futureLocales = ApiService().fetchLocalesTuristicos();
-    _loadMarkers();
+    _puntosFuture = _apiService.fetchPuntosTuristicos();
   }
 
-  Future<void> _loadMarkers() async {
-    try {
-      final puntos = await _futurePuntos;
-      final locales = await _futureLocales;
-
-      setState(() {
-        if (_showPuntos) {
-          for (var punto in puntos) {
-            _markers.add(
-              Marker(
-                markerId: MarkerId('punto_${punto.id}'),
-                position: LatLng(punto.latitud, punto.longitud),
-                infoWindow: InfoWindow(
-                  title: punto.nombre,
-                  snippet: 'Punto Turístico',
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: punto,
-                    );
-                  },
-                ),
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueGreen,
-                ),
-              ),
-            );
-          }
-        }
-
-        if (_showLocales) {
-          for (var local in locales) {
-            _markers.add(
-              Marker(
-                markerId: MarkerId('local_${local.id}'),
-                position: LatLng(local.latitud, local.longitud),
-                infoWindow: InfoWindow(
-                  title: local.nombre,
-                  snippet: 'Local: ${local.descripcion.length > 20 ? local.descripcion.substring(0, 20) + '...' : local.descripcion}',
-                ),
-                icon: BitmapDescriptor.defaultMarkerWithHue(
-                  BitmapDescriptor.hueAzure,
-                ),
-              ),
-            );
-          }
-        }
-        
-        _isLoading = false;
-      });
-    } catch (e) {
-      print('Error cargando marcadores: $e');
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
-  void _onMapCreated(GoogleMapController controller) {
-    _mapController = controller;
-  }
-
-  void _togglePuntosTuristicos() {
+  void _onTabChange(int index) {
     setState(() {
-      _showPuntos = !_showPuntos;
-      _markers.clear();
-      _loadMarkers();
-    });
-  }
-
-  void _toggleLocalesTuristicos() {
-    setState(() {
-      _showLocales = !_showLocales;
-      _markers.clear();
-      _loadMarkers();
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/');
+          break;
+        case 1:
+          // Ya estamos en el mapa
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
     });
   }
 
@@ -110,123 +43,109 @@ class _MapaScreenState extends State<MapaScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Mapa Turístico'),
+        title: const Text('Mapa Turístico'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(
-              Icons.place,
-              color: _showPuntos ? Color(0xFF9DAF3A) : Colors.grey,
-            ),
-            onPressed: _togglePuntosTuristicos,
-            tooltip: 'Mostrar/Ocultar Puntos Turísticos',
-          ),
-          IconButton(
-            icon: Icon(
-              Icons.store,
-              color: _showLocales ? Color(0xFF9DAF3A) : Colors.grey,
-            ),
-            onPressed: _toggleLocalesTuristicos,
-            tooltip: 'Mostrar/Ocultar Locales',
-          ),
-        ],
       ),
-      body: Stack(
-        children: [
-          GoogleMap(
-            onMapCreated: _onMapCreated,
-            initialCameraPosition: CameraPosition(
-              target: _santoDom1ngo,
-              zoom: 12.0,
-            ),
-            markers: _markers,
-            myLocationButtonEnabled: true,
-            myLocationEnabled: true,
-            mapToolbarEnabled: true,
-            zoomControlsEnabled: true,
-          ),
-          if (_isLoading)
-            Center(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF9DAF3A)),
-              ),
-            ),
-          Positioned(
-            bottom: 16.0,
-            left: 16.0,
-            child: Card(
-              elevation: 4.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.green,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text('Puntos Turísticos'),
-                      ],
-                    ),
-                    SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.blue,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        SizedBox(width: 8),
-                        Text('Locales Turísticos'),
-                      ],
-                    ),
-                  ],
+      body: FutureBuilder<List<PuntoTuristico>>(
+        future: _puntosFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(
+              child: Text('No hay puntos turísticos disponibles'),
+            );
+          } else {
+            final puntos = snapshot.data!;
+
+            // Calculate center position based on all points
+            double sumLat = 0;
+            double sumLng = 0;
+
+            for (var punto in puntos) {
+              sumLat += punto.latitud;
+              sumLng += punto.longitud;
+            }
+
+            final centerLat = sumLat / puntos.length;
+            final centerLng = sumLng / puntos.length;
+
+            final Set<Marker> markers = {};
+
+            for (var punto in puntos) {
+              markers.add(
+                Marker(
+                  markerId: MarkerId(punto.id.toString()),
+                  position: LatLng(punto.latitud, punto.longitud),
+                  infoWindow: InfoWindow(
+                    title: punto.nombre,
+                    snippet:
+                        punto.descripcion.length > 50
+                            ? '${punto.descripcion.substring(0, 47)}...'
+                            : punto.descripcion,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: punto,
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.map),
-            label: 'Mapa',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.chat),
-            label: 'Chatbot',
-          ),
-        ],
-        currentIndex: 1,
-        selectedItemColor: Color(0xFF9DAF3A),
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/');
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/chatbot');
+              );
+            }
+
+            return Stack(
+              children: [
+                GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: LatLng(centerLat, centerLng),
+                    zoom: 12,
+                  ),
+                  markers: markers,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: true,
+                ),
+                Positioned(
+                  top: 16,
+                  left: 16,
+                  right: 16,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(30),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.1), // Usando withOpacity
+                          spreadRadius: 1,
+                          blurRadius: 5,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: const TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Buscar en el mapa',
+                        prefixIcon: Icon(Icons.search),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 0),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            );
           }
         },
+      ),
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: _currentIndex,
+        onTabChange: _onTabChange,
       ),
     );
   }

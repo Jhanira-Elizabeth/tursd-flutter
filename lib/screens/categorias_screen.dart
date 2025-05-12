@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import '../widgets/custom_card.dart'; // Importa el CustomCard widget
+import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget
 
-class CategoriasScreen extends StatelessWidget {
+class CategoriasScreen extends StatefulWidget {
   CategoriasScreen({super.key});
+
+  @override
+  _CategoriasScreenState createState() => _CategoriasScreenState();
+}
+
+class _CategoriasScreenState extends State<CategoriasScreen> {
+  int _currentIndex = 0; // Por defecto, seleccionamos 'Inicio'
 
   final List<Map<String, dynamic>> categorias = [
     {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
@@ -12,6 +21,23 @@ class CategoriasScreen extends StatelessWidget {
     {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
     {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
   ];
+
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +53,7 @@ class CategoriasScreen extends StatelessWidget {
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 3 / 4,
+          childAspectRatio: 3 / 4, // Use the same aspect ratio
         ),
         itemCount: categorias.length,
         itemBuilder: (context, index) {
@@ -35,7 +61,7 @@ class CategoriasScreen extends StatelessWidget {
           final ruta =
               '/${categoria['nombre'].toString().toLowerCase().replaceAll(' ', '')}';
 
-          return _CategoryCard( // Use a custom widget for the category card
+          return CustomCard(
             imageUrl: categoria['imagen'],
             title: categoria['nombre'],
             onTap: () {
@@ -44,67 +70,9 @@ class CategoriasScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-// Custom widget for the category card layout
-class _CategoryCard extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final VoidCallback onTap;
-
-  const _CategoryCard({
-    required this.imageUrl,
-    required this.title,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              child: ClipRRect(
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(8),
-                  topRight: Radius.circular(8),
-                ),
-                child: Image.asset( // Use Image.asset
-                  imageUrl,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8),
-              child: Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: _currentIndex,
+        onTabChange: _onTabChange,
       ),
     );
   }

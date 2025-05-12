@@ -6,7 +6,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class DetalleCard extends StatefulWidget {
   final PuntoTuristico puntoTuristico;
 
-  DetalleCard({required this.puntoTuristico});
+  const DetalleCard({super.key, required this.puntoTuristico});
 
   @override
   _DetalleCardState createState() => _DetalleCardState();
@@ -44,7 +44,7 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
           ),
         ),
-        Container(
+        SizedBox(
           height: 150.0,
           width: double.infinity,
           child: punto.imagenUrl != null && punto.imagenUrl!.isNotEmpty

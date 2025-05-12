@@ -5,10 +5,10 @@ class BottomNavigationBarTuristico extends StatefulWidget {
   final int currentIndex;
 
   const BottomNavigationBarTuristico({
-    Key? key,
+    super.key,
     required this.onTabChange,
     required this.currentIndex,
-  }) : super(key: key);
+  });
 
   @override
   _BottomNavigationBarTuristicoState createState() => _BottomNavigationBarTuristicoState();

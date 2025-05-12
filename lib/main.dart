@@ -2,34 +2,45 @@ import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'models/punto_turistico.dart';
 import 'services/api_service.dart';
-import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget de la barra de navegación
+import '../widgets/bottom_navigation_bar_turistico.dart';
 import 'screens/home_screen.dart';
 import 'screens/punto_turistico_lista_screen.dart';
 import 'screens/recomendados_screen.dart';
-import 'screens/chatbot_screen.dart';
+import 'screens/chatbot_screen.dart' as chatbot;
 import 'screens/mapa_screen.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'dart:io';
+import '../widgets/custom_card.dart';
+import 'screens/categorias_screen.dart';
+import 'screens/categorias/parques.dart';
+import 'screens/categorias/atracciones.dart';
+import 'screens/categorias/alojamientos.dart';
+import 'screens/categorias/parroquias.dart';
+import 'screens/categorias/etnia_tsachila.dart';
+import 'screens/categorias/rios.dart';
+import 'screens/categorias/alimentos.dart';
 
 Future<void> main() async {
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Turismo IA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Color(0xFF9DAF3A),
+        primaryColor: const Color(0xFF9DAF3A),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Color(0xFF9DAF3A),
-          primary: Color(0xFF9DAF3A),
+          seedColor: const Color(0xFF9DAF3A),
+          primary: const Color(0xFF9DAF3A),
         ),
         scaffoldBackgroundColor: Colors.grey[50],
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
           elevation: 0,
@@ -37,18 +48,20 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => HomeScreen(),
+        '/': (context) => const HomeScreen(),
+        '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
-        '/recomendados': (context) => RecomendadosScreen(),
+        '/recomendados': (context) => const RecomendadosScreen(),
         '/detalles': (context) => PuntoTuristicoListaScreen(),
-        '/mapa': (context) => MapaScreen(),
-        '/chatbot': (context) => ChatbotScreen(),
-        '/etniatsachila': (context) => PlaceholderScreen(title: 'Etnia Tsáchila'),
-        '/parroquias': (context) => PlaceholderScreen(title: 'Parroquias'),
-        '/alojamiento': (context) => PlaceholderScreen(title: 'Alojamiento'),
-        '/alimentacion': (context) => PlaceholderScreen(title: 'Alimentación'),
-        '/parques': (context) => PlaceholderScreen(title: 'Parques'),
-        '/rios': (context) => PlaceholderScreen(title: 'Ríos'),
+        '/mapa': (context) => const MapaScreen(),
+        '/chatbot': (context) => chatbot.ChatbotScreen(),
+        '/etniatsachila': (context) => const EtniaTsachilaScreen(),
+        '/parroquias': (context) => const ParroquiasScreen(),
+        '/alojamiento': (context) => const AlojamientosScreen(),
+        '/alimentacion': (context) => const AlimentosScreen(),
+        '/parques': (context) => const ParquesScreen(),
+        '/atracciones': (context) => const AtraccionesScreen(), // Changed this line
+        '/rios': (context) => const RiosScreen(),
       },
     );
   }
@@ -64,7 +77,7 @@ class MapaPage extends StatefulWidget {
 class _MapaPageState extends State<MapaPage> {
   final ApiService _apiService = ApiService();
   late Future<List<PuntoTuristico>> _puntosFuture;
-  int _currentIndex = 1; // Inicialmente en el índice 1 (Mapa)
+  int _currentIndex = 1;
 
   @override
   void initState() {
@@ -95,7 +108,6 @@ class _MapaPageState extends State<MapaPage> {
           } else {
             final puntos = snapshot.data!;
 
-            // Calculate center position based on all points
             double sumLat = 0;
             double sumLng = 0;
 
@@ -116,10 +128,9 @@ class _MapaPageState extends State<MapaPage> {
                   position: LatLng(punto.latitud, punto.longitud),
                   infoWindow: InfoWindow(
                     title: punto.nombre,
-                    snippet:
-                        punto.descripcion.length > 50
-                            ? '${punto.descripcion.substring(0, 47)}...'
-                            : punto.descripcion,
+                    snippet: punto.descripcion.length > 50
+                        ? '${punto.descripcion.substring(0, 47)}...'
+                        : punto.descripcion,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
@@ -179,80 +190,14 @@ class _MapaPageState extends State<MapaPage> {
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: (index) {
-          // Cambia onTap a onTabChange
           setState(() {
             _currentIndex = index;
           });
           if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/');
+            Navigator.pushReplacementNamed(context, '/home');
           } else if (index == 2) {
-            // Implementar navegación al chatbot cuando esté disponible
+            Navigator.pushReplacementNamed(context, '/chatbot');
           }
-        },
-      ),
-    );
-  }
-}
-
-// ¡Asegúrate de que SOLO esta clase CategoriasScreen esté presente en main.dart!
-class CategoriasScreen extends StatelessWidget {
-  final List<Map<String, dynamic>> categorias = [
-    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
-    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
-    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
-    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
-    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Categorías'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      ),
-      body: GridView.builder(
-        padding: const EdgeInsets.all(12),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.5,
-        ),
-        itemCount: categorias.length,
-        itemBuilder: (context, index) {
-          final categoria = categorias[index];
-          final ruta =
-              '/${categoria['nombre'].toLowerCase().replaceAll(' ', '')}';
-
-          return InkWell(
-            onTap: () {
-              Navigator.pushNamed(context, ruta);
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(15),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(categoria['imagen'], fit: BoxFit.cover),
-                  Container(color: Colors.black.withOpacity(0.4)),
-                  Center(
-                    child: Text(
-                      categoria['nombre'],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
         },
       ),
     );
@@ -269,6 +214,24 @@ class RecomendadosPage extends StatefulWidget {
 class _RecomendadosPageState extends State<RecomendadosPage> {
   final ApiService _apiService = ApiService();
   late Future<List<PuntoTuristico>> _puntosFuture;
+  int _currentIndex = 0;
+
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -278,102 +241,50 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<PuntoTuristico> puntos =
+        ModalRoute.of(context)!.settings.arguments as List<PuntoTuristico>;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recomendados'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
-      body: FutureBuilder<List<PuntoTuristico>>(
-        future: _puntosFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('No hay puntos turísticos disponibles'),
-            );
-          } else {
-            final puntos = snapshot.data!;
-
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
+      body: puntos.isEmpty
+          ? const Center(child: Text('No hay puntos turísticos disponibles.'))
+          : GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 3 / 4,
+              ),
               itemCount: puntos.length,
               itemBuilder: (context, index) {
                 final punto = puntos[index];
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.2),
-                        spreadRadius: 1,
-                        blurRadius: 3,
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    contentPadding: const EdgeInsets.all(16.0),
-                    leading: Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade300,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Center(child: Icon(Icons.image)),
-                    ),
-                    title: Text(
-                      punto.nombre,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
-                      ),
-                    ),
-                    subtitle: Text(
-                      punto.descripcion.length > 100
-                          ? '${punto.descripcion.substring(0, 97)}...'
-                          : punto.descripcion,
-                      style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: punto,
-                      );
-                    },
-                  ),
+                return CustomCard(
+                  imageUrl:
+                      punto.imagenUrl ?? 'https://via.placeholder.com/181x147',
+                  title: punto.nombre,
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detalles',
+                      arguments: punto,
+                    );
+                  },
                 );
               },
-            );
-          }
-        },
+            ),
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: _currentIndex,
+        onTabChange: _onTabChange,
       ),
-    );
-  }
-}
-
-class PlaceholderScreen extends StatelessWidget {
-  final String title;
-  const PlaceholderScreen({super.key, required this.title});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(title),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      ),
-      body: Center(child: Text('Contenido para $title en construcción')),
     );
   }
 }

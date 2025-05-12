@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/punto_turistico.dart'; // Importación correcta
+import '../models/punto_turistico.dart';
 
 class ApiService {
-  final String baseUrl = 'https://tursd-grhzehh6hta4e9en.eastus-01.azurewebsites.net/api/v1'; // URL de tu API
+  final String baseUrl =
+      'https://tursd-grhzehh6hta4e9en.eastus-01.azurewebsites.net/api/v1';
 
   // Función genérica para manejar la respuesta de la API para un solo objeto
-  Future<T> _handleResponse<T>(http.Response response, T Function(dynamic) fromJson) {
+  Future<T> _handleResponse<T>(
+      http.Response response, T Function(dynamic) fromJson) {
     if (response.statusCode == 200) {
       final dynamic jsonData = json.decode(response.body);
       return Future.value(fromJson(jsonData));
@@ -16,7 +18,8 @@ class ApiService {
   }
 
   // Función genérica para manejar la respuesta de la API para una lista de objetos
-  Future<List<T>> _handleListResponse<T>(http.Response response, T Function(dynamic) fromJsonList) {
+  Future<List<T>> _handleListResponse<T>(
+      http.Response response, T Function(dynamic) fromJsonList) {
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return Future.value(data.map((json) => fromJsonList(json)).toList());
@@ -28,7 +31,8 @@ class ApiService {
   // 1. Puntos Turísticos
   Future<List<PuntoTuristico>> fetchPuntosTuristicos() async {
     final response = await http.get(Uri.parse('$baseUrl/puntos'));
-    return _handleListResponse(response, (json) => PuntoTuristico.fromJson(json));
+    return _handleListResponse(
+        response, (json) => PuntoTuristico.fromJson(json));
   }
 
   Future<PuntoTuristico> fetchPuntoTuristicoById(int id) async {
@@ -37,22 +41,56 @@ class ApiService {
   }
 
   Future<List<PuntoTuristico>> fetchPuntosByParroquia(int parroquiaId) async {
-    final response = await http.get(Uri.parse('$baseUrl/puntos?id_parroquia=$parroquiaId'));
-    return _handleListResponse(response, (json) => PuntoTuristico.fromJson(json));
+    final response =
+        await http.get(Uri.parse('$baseUrl/puntos?id_parroquia=$parroquiaId'));
+    return _handleListResponse(
+        response, (json) => PuntoTuristico.fromJson(json));
   }
 
   Future<List<PuntoTuristico>> fetchPuntosByEtiqueta(int etiquetaId) async {
-    final response = await http.get(Uri.parse('$baseUrl/puntos?id_etiqueta=$etiquetaId'));
-    return _handleListResponse(response, (json) => PuntoTuristico.fromJson(json));
+    final response =
+        await http.get(Uri.parse('$baseUrl/puntos?id_etiqueta=$etiquetaId'));
+    return _handleListResponse(
+        response, (json) => PuntoTuristico.fromJson(json));
+  }
+
+  // Nueva función para obtener puntos turísticos por nombre de etiqueta
+  Future<List<PuntoTuristico>> fetchPuntosTuristicosByEtiqueta(
+      String etiquetaNombre) async {
+    // Primero, necesitamos obtener el ID de la etiqueta a partir de su nombre.
+    final etiquetaId = await _getEtiquetaIdByName(etiquetaNombre);
+    if (etiquetaId == null) {
+      return []; // O podrías lanzar una excepción: throw Exception('Etiqueta no encontrada');
+    }
+    // Luego, usamos el ID de la etiqueta para obtener los puntos turísticos.
+    return fetchPuntosByEtiqueta(etiquetaId);
+  }
+
+  // Función auxiliar para obtener el ID de una etiqueta por su nombre
+  Future<int?> _getEtiquetaIdByName(String etiquetaNombre) async {
+    final response = await http.get(Uri.parse('$baseUrl/etiquetas'));
+    if (response.statusCode == 200) {
+      final List<dynamic> data = json.decode(response.body);
+      for (var item in data) {
+        if (item['nombre'] == etiquetaNombre) {
+          return item['id'];
+        }
+      }
+      return null; // Retorna null si no se encuentra la etiqueta
+    } else {
+      throw Exception('Error al cargar etiquetas: ${response.statusCode}');
+    }
   }
 
   Future<List<PuntoTuristico>> searchPuntosTuristicos(String query) async {
     final response = await http.get(Uri.parse('$baseUrl/puntos?q=$query'));
-    return _handleListResponse(response, (json) => PuntoTuristico.fromJson(json));
+    return _handleListResponse(
+        response, (json) => PuntoTuristico.fromJson(json));
   }
 
   Future<List<Actividad>> fetchActividadesByPunto(int puntoId) async {
-    final response = await http.get(Uri.parse('$baseUrl/actividades?id_punto_turistico=$puntoId'));
+    final response = await http.get(
+        Uri.parse('$baseUrl/actividades?id_punto_turistico=$puntoId'));
     return _handleListResponse(response, (json) => Actividad.fromJson(json));
   }
 
@@ -80,7 +118,6 @@ class ApiService {
   }
 
   // 5. Local-Etiqueta (Relaciones entre locales y etiquetas)
-  // Devuelve una lista de mapas, donde cada mapa tiene 'id_local' e 'id_etiqueta'
   Future<List<Map<String, dynamic>>> fetchLocalEtiquetas() async {
     final response = await http.get(Uri.parse('$baseUrl/local-etiqueta'));
     if (response.statusCode == 200) {
@@ -97,18 +134,22 @@ class ApiService {
   }
 
   Future<List<Servicio>> fetchServiciosByLocal(int localId) async {
-    final response = await http.get(Uri.parse('$baseUrl/servicios?id_local=$localId'));
+    final response =
+        await http.get(Uri.parse('$baseUrl/servicios?id_local=$localId'));
     return _handleListResponse(response, (json) => Servicio.fromJson(json));
   }
 
   // 7. Horarios
   Future<List<HorarioAtencion>> fetchHorarios() async {
     final response = await http.get(Uri.parse('$baseUrl/horarios'));
-    return _handleListResponse(response, (json) => HorarioAtencion.fromJson(json));
+    return _handleListResponse(
+        response, (json) => HorarioAtencion.fromJson(json));
   }
 
   Future<List<HorarioAtencion>> fetchHorariosByLocal(int localId) async {
-    final response = await http.get(Uri.parse('$baseUrl/horarios?id_local=$localId'));
-    return _handleListResponse(response, (json) => HorarioAtencion.fromJson(json));
+    final response =
+        await http.get(Uri.parse('$baseUrl/horarios?id_local=$localId'));
+    return _handleListResponse(
+        response, (json) => HorarioAtencion.fromJson(json));
   }
 }

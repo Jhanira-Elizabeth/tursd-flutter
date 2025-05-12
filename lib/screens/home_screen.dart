@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
 import '../models/punto_turistico.dart';
 import '../widgets/custom_card.dart';
+import '../widgets/bottom_navigation_bar_turistico.dart'; // Import the widget
+import 'categorias/parques.dart'; // Import the ParquesScreen
+import 'categorias/atracciones.dart';
+import 'categorias/etnia_tsachila.dart';
+import 'categorias/parroquias.dart';
+import 'categorias/alojamientos.dart';
+import 'categorias/alimentos.dart';
+import 'categorias/rios.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  int _currentIndex = 0; // Inicio está seleccionado
   // Example data - replace with your actual data source
   final List<PuntoTuristico> puntosRecomendados = [];
   final List<Map<String, dynamic>> categorias = [
-    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
-    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
-    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
-    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
-    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
-    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
+    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg', 'route': '/etniatsachila'}, // Use correct route
+    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg', 'route': '/atracciones'},
+    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg', 'route': '/parroquias'},
+    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg', 'route': '/alojamiento'},
+    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg', 'route': '/alimentacion'},
+    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg', 'route': '/parques'}, // Añadido
+    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg', 'route': '/rios'},
   ];
 
   @override
@@ -68,6 +77,23 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         // Add more points as needed, asegurándote de incluir 'descripcion' y 'longitud'
       ]);
+    });
+  }
+
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          // Ya estamos en Inicio
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
     });
   }
 
@@ -182,7 +208,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           onTap: () {
                             // Handle category selection
                             print('Selected category: ${categoria['nombre']}');
-                            //  Navigator.pushNamed(context, '/categoria', arguments: categoria['nombre']); // Consider adding this
+                            Navigator.pushNamed(context, categoria['route']);
                           },
                         ),
                       ),
@@ -194,27 +220,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0, // Home selected
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inicio'),
-          BottomNavigationBarItem(icon: Icon(Icons.map), label: 'Mapa'),
-          BottomNavigationBarItem(icon: Icon(Icons.chat), label: 'ChatBot'),
-        ],
-        onTap: (index) {
-          // Handle navigation to different screens
-          switch (index) {
-            case 0:
-              // Already on home
-              break;
-            case 1:
-              Navigator.pushNamed(context, '/mapa');
-              break;
-            case 2:
-              Navigator.pushNamed(context, '/chatbot');
-              break;
-          }
-        },
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: _currentIndex,
+        onTabChange: _onTabChange,
       ),
     );
   }
@@ -256,3 +264,4 @@ class _HomeScreenState extends State<HomeScreen> {
     return imageUrl;
   }
 }
+

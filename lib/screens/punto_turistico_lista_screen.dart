@@ -2,9 +2,17 @@
 import 'package:flutter/material.dart';
 import '../models/punto_turistico.dart';
 import '../widgets/detalle_card.dart'; // Importa el componente que muestra los detalles
+import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget
 
-class PuntoTuristicoListaScreen extends StatelessWidget {
+class PuntoTuristicoListaScreen extends StatefulWidget {
   PuntoTuristicoListaScreen({super.key}); // Mantenemos el super.key
+
+  @override
+  State<PuntoTuristicoListaScreen> createState() => _PuntoTuristicoListaScreenState();
+}
+
+class _PuntoTuristicoListaScreenState extends State<PuntoTuristicoListaScreen> {
+  int _currentIndex = 0; // Por defecto, seleccionamos 'Inicio'
 
   final List<PuntoTuristico> puntosTuristicos = [ // Quitamos const aquí
     PuntoTuristico(
@@ -30,6 +38,23 @@ class PuntoTuristicoListaScreen extends StatelessWidget {
     ),
     // ... otros puntos turísticos
   ];
+
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,6 +91,10 @@ class PuntoTuristicoListaScreen extends StatelessWidget {
             ),
           );
         },
+      ),
+      bottomNavigationBar: BottomNavigationBarTuristico(
+        currentIndex: _currentIndex,
+        onTabChange: _onTabChange,
       ),
     );
   }

@@ -7,12 +7,12 @@ class CustomCard extends StatefulWidget {
   final Function()? onTap;
 
   const CustomCard({
-    Key? key,
+    super.key,
     required this.imageUrl,
     required this.title,
     this.subtitle,
     this.onTap,
-  }) : super(key: key);
+  });
 
   @override
   State<CustomCard> createState() => _CustomCardState();

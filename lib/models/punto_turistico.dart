@@ -4,7 +4,7 @@ class PuntoTuristico {
   final String descripcion;
   final int idParroquia;
   final String estado;
-  final double latitud;  // Añadido para mapas
+  final double latitud; // Añadido para mapas
   final double longitud; // Añadido para mapas
   final String? imagenUrl;
   final String? creadoPor;
@@ -38,16 +38,18 @@ class PuntoTuristico {
   factory PuntoTuristico.fromJson(Map<String, dynamic> json) {
     List<Actividad> actividades = [];
     if (json['actividades'] != null) {
-      actividades = (json['actividades'] as List)
-          .map((actividad) => Actividad.fromJson(actividad))
-          .toList();
+      actividades =
+          (json['actividades'] as List)
+              .map((actividad) => Actividad.fromJson(actividad))
+              .toList();
     }
 
     List<Etiqueta> etiquetas = [];
     if (json['etiquetas'] != null) {
-      etiquetas = (json['etiquetas'] as List)
-          .map((etiqueta) => Etiqueta.fromJson(etiqueta))
-          .toList();
+      etiquetas =
+          (json['etiquetas'] as List)
+              .map((etiqueta) => Etiqueta.fromJson(etiqueta))
+              .toList();
     }
 
     Parroquia? parroquia;
@@ -58,20 +60,33 @@ class PuntoTuristico {
     return PuntoTuristico(
       id: json['id'] ?? json['punto_turistico_id'],
       nombre: json['nombre'] ?? json['nombre_punto_turistico'],
-      descripcion: json['descripcion'] ?? json['descripcion_punto_turistico'] ?? '',
+      descripcion:
+          json['descripcion'] ?? json['descripcion_punto_turistico'] ?? '',
       idParroquia: json['id_parroquia'] ?? 0,
       estado: json['estado'] ?? json['estado_punto_turistico'] ?? 'activo',
-      latitud: json['latitud'] != null ? double.parse(json['latitud'].toString()) : 0.0,
-      longitud: json['longitud'] != null ? double.parse(json['longitud'].toString()) : 0.0,
+      latitud:
+          json['latitud'] != null
+              ? double.parse(json['latitud'].toString())
+              : 0.0,
+      longitud:
+          json['longitud'] != null
+              ? double.parse(json['longitud'].toString())
+              : 0.0,
       imagenUrl: json['imagen_url'],
       creadoPor: json['creado_por'] ?? json['punto_turistico_creado_por'],
       editadoPor: json['editado_por'] ?? json['punto_turistico_editado_por'],
-      fechaCreacion: json['fecha_creacion'] != null ? DateTime.parse(json['fecha_creacion']) : null,
-      fechaUltimaEdicion: json['fecha_ultima_edicion'] != null ? DateTime.parse(json['fecha_ultima_edicion']) : null,
+      fechaCreacion:
+          json['fecha_creacion'] != null
+              ? DateTime.parse(json['fecha_creacion'])
+              : null,
+      fechaUltimaEdicion:
+          json['fecha_ultima_edicion'] != null
+              ? DateTime.parse(json['fecha_ultima_edicion'])
+              : null,
       actividades: actividades,
       etiquetas: etiquetas,
       parroquia: parroquia,
-      esRecomendado: json['esRecomendado'] ?? false, 
+      esRecomendado: json['esRecomendado'] ?? false,
     );
   }
 }
@@ -103,13 +118,23 @@ class Actividad {
     return Actividad(
       id: json['id'] ?? json['actividad_punto_turistico_id'] ?? 0,
       nombre: json['actividad'] ?? json['nombre_actividad'] ?? '',
-      idPuntoTuristico: json['id_punto_turistico'] ?? json['apt_id_punto_turistico'] ?? 0,
-      precio: json['precio'] != null ? double.parse(json['precio'].toString()) : 0.0,
+      idPuntoTuristico:
+          json['id_punto_turistico'] ?? json['apt_id_punto_turistico'] ?? 0,
+      precio:
+          json['precio'] != null
+              ? double.parse(json['precio'].toString())
+              : 0.0,
       estado: json['estado'] ?? json['estado_actividad'] ?? '',
       creadoPor: json['creado_por'] ?? json['actividad_creado_por'],
       editadoPor: json['editado_por'] ?? json['actividad_editado_por'],
-      fechaCreacion: json['fecha_creacion'] != null ? DateTime.parse(json['fecha_creacion']) : null,
-      fechaUltimaEdicion: json['fecha_ultima_edicion'] != null ? DateTime.parse(json['fecha_ultima_edicion']) : null,
+      fechaCreacion:
+          json['fecha_creacion'] != null
+              ? DateTime.parse(json['fecha_creacion'])
+              : null,
+      fechaUltimaEdicion:
+          json['fecha_ultima_edicion'] != null
+              ? DateTime.parse(json['fecha_ultima_edicion'])
+              : null,
     );
   }
 }
@@ -131,7 +156,8 @@ class Etiqueta {
     return Etiqueta(
       id: json['id'] ?? json['etiqueta_turistica_id'] ?? 0,
       nombre: json['nombre'] ?? json['nombre_etiqueta_turistica'] ?? '',
-      descripcion: json['descripcion'] ?? json['descripcion_etiqueta_turistica'] ?? '',
+      descripcion:
+          json['descripcion'] ?? json['descripcion_etiqueta_turistica'] ?? '',
       estado: json['estado'] ?? json['estado_etiqueta_turistica'] ?? 'activo',
     );
   }
@@ -155,12 +181,26 @@ class Parroquia {
   });
 
   factory Parroquia.fromJson(Map<String, dynamic> json) {
+    double temperatura = 0.0;
+    if (json['temperatura_promedio'] != null) {
+      final tempString = json['temperatura_promedio'].toString().replaceAll(
+        '°C',
+        '',
+      );
+      temperatura =
+          double.tryParse(tempString) ??
+          0.0; // Intenta parsear, si falla usa 0.0
+    }
+
     return Parroquia(
       id: json['id'] ?? json['parroquia_id'] ?? 0,
       nombre: json['nombre'] ?? json['nombre_parroquia'] ?? '',
       descripcion: json['descripcion'] ?? json['descripcion_parroquia'] ?? '',
-      poblacion: json['poblacion'] != null ? int.parse(json['poblacion'].toString()) : 0,
-      temperaturaPromedio: json['temperatura_promedio'] != null ? double.parse(json['temperatura_promedio'].toString()) : 0.0,
+      poblacion:
+          json['poblacion'] != null
+              ? int.parse(json['poblacion'].toString())
+              : 0,
+      temperaturaPromedio: temperatura,
       estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
     );
   }
@@ -200,23 +240,26 @@ class LocalTuristico {
   factory LocalTuristico.fromJson(Map<String, dynamic> json) {
     List<HorarioAtencion> horarios = [];
     if (json['horarios'] != null) {
-      horarios = (json['horarios'] as List)
-          .map((horario) => HorarioAtencion.fromJson(horario))
-          .toList();
+      horarios =
+          (json['horarios'] as List)
+              .map((horario) => HorarioAtencion.fromJson(horario))
+              .toList();
     }
 
     List<Etiqueta> etiquetas = [];
     if (json['etiquetas'] != null) {
-      etiquetas = (json['etiquetas'] as List)
-          .map((etiqueta) => Etiqueta.fromJson(etiqueta))
-          .toList();
+      etiquetas =
+          (json['etiquetas'] as List)
+              .map((etiqueta) => Etiqueta.fromJson(etiqueta))
+              .toList();
     }
 
     List<Servicio> servicios = [];
     if (json['servicios'] != null) {
-      servicios = (json['servicios'] as List)
-          .map((servicio) => Servicio.fromJson(servicio))
-          .toList();
+      servicios =
+          (json['servicios'] as List)
+              .map((servicio) => Servicio.fromJson(servicio))
+              .toList();
     }
 
     return LocalTuristico(
@@ -224,8 +267,14 @@ class LocalTuristico {
       nombre: json['nombre'] ?? '',
       descripcion: json['descripcion'] ?? '',
       direccion: json['direccion'] ?? '',
-      latitud: json['latitud'] != null ? double.parse(json['latitud'].toString()) : 0.0,
-      longitud: json['longitud'] != null ? double.parse(json['longitud'].toString()) : 0.0,
+      latitud:
+          json['latitud'] != null
+              ? double.parse(json['latitud'].toString())
+              : 0.0,
+      longitud:
+          json['longitud'] != null
+              ? double.parse(json['longitud'].toString())
+              : 0.0,
       telefono: json['telefono'],
       email: json['email'],
       sitioweb: json['sitioweb'],
@@ -271,11 +320,7 @@ class Servicio {
   final int idLocal;
   final String servicio;
 
-  Servicio({
-    required this.id,
-    required this.idLocal,
-    required this.servicio,
-  });
+  Servicio({required this.id, required this.idLocal, required this.servicio});
 
   factory Servicio.fromJson(Map<String, dynamic> json) {
     return Servicio(

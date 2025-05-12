@@ -33,7 +33,12 @@ dependencies:
   google_maps_flutter: ^2.2.0
   google_maps_flutter_web: ^0.4.0
   cached_network_image: ^3.3.0
-  http: ^1.2.1
+  http: ^0.13.6
+  dialog_flowtter: ^0.3.3
+  provider: ^6.1.0 
+  dialogflow_grpc: any
+  protobuf: ^2.0.0
+  grpc: ^3.0.0
   flutter_dotenv: ^5.0.2
 
 
