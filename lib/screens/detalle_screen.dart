@@ -14,8 +14,7 @@ class DetallesScreen extends StatefulWidget {
   _DetallesScreenState createState() => _DetallesScreenState();
 }
 
-class _DetallesScreenState extends State<DetallesScreen>
-    with TickerProviderStateMixin {
+class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStateMixin {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
   late Future<List<HorarioAtencion>> _horariosFuture;
@@ -38,12 +37,8 @@ class _DetallesScreenState extends State<DetallesScreen>
 
   Future<List<HorarioAtencion>> _fetchHorarios() async {
     if (widget.item is LocalTuristico) {
-      final allHorarios = await _apiService.fetchHorariosByLocal(
-        widget.item.id,
-      );
-      return allHorarios
-          .where((horario) => horario.idLocal == widget.item.id)
-          .toList();
+      final allHorarios = await _apiService.fetchHorariosByLocal(widget.item.id);
+      return allHorarios.where((horario) => horario.idLocal == widget.item.id).toList();
     }
     return [];
   }
@@ -104,8 +99,7 @@ class _DetallesScreenState extends State<DetallesScreen>
   }
 
   _openMap(double latitude, double longitude) async {
-    final googleUrl =
-        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    final googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     final uri = Uri.parse(googleUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
@@ -117,13 +111,14 @@ class _DetallesScreenState extends State<DetallesScreen>
   }
 
   String _getCategoryName(dynamic item) {
-    if (item is LocalTuristico && item.etiquetas.isNotEmpty) {
-      return item.etiquetas.first.nombre;
-    } else if (item is PuntoTuristico) {
-      // Si los Puntos Turísticos también tienen una lista de etiquetas,
-      // podrías implementar una lógica similar aquí si aplica.
-      // Por ahora, devolvemos 'Punto Turístico'.
-      return 'Punto Turístico';
+    if (item is LocalTuristico && item.etiquetas != null && item.etiquetas.isNotEmpty) {
+      final categoriaEtiqueta = item.etiquetas.firstWhere(
+        (etiqueta) => etiqueta.id == 2, // Busca la etiqueta con ID 2 (Alimentos)
+        orElse: () => item.etiquetas.isNotEmpty ? item.etiquetas.first : Etiqueta(id: -1, nombre: 'Desconocida', descripcion: '', estado: 'activo'),
+      );
+      return categoriaEtiqueta.nombre;
+    } else if (item is PuntoTuristico && item.etiquetas != null && item.etiquetas.isNotEmpty) {
+      return item.etiquetas.first.nombre ?? 'Punto Turístico';
     }
     return 'Desconocida';
   }
@@ -151,20 +146,25 @@ class _DetallesScreenState extends State<DetallesScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Aquí es donde intentamos mostrar la imagen
+                Image.network(
+                  'https://via.placeholder.com/400', // Reemplaza con la URL real de la imagen
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink(); // O muestra un widget de error
+                  },
+                ),
+                const SizedBox(height: 16),
                 Text(
                   widget.item.nombre ?? '',
-                  style: const TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'Categoría: ${_getCategoryName(widget.item)}',
-                  style: TextStyle(
-                    color: Colors.green.shade300,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(color: Colors.green.shade300, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 const Text(
@@ -172,9 +172,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  widget.item.descripcion ?? 'No hay descripción disponible.',
-                ),
+                Text(widget.item.descripcion ?? 'No hay descripción disponible.'),
                 const SizedBox(height: 16),
                 const Text(
                   'Más Información',
@@ -182,10 +180,8 @@ class _DetallesScreenState extends State<DetallesScreen>
                 ),
                 const SizedBox(height: 8),
                 Text('Dueño: $_dueno'),
-                if (widget.item.email != null)
-                  Text('Email: ${widget.item.email}'),
-                if (widget.item.telefono != null)
-                  Text('Teléfono: ${widget.item.telefono}'),
+                if (widget.item.email != null) Text('Email: ${widget.item.email}'),
+                if (widget.item.telefono != null) Text('Teléfono: ${widget.item.telefono}'),
                 Text('Ubicación: $_barrioSector'),
                 const SizedBox(height: 16),
                 const Text(
@@ -199,22 +195,15 @@ class _DetallesScreenState extends State<DetallesScreen>
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const CircularProgressIndicator();
                     } else if (snapshot.hasError) {
-                      return Text(
-                        'Error al cargar horarios: ${snapshot.error}',
-                      );
+                      return Text('Error al cargar horarios: ${snapshot.error}');
                     } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return const Text(
-                        'No hay horarios de atención disponibles.',
-                      );
+                      return const Text('No hay horarios de atención disponibles.');
                     } else {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children:
-                            snapshot.data!.map((horario) {
-                              return Text(
-                                '${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}',
-                              );
-                            }).toList(),
+                        children: snapshot.data!.map((horario) {
+                          return Text('${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}');
+                        }).toList(),
                       );
                     }
                   },
@@ -229,6 +218,17 @@ class _DetallesScreenState extends State<DetallesScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Aquí también intentamos mostrar la imagen
+                Image.network(
+                  'https://via.placeholder.com/400', // Reemplaza con la URL real de la imagen
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink(); // O muestra un widget de error
+                  },
+                ),
+                const SizedBox(height: 16),
                 if (widget.item is LocalTuristico) ...[
                   const Text(
                     'Servicios',
@@ -241,32 +241,23 @@ class _DetallesScreenState extends State<DetallesScreen>
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();
                       } else if (snapshot.hasError) {
-                        return Text(
-                          'Error al cargar servicios: ${snapshot.error}',
-                        );
+                        return Text('Error al cargar servicios: ${snapshot.error}');
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Text('No hay servicios disponibles.');
                       } else {
-                        final serviciosFiltrados =
-                            snapshot.data!
-                                .where(
-                                  (servicio) =>
-                                      servicio.idLocal == widget.item.id,
-                                )
-                                .toList();
+                        final serviciosFiltrados = snapshot.data!
+                            .where((servicio) => servicio.idLocal == widget.item.id)
+                            .toList();
 
                         if (serviciosFiltrados.isEmpty) {
-                          return const Text(
-                            'No hay servicios disponibles para este local.',
-                          );
+                          return const Text('No hay servicios disponibles para este local.');
                         }
 
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                              serviciosFiltrados.map((servicio) {
-                                return Text('- ${servicio.servicio}');
-                              }).toList(),
+                          children: serviciosFiltrados.map((servicio) {
+                            return Text('- ${servicio.servicio}');
+                          }).toList(),
                         );
                       }
                     },
@@ -283,20 +274,15 @@ class _DetallesScreenState extends State<DetallesScreen>
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const CircularProgressIndicator();
                       } else if (snapshot.hasError) {
-                        return Text(
-                          'Error al cargar actividades: ${snapshot.error}',
-                        );
+                        return Text('Error al cargar actividades: ${snapshot.error}');
                       } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                         return const Text('No hay actividades disponibles.');
                       } else {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children:
-                              snapshot.data!.map((actividad) {
-                                return Text(
-                                  '- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}',
-                                );
-                              }).toList(),
+                          children: snapshot.data!.map((actividad) {
+                            return Text('- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}');
+                          }).toList(),
                         );
                       }
                     },
@@ -311,6 +297,17 @@ class _DetallesScreenState extends State<DetallesScreen>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Aquí también intentamos mostrar la imagen
+                Image.network(
+                  'https://via.placeholder.com/400', // Reemplaza con la URL real de la imagen
+                  width: double.infinity,
+                  height: 200,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink(); // O muestra un widget de error
+                  },
+                ),
+                const SizedBox(height: 16),
                 const Text(
                   'Ubicación en el Mapa',
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
@@ -319,42 +316,27 @@ class _DetallesScreenState extends State<DetallesScreen>
                 SizedBox(
                   height: 200,
                   width: double.infinity,
-                  child:
-                      (widget.item.latitud != null &&
-                              widget.item.longitud != null)
-                          ? GoogleMap(
-                            initialCameraPosition: CameraPosition(
-                              target: LatLng(
-                                widget.item.latitud!,
-                                widget.item.longitud!,
-                              ),
-                              zoom: 15,
-                            ),
-                            markers: {
-                              Marker(
-                                markerId: MarkerId(widget.item.id.toString()),
-                                position: LatLng(
-                                  widget.item.latitud!,
-                                  widget.item.longitud!,
-                                ),
-                                infoWindow: InfoWindow(
-                                  title: widget.item.nombre,
-                                ),
-                                onTap: () {
-                                  _openMap(
-                                    widget.item.latitud!,
-                                    widget.item.longitud!,
-                                  );
-                                },
-                              ),
-                            },
-                            onTap: (LatLng latLng) {
-                              _openMap(latLng.latitude, latLng.longitude);
-                            },
-                          )
-                          : const Center(
-                            child: Text('Ubicación no disponible.'),
+                  child: (widget.item.latitud != null && widget.item.longitud != null)
+                      ? GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(widget.item.latitud!, widget.item.longitud!),
+                            zoom: 15,
                           ),
+                          markers: {
+                            Marker(
+                              markerId: MarkerId(widget.item.id.toString()),
+                              position: LatLng(widget.item.latitud!, widget.item.longitud!),
+                              infoWindow: InfoWindow(title: widget.item.nombre),
+                              onTap: () {
+                                _openMap(widget.item.latitud!, widget.item.longitud!);
+                              },
+                            ),
+                          },
+                          onTap: (LatLng latLng) {
+                            _openMap(latLng.latitude, latLng.longitude);
+                          },
+                        )
+                      : const Center(child: Text('Ubicación no disponible.')),
                 ),
                 if (widget.item.latitud != null && widget.item.longitud != null)
                   ElevatedButton(

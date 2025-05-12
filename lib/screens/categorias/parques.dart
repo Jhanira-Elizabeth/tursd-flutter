@@ -3,6 +3,7 @@ import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
 class ParquesScreen extends StatefulWidget {
   const ParquesScreen({super.key});
@@ -79,12 +80,18 @@ class _ParquesScreenState extends State<ParquesScreen> {
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
 
-                return CustomCard(
-                  imageUrl: imageUrl,
-                  title: parque.nombre,
-                  subtitle: "Santo Domingo",
-                  onTap: () => Navigator.pushNamed(context, '/detalles',
-                      arguments: parque),
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles', // Asegúrate de que esta ruta esté definida en tu MaterialApp
+                    arguments: parque,
+                  ),
+                  child: CustomCard(
+                    imageUrl: imageUrl,
+                    title: parque.nombre,
+                    subtitle: "Santo Domingo",
+                    // Puedes agregar más información aquí si lo deseas
+                  ),
                 );
               },
             );

@@ -3,6 +3,7 @@ import '../../models/punto_turistico.dart'; // Contiene el modelo Parroquia
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
 class ParroquiasScreen extends StatefulWidget {
   const ParroquiasScreen({super.key});
@@ -70,14 +71,17 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
                 final parroquia = parroquias[index];
                 final imageUrl = _defaultImageUrls[index % _defaultImageUrls.length]; // Usar una imagen por defecto
 
-                return CustomCard(
-                  imageUrl: imageUrl,
-                  title: parroquia.nombre,
-                  onTap: () {
-                    // Navegar a los detalles de la parroquia
-                    print('${parroquia.nombre} tocada');
-                    // Navigator.pushNamed(context, '/detalles_parroquia', arguments: parroquia); // Ejemplo de navegación
-                  },
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles_parroquia', // Define una ruta específica para los detalles de la parroquia
+                    arguments: parroquia,
+                  ),
+                  child: CustomCard(
+                    imageUrl: imageUrl,
+                    title: parroquia.nombre,
+                    // Puedes mostrar más información de la parroquia en la tarjeta si lo deseas
+                  ),
                 );
               },
             );

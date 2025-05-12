@@ -3,6 +3,7 @@ import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
 class RiosScreen extends StatefulWidget {
   const RiosScreen({super.key});
@@ -85,11 +86,18 @@ class _RiosScreenState extends State<RiosScreen> {
                 final imageIndex = index % _defaultImageUrls.length;
                 final imageUrl = _defaultImageUrls[imageIndex];
 
-                return CustomCard(
-                  imageUrl: imageUrl,
-                  title: rio.nombre,
-                  subtitle: "Santo Domingo",
-                  onTap: () => Navigator.pushNamed(context, '/detalles_local', arguments: rio),
+                return GestureDetector(
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles', // Asegúrate de que esta ruta esté definida en tu MaterialApp
+                    arguments: rio,
+                  ),
+                  child: CustomCard(
+                    imageUrl: imageUrl,
+                    title: rio.nombre,
+                    subtitle: "Santo Domingo",
+                    // Puedes agregar más información aquí si lo deseas
+                  ),
                 );
               },
             );
