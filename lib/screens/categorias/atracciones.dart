@@ -14,7 +14,7 @@ class AtraccionesScreen extends StatefulWidget {
 class _AtraccionesScreenState extends State<AtraccionesScreen> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  late Future<List<PuntoTuristico>> _atraccionesFuture;
+  late Future<List<LocalTuristico>> _atraccionesFuture;
   final List<String> _imageUrls = [
     'assets/images/BalnearioEspanoles1.jpg',
     'assets/images/BalnearioEspanoles2.jpg',
@@ -26,7 +26,21 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   @override
   void initState() {
     super.initState();
-    _atraccionesFuture = _apiService.fetchPuntosTuristicosByEtiqueta("Atracciones Estables");
+    _atraccionesFuture = _fetchAtraccionesLocales();
+  }
+
+  Future<List<LocalTuristico>> _fetchAtraccionesLocales() async {
+    final locales = await _apiService.fetchLocalesTuristicos();
+    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
+
+    // Obtener los IDs de los locales que tienen la etiqueta con ID 4 (Atracciones Estables)
+    final atraccionesLocalIds = localEtiquetas
+        .where((relation) => relation['id_etiqueta'] == 4)
+        .map((relation) => relation['id_local'])
+        .toSet(); // Usar Set para evitar duplicados
+
+    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de atracciones
+    return locales.where((local) => atraccionesLocalIds.contains(local.id)).toList();
   }
 
   void _onTabChange(int index) {
@@ -50,7 +64,7 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Atracciones Estables')),
-      body: FutureBuilder<List<PuntoTuristico>>(
+      body: FutureBuilder<List<LocalTuristico>>(
         future: _atraccionesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -58,7 +72,7 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay atracciones disponibles.'));
+            return const Center(child: Text('No hay atracciones estables disponibles.'));
           } else {
             final atracciones = snapshot.data!;
             return GridView.builder(
@@ -72,15 +86,14 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
               itemCount: atracciones.length,
               itemBuilder: (context, index) {
                 final atraccion = atracciones[index];
-                // Usa el índice para rotar a través de la lista de imágenes
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
 
                 return CustomCard(
                   imageUrl: imageUrl,
                   title: atraccion.nombre,
-                  subtitle: "Santo Domingo", // Subtítulo fijo
-                  onTap: () => Navigator.pushNamed(context, '/detalles', arguments: atraccion),
+                  subtitle: "Santo Domingo",
+                  onTap: () => Navigator.pushNamed(context, '/detalles_local', arguments: atraccion),
                 );
               },
             );
