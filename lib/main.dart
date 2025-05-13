@@ -65,11 +65,9 @@ class MyApp extends StatelessWidget {
         '/atracciones': (context) => const AtraccionesScreen(),
         '/rios': (context) => const RiosScreen(),
         '/detalles': (context) {
-          final arguments =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>?;
-          return DetallesScreen(itemData: arguments);
-        },
+      final item = ModalRoute.of(context)!.settings.arguments as dynamic;
+      return DetallesScreen(item: item);
+  },
         '/detalles_parroquia':
             (context) => DetallesParroquiaScreen(
               parroquia:

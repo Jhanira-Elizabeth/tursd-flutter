@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../models/punto_turistico.dart'; // Importa tus modelos
-import '../../services/api_service.dart'; // Importa tu servicio API
-import '../../widgets/bottom_navigation_bar_turistico.dart'; // Importa tu barra de navegación
+import '../../models/punto_turistico.dart';
+import '../../services/api_service.dart';
+import '../../widgets/bottom_navigation_bar_turistico.dart';
 
 class DetallesScreen extends StatefulWidget {
-  final Map<String, dynamic>? itemData; // Cambiado a Map<String, dynamic>?
+  final dynamic item; // Cambiado a dynamic
   final String? imageUrl;
 
-  const DetallesScreen({Key? key, required this.itemData, this.imageUrl})
+  const DetallesScreen({Key? key, required this.item, this.imageUrl})
     : super(key: key);
 
   @override
@@ -20,9 +20,11 @@ class _DetallesScreenState extends State<DetallesScreen>
     with TickerProviderStateMixin {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
+
   late Future<List<HorarioAtencion>> _horariosFuture;
   late Future<List<Servicio>> _serviciosFuture;
   late Future<List<Actividad>> _actividadesFuture;
+
   String? _barrioSector;
   String? _dueno;
   late TabController _tabController;
@@ -50,21 +52,14 @@ class _DetallesScreenState extends State<DetallesScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _localImageUrl = widget.imageUrl;
-    // Inicializa _item aquí, extrayéndolo del Map
-    _item = widget.itemData?['item'];
 
-    // Asegúrate de que _item no sea nulo antes de hacer las llamadas a la API
+    // Ahora accedemos directamente a widget.item
+    _item = widget.item;
+
     if (_item != null) {
       _horariosFuture = _fetchHorarios();
       _serviciosFuture = _fetchServicios();
       _actividadesFuture = _fetchActividades();
-    } else {
-      // Si _item es nulo, inicializa los Futures con un valor por defecto,
-      // para evitar errores en el FutureBuilder.
-      _horariosFuture = Future.value([]);
-      _serviciosFuture = Future.value([]);
-      _actividadesFuture = Future.value([]);
     }
     _getBarrioSector();
     _simulateDueno();
@@ -110,8 +105,6 @@ class _DetallesScreenState extends State<DetallesScreen>
       _dueno = duenoNombre;
     });
   }
-
-  
 
   _launchURL(String url) async {
     final uri = Uri.parse(url);
@@ -165,29 +158,8 @@ class _DetallesScreenState extends State<DetallesScreen>
 
   @override
   Widget build(BuildContext context) {
-    // Mover la lógica de extracción de nombre al método build
-    String? nombre;
-    if (_item is LocalTuristico) {
-      nombre = (_item as LocalTuristico).nombre;
-    } else if (_item is PuntoTuristico) {
-      nombre = (_item as PuntoTuristico).nombre;
-    } else {
-      nombre =
-          'Detalles'; // Valor por defecto si _item es nulo o de un tipo inesperado
-    }
-
     return Scaffold(
-      appBar: AppBar(
-        title: Text(nombre ?? 'Detalles'), // Usar el nombre calculado
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Información'),
-            Tab(text: 'Actividades'),
-            Tab(text: 'Ubicación'),
-          ],
-        ),
-      ),
+      appBar: AppBar(title: Text(_item.nombre ?? 'Sin nombre')),
       body: TabBarView(
         controller: _tabController,
         children: [
@@ -195,25 +167,29 @@ class _DetallesScreenState extends State<DetallesScreen>
           SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child:
-                (_item != null) // Añadir comprobación de null para _item
+                (_item != null) // Comprobación de null para _item
                     ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_localImageUrl != null)
-                          Image.asset(
-                            _localImageUrl!,
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const SizedBox.shrink();
-                            },
-                          )
-                        else
-                          const SizedBox.shrink(),
+                        // Siempre mostrar imagen en la parte superior
+                        Image.asset(
+                          _localImageUrl ??
+                              'assets/images/Bomboli8.jpg', // Usar imagen por defecto solo si la URL es nula
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/Bomboli8.jpg', // Imagen de respaldo si hay error
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
                         const SizedBox(height: 16),
                         Text(
-                          nombre ??
+                          _item.nombre ??
                               '', // Usar el nombre calculado, o un valor por defecto
                           style: const TextStyle(
                             fontSize: 24,
@@ -238,8 +214,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          (_item.descripcion ??
-                              'No hay descripción disponible.'), // Comprobar si la descripción existe
+                          _item.descripcion ?? 'No hay descripción disponible.',
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -277,18 +252,22 @@ class _DetallesScreenState extends State<DetallesScreen>
                     ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_localImageUrl != null)
-                          Image.asset(
-                            _localImageUrl!,
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const SizedBox.shrink();
-                            },
-                          )
-                        else
-                          const SizedBox.shrink(),
+                        // Siempre mostrar imagen en la parte superior
+                        Image.asset(
+                          _localImageUrl ??
+                              'assets/images/Bomboli8.jpg', // Usar imagen por defecto solo si la URL es nula
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/Bomboli8.jpg', // Imagen de respaldo si hay error
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
                         const SizedBox(height: 16),
                         if (_item is LocalTuristico) ...[
                           const Text(
@@ -403,28 +382,17 @@ class _DetallesScreenState extends State<DetallesScreen>
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children:
                                       snapshot.data!.map((actividad) {
-                                        return Text(
-                                          '- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}',
-                                        );
+                                        return Text('- ${actividad.nombre}');
                                       }).toList(),
                                 );
                               }
                             },
                           ),
                         ],
-                        if (_item is! LocalTuristico &&
-                            _item is! PuntoTuristico)
-                          const Center(
-                            child: Text(
-                              'No hay información de actividades disponible.',
-                            ),
-                          ),
                       ],
                     )
                     : const Center(
-                      child: Text(
-                        'No se han proporcionado detalles del elemento.',
-                      ),
+                      child: Text('No se han proporcionado actividades.'),
                     ),
           ),
           // Contenido de la pestaña Ubicación
@@ -435,18 +403,21 @@ class _DetallesScreenState extends State<DetallesScreen>
                     ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (_localImageUrl != null)
-                          Image.asset(
-                            _localImageUrl!,
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return const SizedBox.shrink();
-                            },
-                          )
-                        else
-                          const SizedBox.shrink(),
+                        // Siempre mostrar imagen en la parte superior
+                        Image.asset(
+                          _localImageUrl!,
+                          width: double.infinity,
+                          height: 200,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Image.asset(
+                              'assets/images/Bomboli8.jpg', // Imagen de respaldo si hay error
+                              width: double.infinity,
+                              height: 200,
+                              fit: BoxFit.cover,
+                            );
+                          },
+                        ),
                         const SizedBox(height: 16),
                         const Text(
                           'Ubicación en el Mapa',
