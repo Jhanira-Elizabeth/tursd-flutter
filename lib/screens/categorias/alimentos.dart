@@ -1,3 +1,4 @@
+// alimentos.dart
 import 'package:flutter/material.dart';
 import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
@@ -37,11 +38,10 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 2 (Alimentos)
-    final alimentosLocalIds =
-        localEtiquetas
-            .where((relation) => relation['id_etiqueta'] == 2)
-            .map((relation) => relation['id_local'])
-            .toSet(); // Usar Set para evitar duplicados
+    final alimentosLocalIds = localEtiquetas
+        .where((relation) => relation['id_etiqueta'] == 2)
+        .map((relation) => relation['id_local'])
+        .toSet(); // Usar Set para evitar duplicados
 
     // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alimentos
     return locales
@@ -100,8 +100,11 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
                 return GestureDetector(
                   onTap: () => Navigator.pushNamed(
                     context,
-                    '/detalles', // Corregido: Usamos '/detalles'
-                    arguments: alimento,
+                    '/detalles',
+                    arguments: {
+                      'item': alimento,
+                      'imageUrl': imageUrl, // Pasar la URL de la imagen
+                    },
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,

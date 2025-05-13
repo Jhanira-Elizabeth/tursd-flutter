@@ -4,7 +4,7 @@ import 'models/punto_turistico.dart';
 import 'services/api_service.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
 import 'screens/home_screen.dart';
-import 'screens/punto_turistico_lista_screen.dart';
+// import 'screens/punto_turistico_lista_screen.dart'; 
 import 'screens/recomendados_screen.dart';
 import 'screens/chatbot_screen.dart' as chatbot;
 import 'screens/mapa_screen.dart';
@@ -21,6 +21,7 @@ import 'screens/categorias/etnia_tsachila.dart';
 import 'screens/categorias/rios.dart';
 import 'screens/categorias/alimentos.dart';
 import 'screens/detalle_screen.dart';
+import 'screens/detalle_parroquia_screen.dart';
 
 Future<void> main() async {
   runApp(const MyApp());
@@ -53,7 +54,7 @@ class MyApp extends StatelessWidget {
         '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
         '/recomendados': (context) => const RecomendadosScreen(),
-        '/detalles': (context) => PuntoTuristicoListaScreen(),
+        // '/detalles': (context) => PuntoTuristicoListaScreen(), // Elimina o comenta esta línea
         '/mapa': (context) => const MapaScreen(),
         '/chatbot': (context) => chatbot.ChatbotScreen(),
         '/etniatsachila': (context) => const EtniaTsachilaScreen(),
@@ -61,10 +62,15 @@ class MyApp extends StatelessWidget {
         '/alojamiento': (context) => const AlojamientosScreen(),
         '/alimentacion': (context) => const AlimentosScreen(),
         '/parques': (context) => const ParquesScreen(),
-        '/atracciones': (context) => const AtraccionesScreen(), // Changed this line
+        '/atracciones': (context) => const AtraccionesScreen(),
         '/rios': (context) => const RiosScreen(),
-        '/detalles': (context) => DetallesScreen(item: ModalRoute.of(context)!.settings.arguments), // Si usas otra ruta para parques
-  },
+        '/detalles': (context) {
+  final arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
+  return DetallesScreen(itemData: arguments);
+},
+        '/detalles_parroquia': (context) => DetallesParroquiaScreen(
+              parroquia: ModalRoute.of(context)!.settings.arguments as Parroquia,),
+      },
     );
   }
 }

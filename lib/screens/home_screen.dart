@@ -44,9 +44,9 @@ class _HomeScreenState extends State<HomeScreen> {
       puntosRecomendados.addAll([
         PuntoTuristico(
           id: 1,
-          nombre: 'Hotel Cariamanga',
-          imagenUrl: 'assets/images/Hotel1.jpg',
-          descripcion: 'Un cómodo hotel en Cariamanga.',
+          nombre: 'Casa del Hornado',
+          imagenUrl: 'assets/images/Agachaditos1.jpg',
+          descripcion: 'La mejor comida de Santo Domingo',
           latitud: -4.7833,
           longitud: -79.6167,
           idParroquia: 1,
@@ -55,9 +55,9 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         PuntoTuristico(
           id: 2,
-          nombre: 'Balneario Turístico Apcaolii',
-          imagenUrl: 'assets/images/Balneario1.jpg', //  imageUrl from assets
-          descripcion: 'Un hermoso balneario turístico.',
+          nombre: 'Hosteria Cucardas',
+          imagenUrl: 'assets/images/hosteria_cucardas_logo.jpg', //  imageUrl from assets
+          descripcion: 'Hermoso Hospedaje.',
           latitud: -4.8000,
           longitud: -79.6500,
           idParroquia: 1,
@@ -66,16 +66,37 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         PuntoTuristico(
           id: 3,
-          nombre: 'La Piedra del Gorila',
-          imagenUrl: 'assets/images/GorilaPark2.jpg',
-          descripcion: 'Una formación rocosa única.',
+          nombre: 'Turismo Tsáchila Mushily',
+          imagenUrl: 'assets/images/Mushily1.jpg',
+          descripcion: 'Cerca de nuestras raíces.',
           latitud: -4.7500,
           longitud: -79.5833,
           idParroquia: 1,
           estado: 'activo',
           esRecomendado: false,
         ),
-        // Add more points as needed, asegurándote de incluir 'descripcion' y 'longitud'
+        PuntoTuristico(
+          id: 4,
+          nombre: 'Parque Jelen Tenka',
+          imagenUrl: 'assets/images/JelenTenka7.jpg',
+          descripcion: 'Cerca de nuestras raíces.',
+          latitud: -4.7500,
+          longitud: -79.5833,
+          idParroquia: 1,
+          estado: 'activo',
+          esRecomendado: false,
+        ),
+        PuntoTuristico(
+          id: 5,
+          nombre: 'Parque Zaracay',
+          imagenUrl: 'assets/images/Parque Zaracay1.jpg',
+          descripcion: 'Cerca de nuestras raíces.',
+          latitud: -4.7500,
+          longitud: -79.5833,
+          idParroquia: 1,
+          estado: 'activo',
+          esRecomendado: false,
+        ),
       ]);
     });
   }
