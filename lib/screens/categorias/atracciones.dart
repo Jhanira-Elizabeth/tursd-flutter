@@ -17,11 +17,16 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<LocalTuristico>> _atraccionesFuture;
   final List<String> _imageUrls = [
-    'assets/images/BalnearioEspanoles1.jpg',
-    'assets/images/BalnearioEspanoles2.jpg',
-    'assets/images/BalnearioEspanoles3.jpg',
+    'assets/images/afiche_publicitario_balneario_ibiza.jpg',
+    'assets/images/Elpalmar.jpg',
+    'assets/images/Otonga2.jpg',
+    'assets/images/DCarlos.jpg',
+    'assets/images/Ventura2.jpg',
+    'assets/images/ElPulpoPiscina.jpg',
+    'assets/images/GorilaPark1.jpg',
     'assets/images/BalnearioEspanola4.jpg',
-    'assets/images/BalnearioEspanola5.jpg',
+    'assets/images/BalnearioEspanoles3.jpg',
+    'assets/images/VenturaMiniGolf1.jpg',
   ];
 
   @override
@@ -35,13 +40,16 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 4 (Atracciones Estables)
-    final atraccionesLocalIds = localEtiquetas
-        .where((relation) => relation['id_etiqueta'] == 4)
-        .map((relation) => relation['id_local'])
-        .toSet(); // Usar Set para evitar duplicados
+    final atraccionesLocalIds =
+        localEtiquetas
+            .where((relation) => relation['id_etiqueta'] == 4)
+            .map((relation) => relation['id_local'])
+            .toSet(); // Usar Set para evitar duplicados
 
     // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de atracciones
-    return locales.where((local) => atraccionesLocalIds.contains(local.id)).toList();
+    return locales
+        .where((local) => atraccionesLocalIds.contains(local.id))
+        .toList();
   }
 
   void _onTabChange(int index) {
@@ -73,7 +81,9 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay atracciones estables disponibles.'));
+            return const Center(
+              child: Text('No hay atracciones estables disponibles.'),
+            );
           } else {
             final atracciones = snapshot.data!;
             return GridView.builder(
@@ -91,11 +101,14 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/detalles', // Asegúrate de que esta ruta esté definida en tu MaterialApp
-                    arguments: atraccion,
-                  ),
+                  onTap:
+                      () => Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': atraccion,
+                        }, // Envuelve el objeto 'atraccion' en un mapa
+                      ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: atraccion.nombre,

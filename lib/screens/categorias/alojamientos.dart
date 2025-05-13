@@ -17,13 +17,9 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<LocalTuristico>> _alojamientosFuture;
   final List<String> _imageUrls = [
-    'assets/images/IndioColorado1.jpg',
-    'assets/images/IndioColorado2.jpg',
-    'assets/images/IndioColorado3.jpg',
-    'assets/images/IndioColorado4.jpg',
-    'assets/images/IndioColorado5.jpg',
-    'assets/images/IndioColorado6.jpg',
-    'assets/images/IndioColorado7.jpg',
+    'assets/images/Cucardas2.jpg',
+    'assets/images/DCarlos.jpg',
+    'assets/images/BalnearioEspanoles3.jpg',
   ];
 
   @override
@@ -43,7 +39,9 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
         .toSet(); // Usar Set para evitar duplicados
 
     // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alojamientos
-    return locales.where((local) => alojamientosLocalIds.contains(local.id)).toList();
+    return locales
+        .where((local) => alojamientosLocalIds.contains(local.id))
+        .toList();
   }
 
   void _onTabChange(int index) {
@@ -75,7 +73,9 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No hay alojamientos disponibles.'));
+            return const Center(
+              child: Text('No hay alojamientos disponibles.'),
+            );
           } else {
             final alojamientos = snapshot.data!;
             return GridView.builder(
@@ -93,10 +93,13 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
+                  // Dentro del itemBuilder en AlojamientosScreen
                   onTap: () => Navigator.pushNamed(
                     context,
-                    '/detalles', // Asegúrate de que esta ruta esté definida en tu MaterialApp
-                    arguments: alojamiento,
+                    '/detalles',
+                    arguments: {
+                      'item': alojamiento, // <--- Aquí está el cambio. Envolvemos el objeto 'alojamiento' en un Map.
+                    },
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,

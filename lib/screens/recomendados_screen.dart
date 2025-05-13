@@ -11,7 +11,8 @@ class RecomendadosScreen extends StatefulWidget {
 }
 
 class _RecomendadosScreenState extends State<RecomendadosScreen> {
-  int _currentIndex = 0; // Por defecto, podrías querer mostrar 'Inicio' seleccionado
+  int _currentIndex =
+      0; // Por defecto, podrías querer mostrar 'Inicio' seleccionado
 
   void _onTabChange(int index) {
     setState(() {
@@ -48,35 +49,42 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: puntos.isEmpty
-          ? const Center(child: Text('No hay puntos turísticos disponibles.'))
-          : GridView.builder(
-              padding:
-                  const EdgeInsets.all(16), // Espaciado alrededor de la cuadrícula
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 3 / 4, // Relación de aspecto para las tarjetas
+      body:
+          puntos.isEmpty
+              ? const Center(
+                child: Text('No hay puntos turísticos disponibles.'),
+              )
+              : GridView.builder(
+                padding: const EdgeInsets.all(
+                  16,
+                ), // Espaciado alrededor de la cuadrícula
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio:
+                      3 / 4, // Relación de aspecto para las tarjetas
+                ),
+                itemCount: puntos.length,
+                itemBuilder: (context, index) {
+                  final punto = puntos[index];
+                  return CustomCard(
+                    imageUrl:
+                        punto.imagenUrl ??
+                        'https://via.placeholder.com/181x147', // Imagen o placeholder
+                    title: punto.nombre,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': punto,
+                        }, // Envuelve el objeto PuntoTuristico en un Map
+                      );
+                    },
+                  );
+                },
               ),
-              itemCount: puntos.length,
-              itemBuilder: (context, index) {
-                final punto = puntos[index];
-                return CustomCard(
-                  imageUrl:
-                      punto.imagenUrl ??
-                      'https://via.placeholder.com/181x147', // Imagen o placeholder
-                  title: punto.nombre,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: punto,
-                    );
-                  },
-                );
-              },
-            ),
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,

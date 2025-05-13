@@ -22,13 +22,41 @@ class _HomeScreenState extends State<HomeScreen> {
   // Example data - replace with your actual data source
   final List<PuntoTuristico> puntosRecomendados = [];
   final List<Map<String, dynamic>> categorias = [
-    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg', 'route': '/etniatsachila'}, // Use correct route
-    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg', 'route': '/atracciones'},
-    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg', 'route': '/parroquias'},
-    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg', 'route': '/alojamiento'},
-    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg', 'route': '/alimentacion'},
-    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg', 'route': '/parques'}, // Añadido
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg', 'route': '/rios'},
+    {
+      'nombre': 'Etnia Tsáchila',
+      'imagen': 'assets/images/Mushily1.jpg',
+      'route': '/etniatsachila',
+    }, // Use correct route
+    {
+      'nombre': 'Atracciones',
+      'imagen': 'assets/images/GorilaPark1.jpg',
+      'route': '/atracciones',
+    },
+    {
+      'nombre': 'Parroquias',
+      'imagen': 'assets/images/ValleHermoso1.jpg',
+      'route': '/parroquias',
+    },
+    {
+      'nombre': 'Alojamiento',
+      'imagen': 'assets/images/HotelRefugio1.jpg',
+      'route': '/alojamiento',
+    },
+    {
+      'nombre': 'Alimentación',
+      'imagen': 'assets/images/OhQueRico1.jpg',
+      'route': '/alimentacion',
+    },
+    {
+      'nombre': 'Parques',
+      'imagen': 'assets/images/ParqueJuventud1.jpg',
+      'route': '/parques',
+    }, // Añadido
+    {
+      'nombre': 'Ríos',
+      'imagen': 'assets/images/SanGabriel1.jpg',
+      'route': '/rios',
+    },
   ];
 
   @override
@@ -45,7 +73,7 @@ class _HomeScreenState extends State<HomeScreen> {
         PuntoTuristico(
           id: 1,
           nombre: 'Casa del Hornado',
-          imagenUrl: 'assets/images/Agachaditos1.jpg',
+          imagenUrl: 'assets/images/CasaHornado1.jpg',
           descripcion: 'La mejor comida de Santo Domingo',
           latitud: -4.7833,
           longitud: -79.6167,
@@ -56,7 +84,8 @@ class _HomeScreenState extends State<HomeScreen> {
         PuntoTuristico(
           id: 2,
           nombre: 'Hosteria Cucardas',
-          imagenUrl: 'assets/images/hosteria_cucardas_logo.jpg', //  imageUrl from assets
+          imagenUrl:
+              'assets/images/hosteria_cucardas_logo.jpg', //  imageUrl from assets
           descripcion: 'Hermoso Hospedaje.',
           latitud: -4.8000,
           longitud: -79.6500,
@@ -171,35 +200,40 @@ class _HomeScreenState extends State<HomeScreen> {
               // Recommended cards (horizontal scrolling)
               SizedBox(
                 height: 220,
-                child: puntosRecomendados.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
-                    : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: puntosRecomendados.length.clamp(0, 5),
-                        itemBuilder: (context, index) {
-                          final punto = puntosRecomendados[index];
-                          return Padding(
-                            padding: EdgeInsets.only(
-                                right: index < puntosRecomendados.length - 1
-                                    ? 12.0
-                                    : 0.0), // Add right padding except the last item
-                            child: SizedBox(
-                              width: 160, // Set the width of the card
-                              child: CustomCard(
-                                imageUrl: _getImageUrl(punto.imagenUrl),
-                                title: punto.nombre,
-                                onTap: () {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/detalles',
-                                    arguments: punto,
-                                  );
-                                },
+                child:
+                    puntosRecomendados.isEmpty
+                        ? const Center(child: CircularProgressIndicator())
+                        : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: puntosRecomendados.length.clamp(0, 5),
+                          itemBuilder: (context, index) {
+                            final punto = puntosRecomendados[index];
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                right:
+                                    index < puntosRecomendados.length - 1
+                                        ? 12.0
+                                        : 0.0,
+                              ), // Add right padding except the last item
+                              child: SizedBox(
+                                width: 160, // Set the width of the card
+                                child: CustomCard(
+                                  imageUrl: _getImageUrl(punto.imagenUrl),
+                                  title: punto.nombre,
+                                  onTap: () {
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/detalles',
+                                      arguments: {
+                                        'item': punto,
+                                      }, // Envuelve el objeto PuntoTuristico en un Map
+                                    );
+                                  },
+                                ),
                               ),
-                            ),
-                          );
-                        },
-                      ),
+                            );
+                          },
+                        ),
               ),
               const SizedBox(height: 24),
               // Categories section with "Ver todos" button
@@ -258,7 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFFA3CF3D), // Green color from your design
+            color: Color.fromARGB(255, 0, 0, 0), // Green color from your design
           ),
         ),
         TextButton(
@@ -285,4 +319,3 @@ class _HomeScreenState extends State<HomeScreen> {
     return imageUrl;
   }
 }
-

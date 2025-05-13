@@ -17,13 +17,13 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<Parroquia>> _parroquiasFuture;
   final List<String> _defaultImageUrls = [
-    'assets/images/Alluriqui1.jpg',
-    'assets/images/Esfuerzo.jpg',
+    'assets/images/Alluriquin.jpg',
+    'assets/images/ElEsfuerzo.jpg',
     'assets/images/ValleHermoso1.jpg',
-    'assets/images/SantaMaria.jpg',
+    'assets/images/SantaMaria2.jpg',
     'assets/images/SanJacinto.jpg',
     'assets/images/LuzDeAmerica.jpg',
-    'assets/images/ParqueJuventud4.jpg', // Imagen por defecto para las tarjetas
+    'assets/images/Bomboli8.jpg', // Imagen por defecto para las tarjetas
   ];
 
   @override

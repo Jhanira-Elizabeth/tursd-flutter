@@ -18,13 +18,19 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<LocalTuristico>> _alimentosFuture;
   final List<String> _imageUrls = [
-    'assets/images/IndioColorado1.jpg',
-    'assets/images/IndioColorado2.jpg',
-    'assets/images/IndioColorado3.jpg',
-    'assets/images/IndioColorado4.jpg',
-    'assets/images/IndioColorado5.jpg',
-    'assets/images/IndioColorado6.jpg',
-    'assets/images/IndioColorado7.jpg',
+    'assets/images/Marias2.jpg',
+    'assets/images/afiche_publicitario_balneario_ibiza.jpg',
+    'assets/images/Elpalmar.jpg',
+    'assets/images/Cucardas4.jpg',
+    'assets/images/Otonga2.jpg',
+    'assets/images/DCarlos3.jpg',
+    'assets/images/Ventura5.jpg',
+    'assets/images/ElPulpo3.jpg',
+    'assets/images/GorilaPark1.jpg',
+    'assets/images/BalnearioEspanola5.jpg',
+    'assets/images/SantaRosa1.jpg',
+    'assets/images/Agachaditos2.jpg',
+    'assets/images/CasaHornado1.jpg',
   ];
 
   @override

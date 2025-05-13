@@ -17,7 +17,13 @@ class _RiosScreenState extends State<RiosScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<LocalTuristico>> _riosFuture;
   final List<String> _defaultImageUrls = [
-    'assets/images/ValleHermoso1.jpg', // Imagen por defecto para los ríos
+    'assets/images/cascadas_diablo.jpg',
+    'assets/images/Rio3.jpg',
+    'assets/images/Cascadas1.jpg',
+    'assets/images/Ventura1.jpg',
+    'assets/images/elPulpo4.jpg',
+    'assets/images/GorilaPark1.jpg',
+    'assets/images/Rio2.jpg', // Imagen por defecto para los ríos
   ];
 
   @override
@@ -69,7 +75,11 @@ class _RiosScreenState extends State<RiosScreen> {
           } else if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text('No se encontraron establecimientos relacionados con ríos.'));
+            return const Center(
+              child: Text(
+                'No se encontraron establecimientos relacionados con ríos.',
+              ),
+            );
           } else {
             final rios = snapshot.data!;
             return GridView.builder(
@@ -87,10 +97,13 @@ class _RiosScreenState extends State<RiosScreen> {
                 final imageUrl = _defaultImageUrls[imageIndex];
 
                 return GestureDetector(
+                  // Dentro del itemBuilder en RiosScreen
                   onTap: () => Navigator.pushNamed(
                     context,
-                    '/detalles', // Asegúrate de que esta ruta esté definida en tu MaterialApp
-                    arguments: rio,
+                    '/detalles',
+                    arguments: {
+                      'item': rio, // Envuelve el objeto 'rio' bajo la clave 'item'
+                    },
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,

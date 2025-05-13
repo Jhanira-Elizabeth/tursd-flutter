@@ -1,4 +1,3 @@
-// detalle_parroquia_screen.dart
 import 'package:flutter/material.dart';
 import '../../models/punto_turistico.dart'; // Asegúrate de que Parroquia esté aquí
 import '../../widgets/bottom_navigation_bar_turistico.dart';
@@ -76,15 +75,7 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                   style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Población: ${widget.parroquia.poblacion}',
-                  style: TextStyle(color: Colors.blue.shade300, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Temperatura Promedio: ${widget.parroquia.temperaturaPromedio}°C',
-                  style: TextStyle(color: Colors.orange.shade300, fontWeight: FontWeight.bold),
-                ),
+                
                 const SizedBox(height: 16),
                 const Text(
                   'Descripción',
@@ -98,8 +89,15 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text('ID: ${widget.parroquia.id}'),
-                Text('Estado: ${widget.parroquia.estado}'),
+                Text(
+                  'Población: ${widget.parroquia.poblacion}',
+                  style: TextStyle(color: Colors.blue.shade300, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Temperatura Promedio: ${widget.parroquia.temperaturaPromedio}°C',
+                  style: TextStyle(color: Colors.orange.shade300, fontWeight: FontWeight.bold),
+                ),
                 // Puedes agregar aquí más información de la parroquia que quieras mostrar
               ],
             ),

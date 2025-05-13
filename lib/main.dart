@@ -4,7 +4,7 @@ import 'models/punto_turistico.dart';
 import 'services/api_service.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
 import 'screens/home_screen.dart';
-// import 'screens/punto_turistico_lista_screen.dart'; 
+// import 'screens/punto_turistico_lista_screen.dart';
 import 'screens/recomendados_screen.dart';
 import 'screens/chatbot_screen.dart' as chatbot;
 import 'screens/mapa_screen.dart';
@@ -65,11 +65,16 @@ class MyApp extends StatelessWidget {
         '/atracciones': (context) => const AtraccionesScreen(),
         '/rios': (context) => const RiosScreen(),
         '/detalles': (context) {
-  final arguments = ModalRoute.of(context)!.settings.arguments as Map<String, dynamic>?;
-  return DetallesScreen(itemData: arguments);
-},
-        '/detalles_parroquia': (context) => DetallesParroquiaScreen(
-              parroquia: ModalRoute.of(context)!.settings.arguments as Parroquia,),
+          final arguments =
+              ModalRoute.of(context)!.settings.arguments
+                  as Map<String, dynamic>?;
+          return DetallesScreen(itemData: arguments);
+        },
+        '/detalles_parroquia':
+            (context) => DetallesParroquiaScreen(
+              parroquia:
+                  ModalRoute.of(context)!.settings.arguments as Parroquia,
+            ),
       },
     );
   }
@@ -136,14 +141,17 @@ class _MapaPageState extends State<MapaPage> {
                   position: LatLng(punto.latitud, punto.longitud),
                   infoWindow: InfoWindow(
                     title: punto.nombre,
-                    snippet: punto.descripcion.length > 50
-                        ? '${punto.descripcion.substring(0, 47)}...'
-                        : punto.descripcion,
+                    snippet:
+                        punto.descripcion.length > 50
+                            ? '${punto.descripcion.substring(0, 47)}...'
+                            : punto.descripcion,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
                         '/detalles',
-                        arguments: punto,
+                        arguments: {
+                          'item': punto,
+                        }, // Envuelve el PuntoTuristico en un mapa
                       );
                     },
                   ),
@@ -262,33 +270,39 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: puntos.isEmpty
-          ? const Center(child: Text('No hay puntos turísticos disponibles.'))
-          : GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 3 / 4,
+      body:
+          puntos.isEmpty
+              ? const Center(
+                child: Text('No hay puntos turísticos disponibles.'),
+              )
+              : GridView.builder(
+                padding: const EdgeInsets.all(16),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 3 / 4,
+                ),
+                itemCount: puntos.length,
+                itemBuilder: (context, index) {
+                  final punto = puntos[index];
+                  return CustomCard(
+                    imageUrl:
+                        punto.imagenUrl ??
+                        'https://via.placeholder.com/181x147',
+                    title: punto.nombre,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': punto,
+                        }, // Envuelve el PuntoTuristico en un mapa
+                      );
+                    },
+                  );
+                },
               ),
-              itemCount: puntos.length,
-              itemBuilder: (context, index) {
-                final punto = puntos[index];
-                return CustomCard(
-                  imageUrl:
-                      punto.imagenUrl ?? 'https://via.placeholder.com/181x147',
-                  title: punto.nombre,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: punto,
-                    );
-                  },
-                );
-              },
-            ),
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,

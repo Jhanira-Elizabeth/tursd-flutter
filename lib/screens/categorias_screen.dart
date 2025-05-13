@@ -17,9 +17,9 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
     {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
     {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
-    {'nombre': 'Alimentación', 'imagen': 'assets/images/OhQueRico1.jpg'},
+    {'nombre': 'Alimentacion', 'imagen': 'assets/images/OhQueRico1.jpg'},
     {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Ríos', 'imagen': 'assets/images/SanGabriel1.jpg'},
+    {'nombre': 'Rios', 'imagen': 'assets/images/SanGabriel1.jpg'},
   ];
 
   void _onTabChange(int index) {

@@ -17,14 +17,17 @@ class _ParquesScreenState extends State<ParquesScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<PuntoTuristico>> _parquesFuture;
   final List<String> _imageUrls = [
-    'assets/images/Bomboli1.jpg',
-    'assets/images/Bomboli2.jpg',
-    'assets/images/Bomboli3.jpg',
-    'assets/images/Bomboli4.jpg',
-    'assets/images/Bomboli5.jpg',
-    'assets/images/Bomboli6.jpg',
+    'assets/images/congoma1.jpg',
+    'assets/images/LuzDeAmerica4.jpg',
+    'assets/images/ElEsfuerzo.jpg',
+    'assets/images/Rio5.jpg',
+    'assets/images/Tapir5.jpg',
+    'assets/images/JelenTenka1.jpg',
+    'assets/images/Catedral1.jpg',
     'assets/images/Bomboli7.jpg',
-    'assets/images/Bomboli8.jpg',
+    'assets/images/jardin_botanico.jpg',
+    'assets/images/Parque Zaracay1.jpg',
+    'assets/images/IndioColorado7.jpg',
   ];
 
   @override
@@ -81,10 +84,13 @@ class _ParquesScreenState extends State<ParquesScreen> {
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
+                  // Dentro del itemBuilder en ParquesScreen
                   onTap: () => Navigator.pushNamed(
                     context,
-                    '/detalles', // Asegúrate de que esta ruta esté definida en tu MaterialApp
-                    arguments: parque,
+                    '/detalles',
+                    arguments: {
+                      'item': parque, // Envuelve el objeto 'parque' en un mapa
+                    },
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,
