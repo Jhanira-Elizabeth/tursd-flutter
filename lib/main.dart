@@ -8,9 +8,9 @@ import 'screens/home_screen.dart';
 import 'screens/recomendados_screen.dart';
 import 'screens/chatbot_screen.dart' as chatbot;
 import 'screens/mapa_screen.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
-import 'dart:io';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter/foundation.dart' show kIsWeb;
+// import 'dart:io';
 import '../widgets/custom_card.dart';
 import 'screens/categorias_screen.dart';
 import 'screens/categorias/parques.dart';
@@ -70,11 +70,7 @@ class MyApp extends StatelessWidget {
                   as Map<String, dynamic>?;
           return DetallesScreen(itemData: arguments);
         },
-        '/detalles_parroquia':
-            (context) => DetallesParroquiaScreen(
-              parroquia:
-                  ModalRoute.of(context)!.settings.arguments as Parroquia,
-            ),
+        '/detalles_parroquia': (context) => const DetallesParroquiaScreen(),
       },
     );
   }

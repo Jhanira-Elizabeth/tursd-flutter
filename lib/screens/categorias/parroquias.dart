@@ -73,23 +73,25 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
                 childAspectRatio: 0.75,
               ),
               itemCount: parroquias.length,
-              itemBuilder: (context, index) {
-                final parroquia = parroquias[index];
-                final imageUrl = _defaultImageUrls[index % _defaultImageUrls.length]; // Usar una imagen por defecto
+             itemBuilder: (context, index) {
+  final parroquia = parroquias[index];
+  final imageUrl = _defaultImageUrls[index % _defaultImageUrls.length];
 
-                return GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/detalles_parroquia', // Define una ruta específica para los detalles de la parroquia
-                    arguments: parroquia,
-                  ),
-                  child: CustomCard(
-                    imageUrl: imageUrl,
-                    title: parroquia.nombre,
-                    // Puedes mostrar más información de la parroquia en la tarjeta si lo deseas
-                  ),
-                );
-              },
+  return GestureDetector(
+    onTap: () => Navigator.pushNamed(
+      context,
+      '/detalles_parroquia',
+      arguments: {
+    'parroquia': parroquia,
+    'imageUrl': imageUrl,
+  },
+    ),
+    child: CustomCard(
+      imageUrl: imageUrl,
+      title: parroquia.nombre,
+    ),
+  );
+},
             );
           }
         },

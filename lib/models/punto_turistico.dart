@@ -170,6 +170,7 @@ class Parroquia {
   final int poblacion;
   final double temperaturaPromedio;
   final String estado;
+  final String? imagenUrl;
 
   Parroquia({
     required this.id,
@@ -178,6 +179,7 @@ class Parroquia {
     required this.poblacion,
     required this.temperaturaPromedio,
     required this.estado,
+    this.imagenUrl,
   });
 
   factory Parroquia.fromJson(Map<String, dynamic> json) {
@@ -196,12 +198,10 @@ class Parroquia {
       id: json['id'] ?? json['parroquia_id'] ?? 0,
       nombre: json['nombre'] ?? json['nombre_parroquia'] ?? '',
       descripcion: json['descripcion'] ?? json['descripcion_parroquia'] ?? '',
-      poblacion:
-          json['poblacion'] != null
-              ? int.parse(json['poblacion'].toString())
-              : 0,
+      poblacion: json['poblacion'] != null ? int.parse(json['poblacion'].toString()) : 0,
       temperaturaPromedio: temperatura,
       estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
+      imagenUrl: json['imagen_url'],
     );
   }
 }
@@ -220,6 +220,7 @@ class LocalTuristico {
   final List<HorarioAtencion> horarios;
   final List<Etiqueta> etiquetas;
   final List<Servicio> servicios;
+  final String? imagenUrl;
 
   LocalTuristico({
     required this.id,
@@ -235,6 +236,7 @@ class LocalTuristico {
     this.horarios = const [],
     this.etiquetas = const [],
     this.servicios = const [],
+    this.imagenUrl,
   });
 
   factory LocalTuristico.fromJson(Map<String, dynamic> json) {
@@ -278,7 +280,8 @@ class LocalTuristico {
       telefono: json['telefono'],
       email: json['email'],
       sitioweb: json['sitioweb'],
-      estado: json['estado'] ?? json['estado_local_turistico'] ?? 'activo',
+      estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
+      imagenUrl: json['imagen_url'],
       horarios: horarios,
       etiquetas: etiquetas,
       servicios: servicios,

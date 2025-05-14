@@ -3,9 +3,7 @@ import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 
 class DetallesParroquiaScreen extends StatefulWidget {
-  final Parroquia parroquia;
-
-  const DetallesParroquiaScreen({Key? key, required this.parroquia}) : super(key: key);
+  const DetallesParroquiaScreen({Key? key}) : super(key: key);
 
   @override
   _DetallesParroquiaScreenState createState() => _DetallesParroquiaScreenState();
@@ -40,67 +38,71 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
 
   @override
   Widget build(BuildContext context) {
+    final args = ModalRoute.of(context)!.settings.arguments as Map;
+    final Parroquia parroquia = args['parroquia'];
+    final String imageUrl = args['imageUrl'];
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       body: Stack(
         children: [
           // Imagen de cabecera
           SizedBox(
-  width: double.infinity,
-  height: 250,
-  child: Stack(
-    fit: StackFit.expand,
-    children: [
-      Image.asset(
-        'assets/images/Bomboli8.jpg',
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return const SizedBox.shrink();
-        },
-      ),
-      Positioned(
-        left: 20,
-        bottom: 24,
-        child: Stack(
-          children: [
-            // Borde blanco
-            Text(
-              widget.parroquia.nombre ?? '',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..strokeWidth = 6
-                  ..color = Colors.white,
-              ),
+            width: double.infinity,
+            height: 250,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const SizedBox.shrink();
+                  },
+                ),
+                Positioned(
+                  left: 20,
+                  bottom: 24,
+                  child: Stack(
+                    children: [
+                      // Borde blanco
+                      Text(
+                        parroquia.nombre,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 6
+                            ..color = Colors.white,
+                        ),
+                      ),
+                      // Texto negro encima
+                      Text(
+                        parroquia.nombre,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            // Texto negro encima
-            Text(
-              widget.parroquia.nombre ?? '',
-              style: const TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-          ],
-        ),
-      ),
-    ],
-  ),
-),
-    // Contenido desplazable sobre la imagen
-    DraggableScrollableSheet(
-      initialChildSize: 0.65,
-      minChildSize: 0.65,
-      maxChildSize: 0.95,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
           ),
+          // Contenido desplazable sobre la imagen
+          DraggableScrollableSheet(
+            initialChildSize: 0.65,
+            minChildSize: 0.65,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+                ),
                 child: Column(
                   children: [
                     // Título y tabs
@@ -110,7 +112,7 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            widget.parroquia.nombre ?? '',
+                            parroquia.nombre,
                             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
@@ -145,7 +147,7 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text(widget.parroquia.descripcion ?? 'No hay descripción disponible.'),
+                                  Text(parroquia.descripcion),
                                   const SizedBox(height: 16),
                                   const Text(
                                     'Más Información',
@@ -153,12 +155,12 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Población: ${widget.parroquia.poblacion}',
+                                    'Población: ${parroquia.poblacion}',
                                     style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontWeight: FontWeight.bold),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
-                                    'Temperatura Promedio: ${widget.parroquia.temperaturaPromedio}°C',
+                                    'Temperatura Promedio: ${parroquia.temperaturaPromedio}°C',
                                     style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontWeight: FontWeight.bold),
                                   ),
                                 ],
