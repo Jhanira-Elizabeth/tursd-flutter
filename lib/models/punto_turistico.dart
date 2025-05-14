@@ -220,7 +220,6 @@ class LocalTuristico {
   final List<HorarioAtencion> horarios;
   final List<Etiqueta> etiquetas;
   final List<Servicio> servicios;
-  final String? imagenUrl;
 
   LocalTuristico({
     required this.id,
@@ -236,7 +235,6 @@ class LocalTuristico {
     this.horarios = const [],
     this.etiquetas = const [],
     this.servicios = const [],
-    this.imagenUrl,
   });
 
   factory LocalTuristico.fromJson(Map<String, dynamic> json) {
