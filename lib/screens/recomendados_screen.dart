@@ -74,14 +74,15 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
                         'https://via.placeholder.com/181x147', // Imagen o placeholder
                     title: punto.nombre,
                     onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': punto,
-                        }, // Envuelve el objeto PuntoTuristico en un Map
-                      );
-                    },
+  Navigator.pushNamed(
+    context,
+    '/detalles',
+    arguments: {
+      'item': punto,
+      'imageUrl': punto.imagenUrl ?? 'https://via.placeholder.com/181x147',
+    },
+  );
+},
                   );
                 },
               ),

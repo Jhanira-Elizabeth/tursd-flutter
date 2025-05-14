@@ -151,87 +151,102 @@ class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStat
         children: [
           // Cabecera con imagen y título
           SizedBox(
-            width: double.infinity,
-            height: 250,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  _imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
-                ),
-                Positioned(
-                  left: 20,
-                  bottom: 24,
-                  child: Stack(
-                    children: [
-                      // Borde blanco
-                      Text(
-                        nombre,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          foreground: Paint()
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = 6
-                            ..color = Colors.white,
-                        ),
-                      ),
-                      // Texto negro encima
-                      Text(
-                        nombre,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
+  width: double.infinity,
+  height: 250,
+  child: Stack(
+    fit: StackFit.expand,
+    children: [
+      Image.asset(
+        _imageUrl,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return const SizedBox.shrink();
+        },
+      ),
+      Positioned(
+        left: 20,
+        bottom: 40,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Nombre principal con borde blanco
+            Text(
+              nombre,
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                shadows: [
+                  Shadow(
+                    blurRadius: 8,
+                    color: Colors.black.withOpacity(0.7),
+                    offset: Offset(2, 2),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            // Subcategoría (por ejemplo, "Tsáchila")
+            if (_getCategoryName(_item) != 'Desconocida')
+              Text(
+                _getCategoryName(_item),
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w500,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 6,
+                      color: Colors.black.withOpacity(0.6),
+                      offset: Offset(1, 1),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+      // Botón de regreso
+      Positioned(
+        top: MediaQuery.of(context).padding.top + 8,
+        left: 8,
+        child: CircleAvatar(
+          backgroundColor: Colors.black.withOpacity(0.4),
+          child: IconButton(
+            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            onPressed: () => Navigator.pop(context),
           ),
+        ),
+      ),
+    ],
+  ),
+),
           // Contenido desplazable sobre la imagen
           DraggableScrollableSheet(
-            initialChildSize: 0.65,
-            minChildSize: 0.65,
-            maxChildSize: 0.95,
-            builder: (context, scrollController) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
-                ),
+  initialChildSize: 0.7,
+  minChildSize: 0.7,
+  maxChildSize: 0.95,
+  builder: (context, scrollController) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+      ),
                 child: Column(
                   children: [
                     // Título y tabs
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0, left: 20, right: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            nombre,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          TabBar(
-                            controller: _tabController,
-                            labelColor: Colors.green,
-                            unselectedLabelColor: Colors.black54,
-                            indicatorColor: Colors.green,
-                            tabs: const [
-                              Tab(text: 'Información'),
-                              Tab(text: 'Actividades'),
-                              Tab(text: 'Ubicación'),
-                            ],
-                          ),
-                        ],
-                      ),
+  padding: const EdgeInsets.only(top: 16.0, left: 20, right: 20),
+  child: TabBar(
+    controller: _tabController,
+    labelColor: Colors.green,
+    unselectedLabelColor: Colors.black54,
+    indicatorColor: Colors.green,
+    tabs: const [
+      Tab(text: 'Información'),
+      Tab(text: 'Actividades'),
+      Tab(text: 'Ubicación'),
+    ],
+  ),
                     ),
                     Expanded(
                       child: TabBarView(
