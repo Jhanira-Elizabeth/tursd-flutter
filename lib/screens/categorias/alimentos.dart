@@ -40,7 +40,7 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
   }
 
   Future<List<LocalTuristico>> _fetchAlimentosLocales() async {
-    final locales = await _apiService.fetchLocalesTuristicos();
+  final locales = await _apiService.fetchLocalesConEtiquetas();   
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 2 (Alimentos)
@@ -99,19 +99,19 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
               ),
               itemCount: alimentos.length,
               itemBuilder: (context, index) {
-                final alimento = alimentos[index];
-                final imageIndex = index % _imageUrls.length;
-                final imageUrl = _imageUrls[imageIndex];
+  final alimento = alimentos[index];
+  final imageIndex = index % _imageUrls.length;
+  final imageUrl = _imageUrls[imageIndex];
 
-                return GestureDetector(
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/detalles',
-                    arguments: {
-                      'item': alimento,
-                      'imageUrl': imageUrl, // Pasar la URL de la imagen
-                    },
-                  ),
+  return GestureDetector(
+    onTap: () => Navigator.pushNamed(
+      context,
+      '/detalles',
+      arguments: {
+        'item': alimento, // <--- aquí usa alimento
+        'imageUrl': imageUrl,
+      },
+),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alimento.nombre,

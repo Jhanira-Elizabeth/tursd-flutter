@@ -36,7 +36,7 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   }
 
   Future<List<LocalTuristico>> _fetchAtraccionesLocales() async {
-    final locales = await _apiService.fetchLocalesTuristicos();
+    final locales = await _apiService.fetchLocalesConEtiquetas();
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 4 (Atracciones Estables)
@@ -98,17 +98,17 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
               itemBuilder: (context, index) {
                 final atraccion = atracciones[index];
                 final imageIndex = index % _imageUrls.length;
-                final imageUrl = _imageUrls[imageIndex];
+  final imageUrl = _imageUrls[imageIndex];
 
-                return GestureDetector(
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': atraccion,
-                        }, // Envuelve el objeto 'atraccion' en un mapa
-                      ),
+  return GestureDetector(
+    onTap: () => Navigator.pushNamed(
+      context,
+      '/detalles',
+      arguments: {
+        'item': atraccion, // <--- aquí usa alimento
+        'imageUrl': imageUrl,
+      },
+    ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: atraccion.nombre,

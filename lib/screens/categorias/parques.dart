@@ -33,7 +33,18 @@ class _ParquesScreenState extends State<ParquesScreen> {
   @override
   void initState() {
     super.initState();
-    _parquesFuture = _apiService.fetchPuntosTuristicosByEtiqueta("Parques");
+    _parquesFuture = _fetchParquesConEtiqueta();
+  }
+
+  Future<List<PuntoTuristico>> _fetchParquesConEtiqueta() async {
+    final puntos = await _apiService.fetchPuntosConEtiquetas();
+    // Filtra los puntos que tengan la etiqueta "Parques"
+    return puntos
+        .where(
+          (p) =>
+              p.etiquetas.any((e) => e.nombre.toLowerCase().contains('parque')),
+        )
+        .toList();
   }
 
   void _onTabChange(int index) {
@@ -84,14 +95,15 @@ class _ParquesScreenState extends State<ParquesScreen> {
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
-                  // Dentro del itemBuilder en ParquesScreen
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/detalles',
-                    arguments: {
-                      'item': parque, // Envuelve el objeto 'parque' en un mapa
-                    },
-                  ),
+                  onTap:
+                      () => Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': parque, // <--- aquí usa alimento
+                          'imageUrl': imageUrl,
+                        },
+                      ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: parque.nombre,

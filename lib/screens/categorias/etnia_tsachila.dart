@@ -28,50 +28,34 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
   }
 
   Future<List<dynamic>> _fetchEtniaData() async {
-    print("EtniaTsachilaScreen: _fetchEtniaData - Iniciando fetching...");
-    try {
-      final puntos = await _apiService.fetchPuntosTuristicos();
-      print("EtniaTsachilaScreen: Puntos turísticos obtenidos: ${puntos.length}");
+  try {
+    // Usa los métodos que traen las etiquetas asociadas
+    final puntos = await _apiService.fetchPuntosConEtiquetas();
+    final locales = await _apiService.fetchLocalesConEtiquetas();
 
-      final locales = await _apiService.fetchLocalesTuristicos();
-      print("EtniaTsachilaScreen: Locales turísticos obtenidos: ${locales.length}");
+    final puntoTsachila = puntos.firstWhere(
+      (p) => p.id == 3,
+      orElse: () => PuntoTuristico(
+        id: 0, nombre: 'No encontrado', descripcion: '', latitud: 0, longitud: 0, idParroquia: 0, estado: 'inactivo', esRecomendado: false),
+    );
 
-      final puntoTsachila = puntos.firstWhere(
-        (p) => p.id == 3,
-        orElse: () {
-          print("EtniaTsachilaScreen: No se encontró PuntoTuristico con ID 3.");
-          return PuntoTuristico(
-              id: 0, nombre: 'No encontrado', descripcion: '', latitud: 0, longitud: 0, idParroquia: 0, estado: 'inactivo', esRecomendado: false);
-        },
-      );
+    final localOtonga = locales.firstWhere(
+      (l) => l.id == 5,
+      orElse: () => LocalTuristico(
+        id: 0, nombre: 'No encontrado', descripcion: '', direccion: '', latitud: 0, longitud: 0, estado: 'inactivo'),
+    );
 
-      final localOtonga = locales.firstWhere(
-        (l) => l.id == 5,
-        orElse: () {
-          print("EtniaTsachilaScreen: No se encontró LocalTuristico con ID 5.");
-          return LocalTuristico( // Asegúrate que el constructor coincida con tu modelo
-              id: 0, nombre: 'No encontrado', descripcion: '', direccion: '', latitud: 0, longitud: 0, estado: 'inactivo');
-        },
-      );
+    List<dynamic> results = [];
+    if (puntoTsachila.id != 0) results.add(puntoTsachila);
+    if (localOtonga.id != 0) results.add(localOtonga);
 
-      List<dynamic> results = [];
-      if (puntoTsachila.id != 0) {
-        print("EtniaTsachilaScreen: Añadiendo PuntoTuristico ID ${puntoTsachila.id}");
-        results.add(puntoTsachila);
-      }
-      if (localOtonga.id != 0) {
-        print("EtniaTsachilaScreen: Añadiendo LocalTuristico ID ${localOtonga.id}");
-        results.add(localOtonga);
-      }
-
-      print("EtniaTsachilaScreen: _fetchEtniaData completado. Results count: ${results.length}");
-      return results;
-    } catch (e, stacktrace) { // Captura también el stacktrace
-      print("Error fetching data in EtniaTsachilaScreen: $e");
-      print("Stacktrace: $stacktrace"); // Imprime el stacktrace para más detalles
-      return [];
-    }
+    return results;
+  } catch (e, stacktrace) {
+    print("Error fetching data in EtniaTsachilaScreen: $e");
+    print("Stacktrace: $stacktrace");
+    return [];
   }
+}
 
   void _onTabChange(int index) {
     setState(() {
@@ -122,51 +106,48 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
               ),
               itemCount: data.length,
               itemBuilder: (context, index) {
-                final item = data[index];
-                String imageUrl;
-                try {
-                  imageUrl = _defaultImageUrls[index % _defaultImageUrls.length];
-                } catch (e) {
-                  print("Error al obtener imagen URL en itemBuilder: $e");
-                  imageUrl = ''; // O una URL de imagen placeholder válida
-                }
+  final item = data[index];
+  final imageUrl = _defaultImageUrls[index % _defaultImageUrls.length];
 
-                String title = 'Desconocido';
-                String subtitle = 'Santo Domingo';
-                VoidCallback? onTap;
+  String title = 'Desconocido';
+  String subtitle = 'Santo Domingo';
+  VoidCallback? onTap;
 
-                if (item is PuntoTuristico) {
-                  title = item.nombre;
-                  onTap = () {
-                    print("Navegando a /detalles con PuntoTuristico ID: ${item.id}");
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: {'item': item}, // <--- ¡CORRECCIÓN AQUÍ!
-                    );
-                  };
-                } else if (item is LocalTuristico) {
-                  title = item.nombre;
-                  onTap = () {
-                    print("Navegando a /detalles con LocalTuristico ID: ${item.id}");
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: {'item': item}, // <--- ¡CORRECCIÓN AQUÍ!
-                    );
-                  };
-                } else {
-                  print("EtniaTsachilaScreen: itemBuilder - Tipo de dato no válido en índice $index: ${item.runtimeType}");
-                  return Card(child: Center(child: Text("Dato inválido: ${item.runtimeType}")));
-                }
+  if (item is PuntoTuristico) {
+    title = item.nombre;
+    onTap = () {
+      Navigator.pushNamed(
+        context,
+        '/detalles',
+        arguments: {
+          'item': item,
+          'imageUrl': imageUrl, // <-- ¡Agrega esto!
+        },
+      );
+    };
+  } else if (item is LocalTuristico) {
+    title = item.nombre;
+    onTap = () {
+      Navigator.pushNamed(
+        context,
+        '/detalles',
+        arguments: {
+          'item': item,
+          'imageUrl': imageUrl, // <-- ¡Agrega esto!
+        },
+      );
+    };
+  } else {
+    return Card(child: Center(child: Text("Dato inválido: ${item.runtimeType}")));
+  }
 
-                return CustomCard(
-                  imageUrl: imageUrl,
-                  title: title,
-                  subtitle: subtitle,
-                  onTap: onTap,
-                );
-              },
+  return CustomCard(
+    imageUrl: imageUrl,
+    title: title,
+    subtitle: subtitle,
+    onTap: onTap,
+  );
+}
             );
           }
         },

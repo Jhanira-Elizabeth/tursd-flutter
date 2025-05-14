@@ -33,7 +33,7 @@ class _RiosScreenState extends State<RiosScreen> {
   }
 
   Future<List<LocalTuristico>> _fetchRiosLocales() async {
-    final locales = await _apiService.fetchLocalesTuristicos();
+    final locales = await _apiService.fetchLocalesConEtiquetas();
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 6 (Rios)
@@ -92,19 +92,19 @@ class _RiosScreenState extends State<RiosScreen> {
               ),
               itemCount: rios.length,
               itemBuilder: (context, index) {
-                final rio = rios[index];
-                final imageIndex = index % _defaultImageUrls.length;
-                final imageUrl = _defaultImageUrls[imageIndex];
+  final rio = rios[index];
+  final imageIndex = index % _defaultImageUrls.length;
+  final imageUrl = _defaultImageUrls[imageIndex];
 
-                return GestureDetector(
-                  // Dentro del itemBuilder en RiosScreen
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/detalles',
-                    arguments: {
-                      'item': rio, // Envuelve el objeto 'rio' bajo la clave 'item'
-                    },
-                  ),
+  return GestureDetector(
+    onTap: () => Navigator.pushNamed(
+      context,
+      '/detalles',
+      arguments: {
+        'item': rio,
+        'imageUrl': imageUrl,
+      },
+    ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: rio.nombre,

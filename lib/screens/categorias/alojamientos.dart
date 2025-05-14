@@ -29,7 +29,7 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
   }
 
   Future<List<LocalTuristico>> _fetchAlojamientosLocales() async {
-    final locales = await _apiService.fetchLocalesTuristicos();
+    final locales = await _apiService.fetchLocalesConEtiquetas();
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 3 (Alojamientos)
@@ -90,17 +90,17 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
               itemBuilder: (context, index) {
                 final alojamiento = alojamientos[index];
                 final imageIndex = index % _imageUrls.length;
-                final imageUrl = _imageUrls[imageIndex];
+  final imageUrl = _imageUrls[imageIndex];
 
-                return GestureDetector(
-                  // Dentro del itemBuilder en AlojamientosScreen
-                  onTap: () => Navigator.pushNamed(
-                    context,
-                    '/detalles',
-                    arguments: {
-                      'item': alojamiento, // <--- Aquí está el cambio. Envolvemos el objeto 'alojamiento' en un Map.
-                    },
-                  ),
+  return GestureDetector(
+    onTap: () => Navigator.pushNamed(
+      context,
+      '/detalles',
+      arguments: {
+        'item': alojamiento, // <--- aquí usa alimento
+        'imageUrl': imageUrl,
+      },
+    ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alojamiento.nombre,

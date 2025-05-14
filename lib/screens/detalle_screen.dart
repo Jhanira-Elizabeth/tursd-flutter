@@ -1,35 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../models/punto_turistico.dart'; // Importa tus modelos
-import '../../services/api_service.dart'; // Importa tu servicio API
-import '../../widgets/bottom_navigation_bar_turistico.dart'; // Importa tu barra de navegación
+import '../../models/punto_turistico.dart';
+import '../../services/api_service.dart';
+import '../../widgets/bottom_navigation_bar_turistico.dart';
 
 class DetallesScreen extends StatefulWidget {
-  final Map<String, dynamic>? itemData; // Cambiado a Map<String, dynamic>?
+  final Map<String, dynamic>? itemData;
   final String? imageUrl;
 
-  const DetallesScreen({Key? key, required this.itemData, this.imageUrl})
-    : super(key: key);
+  const DetallesScreen({Key? key, this.itemData, this.imageUrl}) : super(key: key);
 
   @override
   _DetallesScreenState createState() => _DetallesScreenState();
 }
 
-class _DetallesScreenState extends State<DetallesScreen>
-    with TickerProviderStateMixin {
+class _DetallesScreenState extends State<DetallesScreen> with TickerProviderStateMixin {
+  late TabController _tabController;
   int _currentIndex = 0;
+  dynamic _item;
+  late String _imageUrl;
   final ApiService _apiService = ApiService();
   late Future<List<HorarioAtencion>> _horariosFuture;
   late Future<List<Servicio>> _serviciosFuture;
   late Future<List<Actividad>> _actividadesFuture;
   String? _barrioSector;
   String? _dueno;
-  late TabController _tabController;
-  String? _localImageUrl;
-  dynamic _item; // Declarar _item
 
   @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _item = widget.itemData?['item'];
+    _imageUrl = widget.itemData?['imageUrl'] ?? 'assets/images/Bomboli8.jpg';
+
+    if (_item != null) {
+      _horariosFuture = _fetchHorarios();
+      _serviciosFuture = _fetchServicios();
+      _actividadesFuture = _fetchActividades();
+    } else {
+      _horariosFuture = Future.value([]);
+      _serviciosFuture = Future.value([]);
+      _actividadesFuture = Future.value([]);
+    }
+    _getBarrioSector();
+    _simulateDueno();
+  }
+
   void _onTabChange(int index) {
     setState(() {
       _currentIndex = index;
@@ -47,36 +64,10 @@ class _DetallesScreenState extends State<DetallesScreen>
     });
   }
 
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-    _localImageUrl = widget.imageUrl;
-    // Inicializa _item aquí, extrayéndolo del Map
-    _item = widget.itemData?['item'];
-
-    // Asegúrate de que _item no sea nulo antes de hacer las llamadas a la API
-    if (_item != null) {
-      _horariosFuture = _fetchHorarios();
-      _serviciosFuture = _fetchServicios();
-      _actividadesFuture = _fetchActividades();
-    } else {
-      // Si _item es nulo, inicializa los Futures con un valor por defecto,
-      // para evitar errores en el FutureBuilder.
-      _horariosFuture = Future.value([]);
-      _serviciosFuture = Future.value([]);
-      _actividadesFuture = Future.value([]);
-    }
-    _getBarrioSector();
-    _simulateDueno();
-  }
-
-  // Métodos para obtener datos (adaptados para usar _item)
   Future<List<HorarioAtencion>> _fetchHorarios() async {
     if (_item is LocalTuristico) {
       final allHorarios = await _apiService.fetchHorariosByLocal(_item.id);
-      return allHorarios
-          .where((horario) => horario.idLocal == _item.id)
-          .toList();
+      return allHorarios.where((horario) => horario.idLocal == _item.id).toList();
     }
     return [];
   }
@@ -111,22 +102,8 @@ class _DetallesScreenState extends State<DetallesScreen>
     });
   }
 
-  
-
-  _launchURL(String url) async {
-    final uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No se pudo abrir el enlace.')),
-      );
-    }
-  }
-
   _openMap(double latitude, double longitude) async {
-    final googleUrl =
-        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    final googleUrl = 'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
     final uri = Uri.parse(googleUrl);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri);
@@ -138,397 +115,347 @@ class _DetallesScreenState extends State<DetallesScreen>
   }
 
   String _getCategoryName(dynamic item) {
-    if (item is LocalTuristico &&
-        item.etiquetas != null &&
-        item.etiquetas.isNotEmpty) {
-      final categoriaEtiqueta = item.etiquetas.firstWhere(
-        (etiqueta) => etiqueta.id == 2,
-        orElse:
-            () =>
-                item.etiquetas.isNotEmpty
-                    ? item.etiquetas.first
-                    : Etiqueta(
-                      id: -1,
-                      nombre: 'Desconocida',
-                      descripcion: '',
-                      estado: 'activo',
-                    ),
-      );
-      return categoriaEtiqueta.nombre;
-    } else if (item is PuntoTuristico &&
-        item.etiquetas != null &&
-        item.etiquetas.isNotEmpty) {
-      return item.etiquetas.first.nombre ?? 'Punto Turístico';
-    }
-    return 'Desconocida';
+  if (item is LocalTuristico && item.etiquetas.isNotEmpty) {
+    final categoria = item.etiquetas.firstWhere(
+      (e) =>
+        e.nombre.toLowerCase().contains('alojamiento') ||
+        e.nombre.toLowerCase().contains('río') ||
+        e.nombre.toLowerCase().contains('etnia') ||
+        e.nombre.toLowerCase().contains('alimento') ||
+        e.nombre.toLowerCase().contains('atracción'),
+      orElse: () => item.etiquetas.first,
+    );
+    return categoria.nombre;
+  } else if (item is PuntoTuristico && item.etiquetas.isNotEmpty) {
+    final categoria = item.etiquetas.firstWhere(
+      (e) =>
+        e.nombre.toLowerCase().contains('alojamiento') ||
+        e.nombre.toLowerCase().contains('río') ||
+        e.nombre.toLowerCase().contains('etnia') ||
+        e.nombre.toLowerCase().contains('alimento') ||
+        e.nombre.toLowerCase().contains('atracción'),
+      orElse: () => item.etiquetas.first,
+    );
+    return categoria.nombre;
   }
+  return 'Desconocida';
+}
 
   @override
   Widget build(BuildContext context) {
-    // Mover la lógica de extracción de nombre al método build
-    String? nombre;
-    if (_item is LocalTuristico) {
-      nombre = (_item as LocalTuristico).nombre;
-    } else if (_item is PuntoTuristico) {
-      nombre = (_item as PuntoTuristico).nombre;
-    } else {
-      nombre =
-          'Detalles'; // Valor por defecto si _item es nulo o de un tipo inesperado
-    }
+    String nombre = (_item != null && _item.nombre != null) ? _item.nombre : 'Detalles';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(nombre ?? 'Detalles'), // Usar el nombre calculado
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Información'),
-            Tab(text: 'Actividades'),
-            Tab(text: 'Ubicación'),
-          ],
-        ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
+      backgroundColor: Colors.grey[200],
+      body: Stack(
         children: [
-          // Contenido de la pestaña Información
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child:
-                (_item != null) // Añadir comprobación de null para _item
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (_localImageUrl != null)
-                          Image.asset(
-                  'assets/images/Bomboli8.jpg', // Imagen por defecto
-                  width: double.infinity,
-                  height: 200,
+          // Cabecera con imagen y título
+          SizedBox(
+            width: double.infinity,
+            height: 250,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Image.asset(
+                  _imageUrl,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink(); // O muestra un widget de error
+                    return const SizedBox.shrink();
                   },
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        const SizedBox(height: 16),
-                        Text(
-                          nombre ??
-                              '', // Usar el nombre calculado, o un valor por defecto
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                ),
+                Positioned(
+                  left: 20,
+                  bottom: 24,
+                  child: Stack(
+                    children: [
+                      // Borde blanco
+                      Text(
+                        nombre,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          foreground: Paint()
+                            ..style = PaintingStyle.stroke
+                            ..strokeWidth = 6
+                            ..color = Colors.white,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Categoría: ${_getCategoryName(_item)}',
-                          style: TextStyle(
-                            color: Colors.green.shade300,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Descripción',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          (_item.descripcion ??
-                              'No hay descripción disponible.'), // Comprobar si la descripción existe
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Más Información',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text('Dueño: $_dueno'),
-                        if (_item is LocalTuristico) ...[
-                          if ((_item as LocalTuristico).email != null)
-                            Text('Email: ${(_item as LocalTuristico).email}'),
-                          if ((_item as LocalTuristico).telefono != null)
-                            Text(
-                              'Teléfono: ${(_item as LocalTuristico).telefono}',
-                            ),
-                        ],
-                        Text('Ubicación: $_barrioSector'),
-                        const SizedBox(height: 16),
-                      ],
-                    )
-                    : const Center(
-                      child: Text(
-                        'No se han proporcionado detalles del elemento.',
                       ),
-                    ),
+                      // Texto negro encima
+                      Text(
+                        nombre,
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-          // Contenido de la pestaña Actividades
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child:
-                (_item != null) // Comprobación de null para _item
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (_localImageUrl != null)
-                          Image.asset(
-                  'assets/images/Bomboli8.jpg', // Imagen por defecto
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink(); // O muestra un widget de error
-                  },
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        const SizedBox(height: 16),
-                        if (_item is LocalTuristico) ...[
-                          const Text(
-                            'Servicios',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+          // Contenido desplazable sobre la imagen
+          DraggableScrollableSheet(
+            initialChildSize: 0.65,
+            minChildSize: 0.65,
+            maxChildSize: 0.95,
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+                ),
+                child: Column(
+                  children: [
+                    // Título y tabs
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16.0, left: 20, right: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            nombre,
+                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 8),
-                          FutureBuilder<List<Servicio>>(
-                            future: _serviciosFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text(
-                                  'Error al cargar servicios: ${snapshot.error}',
-                                );
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return const Text(
-                                  'No hay servicios disponibles.',
-                                );
-                              } else {
-                                final serviciosFiltrados =
-                                    snapshot.data!
-                                        .where(
-                                          (servicio) =>
-                                              servicio.idLocal == _item.id,
-                                        )
-                                        .toList();
-                                if (serviciosFiltrados.isEmpty) {
-                                  return const Text(
-                                    'No hay servicios disponibles para este local.',
-                                  );
-                                }
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:
-                                      serviciosFiltrados.map((servicio) {
-                                        return Text('- ${servicio.servicio}');
-                                      }).toList(),
-                                );
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 16),
-                          const Text(
-                            'Horarios de atención',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          FutureBuilder<List<HorarioAtencion>>(
-                            future: _horariosFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text(
-                                  'Error al cargar horarios: ${snapshot.error}',
-                                );
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return const Text(
-                                  'No hay horarios de atención disponibles.',
-                                );
-                              } else {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:
-                                      snapshot.data!.map((horario) {
-                                        return Text(
-                                          '${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}',
-                                        );
-                                      }).toList(),
-                                );
-                              }
-                            },
-                          ),
-                        ] else if (_item is PuntoTuristico) ...[
-                          const Text(
-                            'Actividades',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          FutureBuilder<List<Actividad>>(
-                            future: _actividadesFuture,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.waiting) {
-                                return const CircularProgressIndicator();
-                              } else if (snapshot.hasError) {
-                                return Text(
-                                  'Error al cargar actividades: ${snapshot.error}',
-                                );
-                              } else if (!snapshot.hasData ||
-                                  snapshot.data!.isEmpty) {
-                                return const Text(
-                                  'No hay actividades disponibles.',
-                                );
-                              } else {
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children:
-                                      snapshot.data!.map((actividad) {
-                                        return Text(
-                                          '- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}',
-                                        );
-                                      }).toList(),
-                                );
-                              }
-                            },
+                          TabBar(
+                            controller: _tabController,
+                            labelColor: Colors.green,
+                            unselectedLabelColor: Colors.black54,
+                            indicatorColor: Colors.green,
+                            tabs: const [
+                              Tab(text: 'Información'),
+                              Tab(text: 'Actividades'),
+                              Tab(text: 'Ubicación'),
+                            ],
                           ),
                         ],
-                        if (_item is! LocalTuristico &&
-                            _item is! PuntoTuristico)
-                          const Center(
-                            child: Text(
-                              'No hay información de actividades disponible.',
-                            ),
-                          ),
-                      ],
-                    )
-                    : const Center(
-                      child: Text(
-                        'No se han proporcionado detalles del elemento.',
                       ),
                     ),
-          ),
-          // Contenido de la pestaña Ubicación
-          SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child:
-                (_item != null) // Comprobación de null
-                    ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (_localImageUrl != null)
-                          Image.asset(
-                  'assets/images/Bomboli8.jpg', // Imagen por defecto
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink(); // O muestra un widget de error
-                   },
-                          )
-                        else
-                          const SizedBox.shrink(),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Ubicación en el Mapa',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        SizedBox(
-                          height: 200,
-                          width: double.infinity,
-                          // Comprobar si latitud y longitud son no nulos
-                          child:
-                              (_item.latitud != null && _item.longitud != null)
-                                  ? GoogleMap(
-                                    initialCameraPosition: CameraPosition(
-                                      target: LatLng(
-                                        _item.latitud!,
-                                        _item.longitud!,
-                                      ),
-                                      zoom: 15,
+                    Expanded(
+                      child: TabBarView(
+                        controller: _tabController,
+                        children: [
+                          // Información
+                          SingleChildScrollView(
+                            controller: scrollController,
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'Categoría: ${_getCategoryName(_item)}',
+                                    style: TextStyle(
+                                      color: Colors.green.shade300,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    markers: {
-                                      Marker(
-                                        markerId: MarkerId(_item.id.toString()),
-                                        position: LatLng(
-                                          _item.latitud!,
-                                          _item.longitud!,
-                                        ),
-                                        infoWindow: InfoWindow(
-                                          title: _item.nombre,
-                                        ),
-                                        onTap: () {
-                                          _openMap(
-                                            _item.latitud!,
-                                            _item.longitud!,
+                                  ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Descripción',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(_item?.descripcion ?? 'No hay descripción disponible.'),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Más Información',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text('Dueño: $_dueno'),
+                                  if (_item is LocalTuristico) ...[
+                                    if ((_item as LocalTuristico).email != null)
+                                      Text('Email: ${(_item as LocalTuristico).email}'),
+                                    if ((_item as LocalTuristico).telefono != null)
+                                      Text('Teléfono: ${(_item as LocalTuristico).telefono}'),
+                                    if ((_item as LocalTuristico).direccion != null)
+                                      Text('Dirección: ${(_item as LocalTuristico).direccion}'),
+                                  ],
+                                  Text('Ubicación: $_barrioSector'),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // Actividades / Servicios / Horarios
+                          SingleChildScrollView(
+                            controller: scrollController,
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  if (_item is LocalTuristico) ...[
+                                    const Text(
+                                      'Servicios',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    FutureBuilder<List<Servicio>>(
+                                      future: _serviciosFuture,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return const CircularProgressIndicator();
+                                        } else if (snapshot.hasError) {
+                                          return Text('Error al cargar servicios: ${snapshot.error}');
+                                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                          return const Text('No hay servicios disponibles.');
+                                        } else {
+                                          final serviciosFiltrados = snapshot.data!
+                                              .where((servicio) => servicio.idLocal == _item.id)
+                                              .toList();
+                                          if (serviciosFiltrados.isEmpty) {
+                                            return const Text('No hay servicios disponibles para este local.');
+                                          }
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: serviciosFiltrados.map((servicio) {
+                                              return Text('- ${servicio.servicio}');
+                                            }).toList(),
                                           );
+                                        }
+                                      },
+                                    ),
+                                    const SizedBox(height: 16),
+                                    const Text(
+                                      'Horarios de atención',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    FutureBuilder<List<HorarioAtencion>>(
+                                      future: _horariosFuture,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return const CircularProgressIndicator();
+                                        } else if (snapshot.hasError) {
+                                          return Text('Error al cargar horarios: ${snapshot.error}');
+                                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                          return const Text('No hay horarios de atención disponibles.');
+                                        } else {
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: snapshot.data!.map((horario) {
+                                              return Text('${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}');
+                                            }).toList(),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ] else if (_item is PuntoTuristico) ...[
+                                    const Text(
+                                      'Actividades',
+                                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    FutureBuilder<List<Actividad>>(
+                                      future: _actividadesFuture,
+                                      builder: (context, snapshot) {
+                                        if (snapshot.connectionState == ConnectionState.waiting) {
+                                          return const CircularProgressIndicator();
+                                        } else if (snapshot.hasError) {
+                                          return Text('Error al cargar actividades: ${snapshot.error}');
+                                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                          return const Text('No hay actividades disponibles.');
+                                        } else {
+                                          return Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: snapshot.data!.map((actividad) {
+                                              return Text('- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}');
+                                            }).toList(),
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                  if (_item is! LocalTuristico && _item is! PuntoTuristico)
+                                    const Center(child: Text('No hay información de actividades disponible.')),
+                                ],
+                              ),
+                            ),
+                          ),
+                          // Ubicación
+                          SingleChildScrollView(
+                            controller: scrollController,
+                            child: Padding(
+                              padding: const EdgeInsets.all(20.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Ubicación en el Mapa',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  if (_item?.latitud != null && _item?.longitud != null)
+                                    SizedBox(
+                                      height: 200,
+                                      width: double.infinity,
+                                      child: GoogleMap(
+                                        initialCameraPosition: CameraPosition(
+                                          target: LatLng(_item.latitud, _item.longitud),
+                                          zoom: 15,
+                                        ),
+                                        markers: {
+                                          Marker(
+                                            markerId: MarkerId(_item.id.toString()),
+                                            position: LatLng(_item.latitud, _item.longitud),
+                                            infoWindow: InfoWindow(title: nombre),
+                                            onTap: () {
+                                              _openMap(_item.latitud, _item.longitud);
+                                            },
+                                          ),
+                                        },
+                                        onTap: (LatLng latLng) {
+                                          _openMap(latLng.latitude, latLng.longitude);
                                         },
                                       ),
-                                    },
-                                    onTap: (LatLng latLng) {
-                                      _openMap(
-                                        latLng.latitude,
-                                        latLng.longitude,
-                                      );
-                                    },
-                                  )
-                                  : const Center(
-                                    child: Text('Ubicación no disponible.'),
+                                    )
+                                  else
+                                    const Text('Ubicación no disponible.'),
+                                  if (_item?.latitud != null && _item?.longitud != null)
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        _openMap(_item.latitud, _item.longitud);
+                                      },
+                                      child: const Text('Abrir en Google Maps'),
+                                    ),
+                                  const SizedBox(height: 16),
+                                  const Text(
+                                    'Dirección',
+                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                                   ),
-                        ),
-                        if (_item.latitud != null &&
-                            _item.longitud != null) // Otra comprobación
-                          ElevatedButton(
-                            onPressed: () {
-                              _openMap(_item.latitud!, _item.longitud!);
-                            },
-                            child: const Text('Abrir en Google Maps'),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    (_item is LocalTuristico)
+                                        ? (_item as LocalTuristico).direccion ?? 'Dirección no disponible.'
+                                        : 'Dirección no disponible.',
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Dirección',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          (_item is LocalTuristico)
-                              ? (_item as LocalTuristico).direccion ??
-                                  'Dirección no disponible.'
-                              : 'Dirección no disponible.',
-                        ),
-                      ],
-                    )
-                    : const Center(
-                      child: Text(
-                        'No se han proporcionado detalles del elemento.',
+                        ],
                       ),
                     ),
+                  ],
+                ),
+              );
+            },
+          ),
+          // Botón de regreso
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 8,
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.4),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
           ),
         ],
       ),

@@ -12,7 +12,7 @@ class PuntoTuristico {
   final DateTime? fechaCreacion;
   final DateTime? fechaUltimaEdicion;
   final List<Actividad> actividades;
-  final List<Etiqueta> etiquetas;
+  List<Etiqueta> etiquetas;
   final Parroquia? parroquia;
   final bool esRecomendado;
 
@@ -218,7 +218,7 @@ class LocalTuristico {
   final String? sitioweb;
   final String estado;
   final List<HorarioAtencion> horarios;
-  final List<Etiqueta> etiquetas;
+  List<Etiqueta> etiquetas;
   final List<Servicio> servicios;
   final String? imagenUrl;
 
