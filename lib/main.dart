@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'models/punto_turistico.dart';
 import 'services/api_service.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
 import 'screens/home_screen.dart';
-// import 'screens/punto_turistico_lista_screen.dart';
+import 'screens/splash_screen.dart';
 import 'screens/recomendados_screen.dart';
 import 'screens/chatbot_screen.dart' as chatbot;
 import 'screens/mapa_screen.dart';
-// import 'package:flutter_dotenv/flutter_dotenv.dart';
-// import 'package:flutter/foundation.dart' show kIsWeb;
-// import 'dart:io';
 import '../widgets/custom_card.dart';
 import 'screens/categorias_screen.dart';
 import 'screens/categorias/parques.dart';
@@ -23,12 +21,38 @@ import 'screens/categorias/alimentos.dart';
 import 'screens/detalle_screen.dart';
 import 'screens/detalle_parroquia_screen.dart';
 
-Future<void> main() async {
+void main() {
   runApp(const MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  bool _showSplash = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkFirstTime();
+  }
+
+  Future<void> _checkFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final alreadyOpened = prefs.getBool('alreadyOpened') ?? false;
+    if (alreadyOpened) {
+      setState(() => _showSplash = false);
+    } else {
+      await prefs.setBool('alreadyOpened', true);
+      Future.delayed(const Duration(seconds: 2), () {
+        setState(() => _showSplash = false);
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +65,7 @@ class MyApp extends StatelessWidget {
           seedColor: const Color(0xFF9DAF3A),
           primary: const Color(0xFF9DAF3A),
         ),
-        scaffoldBackgroundColor: Colors.grey[50],
+        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         appBarTheme: const AppBarTheme(
           backgroundColor: Colors.white,
           foregroundColor: Colors.black,
@@ -50,11 +74,10 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomeScreen(),
-        '/home': (context) => const HomeScreen(),
+        '/': (context) => _showSplash ? const SplashScreen() : const HomeScreen(),
+  '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
         '/recomendados': (context) => const RecomendadosScreen(),
-        // '/detalles': (context) => PuntoTuristicoListaScreen(), // Elimina o comenta esta línea
         '/mapa': (context) => const MapaScreen(),
         '/chatbot': (context) => chatbot.ChatbotScreen(),
         '/etniatsachila': (context) => const EtniaTsachilaScreen(),

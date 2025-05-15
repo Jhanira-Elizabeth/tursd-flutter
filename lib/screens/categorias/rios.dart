@@ -37,10 +37,11 @@ class _RiosScreenState extends State<RiosScreen> {
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 6 (Rios)
-    final riosLocalIds = localEtiquetas
-        .where((relation) => relation['id_etiqueta'] == 6)
-        .map((relation) => relation['id_local'])
-        .toSet(); // Usar Set para evitar duplicados
+    final riosLocalIds =
+        localEtiquetas
+            .where((relation) => relation['id_etiqueta'] == 6)
+            .map((relation) => relation['id_local'])
+            .toSet(); // Usar Set para evitar duplicados
 
     // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de ríos
     return locales.where((local) => riosLocalIds.contains(local.id)).toList();
@@ -92,19 +93,17 @@ class _RiosScreenState extends State<RiosScreen> {
               ),
               itemCount: rios.length,
               itemBuilder: (context, index) {
-  final rio = rios[index];
-  final imageIndex = index % _defaultImageUrls.length;
-  final imageUrl = _defaultImageUrls[imageIndex];
+                final rio = rios[index];
+                final imageIndex = index % _defaultImageUrls.length;
+                final imageUrl = _defaultImageUrls[imageIndex];
 
-  return GestureDetector(
-    onTap: () => Navigator.pushNamed(
-      context,
-      '/detalles',
-      arguments: {
-        'item': rio,
-        'imageUrl': imageUrl,
-      },
-    ),
+                return GestureDetector(
+                  onTap:
+                      () => Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {'item': rio, 'imageUrl': imageUrl},
+                      ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: rio.nombre,

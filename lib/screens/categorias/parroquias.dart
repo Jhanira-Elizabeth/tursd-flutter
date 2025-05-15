@@ -29,7 +29,9 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
   @override
   void initState() {
     super.initState();
-    _parroquiasFuture = _apiService.fetchParroquias(); // Llama a la función para obtener todas las parroquias
+    _parroquiasFuture =
+        _apiService
+            .fetchParroquias(); // Llama a la función para obtener todas las parroquias
   }
 
   void _onTabChange(int index) {
@@ -73,25 +75,27 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
                 childAspectRatio: 0.75,
               ),
               itemCount: parroquias.length,
-             itemBuilder: (context, index) {
-  final parroquia = parroquias[index];
-  final imageUrl = _defaultImageUrls[index % _defaultImageUrls.length];
+              itemBuilder: (context, index) {
+                final parroquia = parroquias[index];
+                final imageUrl =
+                    _defaultImageUrls[index % _defaultImageUrls.length];
 
-  return GestureDetector(
-    onTap: () => Navigator.pushNamed(
-      context,
-      '/detalles_parroquia',
-      arguments: {
-    'parroquia': parroquia,
-    'imageUrl': imageUrl,
-  },
-    ),
-    child: CustomCard(
-      imageUrl: imageUrl,
-      title: parroquia.nombre,
-    ),
-  );
-},
+                return GestureDetector(
+                  onTap:
+                      () => Navigator.pushNamed(
+                        context,
+                        '/detalles_parroquia',
+                        arguments: {
+                          'parroquia': parroquia,
+                          'imageUrl': imageUrl,
+                        },
+                      ),
+                  child: CustomCard(
+                    imageUrl: imageUrl,
+                    title: parroquia.nombre,
+                  ),
+                );
+              },
             );
           }
         },

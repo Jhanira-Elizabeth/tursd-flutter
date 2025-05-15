@@ -8,7 +8,9 @@ class ApiService {
 
   // Función genérica para manejar la respuesta de la API para un solo objeto
   Future<T> _handleResponse<T>(
-      http.Response response, T Function(dynamic) fromJson) {
+    http.Response response,
+    T Function(dynamic) fromJson,
+  ) {
     if (response.statusCode == 200) {
       final dynamic jsonData = json.decode(response.body);
       return Future.value(fromJson(jsonData));
@@ -19,12 +21,16 @@ class ApiService {
 
   // Función genérica para manejar la respuesta de la API para una lista de objetos
   Future<List<T>> _handleListResponse<T>(
-      http.Response response, T Function(dynamic) fromJsonList) {
+    http.Response response,
+    T Function(dynamic) fromJsonList,
+  ) {
     if (response.statusCode == 200) {
       final List<dynamic> data = json.decode(response.body);
       return Future.value(data.map((json) => fromJsonList(json)).toList());
     } else {
-      throw Exception('Error al cargar la lista de datos: ${response.statusCode}');
+      throw Exception(
+        'Error al cargar la lista de datos: ${response.statusCode}',
+      );
     }
   }
 
@@ -32,7 +38,9 @@ class ApiService {
   Future<List<PuntoTuristico>> fetchPuntosTuristicos() async {
     final response = await http.get(Uri.parse('$baseUrl/puntos'));
     return _handleListResponse(
-        response, (json) => PuntoTuristico.fromJson(json));
+      response,
+      (json) => PuntoTuristico.fromJson(json),
+    );
   }
 
   Future<PuntoTuristico> fetchPuntoTuristicoById(int id) async {
@@ -41,22 +49,29 @@ class ApiService {
   }
 
   Future<List<PuntoTuristico>> fetchPuntosByParroquia(int parroquiaId) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/puntos?id_parroquia=$parroquiaId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/puntos?id_parroquia=$parroquiaId'),
+    );
     return _handleListResponse(
-        response, (json) => PuntoTuristico.fromJson(json));
+      response,
+      (json) => PuntoTuristico.fromJson(json),
+    );
   }
 
   Future<List<PuntoTuristico>> fetchPuntosByEtiqueta(int etiquetaId) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/puntos?id_etiqueta=$etiquetaId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/puntos?id_etiqueta=$etiquetaId'),
+    );
     return _handleListResponse(
-        response, (json) => PuntoTuristico.fromJson(json));
+      response,
+      (json) => PuntoTuristico.fromJson(json),
+    );
   }
 
   // Nueva función para obtener puntos turísticos por nombre de etiqueta
   Future<List<PuntoTuristico>> fetchPuntosTuristicosByEtiqueta(
-      String etiquetaNombre) async {
+    String etiquetaNombre,
+  ) async {
     // Primero, necesitamos obtener el ID de la etiqueta a partir de su nombre.
     final etiquetaId = await _getEtiquetaIdByName(etiquetaNombre);
     if (etiquetaId == null) {
@@ -85,19 +100,25 @@ class ApiService {
   Future<List<PuntoTuristico>> searchPuntosTuristicos(String query) async {
     final response = await http.get(Uri.parse('$baseUrl/puntos?q=$query'));
     return _handleListResponse(
-        response, (json) => PuntoTuristico.fromJson(json));
+      response,
+      (json) => PuntoTuristico.fromJson(json),
+    );
   }
 
   Future<List<Actividad>> fetchActividadesByPunto(int puntoId) async {
     final response = await http.get(
-        Uri.parse('$baseUrl/actividades?id_punto_turistico=$puntoId'));
+      Uri.parse('$baseUrl/actividades?id_punto_turistico=$puntoId'),
+    );
     return _handleListResponse(response, (json) => Actividad.fromJson(json));
   }
 
   // 2. Locales Turísticos
   Future<List<LocalTuristico>> fetchLocalesTuristicos() async {
     final response = await http.get(Uri.parse('$baseUrl/locales'));
-    return _handleListResponse(response, (json) => LocalTuristico.fromJson(json));
+    return _handleListResponse(
+      response,
+      (json) => LocalTuristico.fromJson(json),
+    );
   }
 
   Future<LocalTuristico> fetchLocalTuristicoById(int id) async {
@@ -121,7 +142,9 @@ class ApiService {
   Future<List<Map<String, dynamic>>> fetchLocalEtiquetas() async {
     final response = await http.get(Uri.parse('$baseUrl/local-etiqueta'));
     if (response.statusCode == 200) {
-      return Future.value((json.decode(response.body) as List).cast<Map<String, dynamic>>());
+      return Future.value(
+        (json.decode(response.body) as List).cast<Map<String, dynamic>>(),
+      );
     } else {
       throw Exception('Error al cargar las relaciones local-etiqueta');
     }
@@ -134,8 +157,9 @@ class ApiService {
   }
 
   Future<List<Servicio>> fetchServiciosByLocal(int localId) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/servicios?id_local=$localId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/servicios?id_local=$localId'),
+    );
     return _handleListResponse(response, (json) => Servicio.fromJson(json));
   }
 
@@ -143,65 +167,75 @@ class ApiService {
   Future<List<HorarioAtencion>> fetchHorarios() async {
     final response = await http.get(Uri.parse('$baseUrl/horarios'));
     return _handleListResponse(
-        response, (json) => HorarioAtencion.fromJson(json));
+      response,
+      (json) => HorarioAtencion.fromJson(json),
+    );
   }
 
   Future<List<HorarioAtencion>> fetchHorariosByLocal(int localId) async {
-    final response =
-        await http.get(Uri.parse('$baseUrl/horarios?id_local=$localId'));
+    final response = await http.get(
+      Uri.parse('$baseUrl/horarios?id_local=$localId'),
+    );
     return _handleListResponse(
-        response, (json) => HorarioAtencion.fromJson(json));
+      response,
+      (json) => HorarioAtencion.fromJson(json),
+    );
   }
 
   Future<List<LocalTuristico>> fetchLocalesConEtiquetas() async {
-  final locales = await fetchLocalesTuristicos();
-  final relaciones = await fetchLocalEtiquetas();
-  final etiquetas = await fetchEtiquetas();
+    final locales = await fetchLocalesTuristicos();
+    final relaciones = await fetchLocalEtiquetas();
+    final etiquetas = await fetchEtiquetas();
 
-  for (var local in locales) {
-    final etiquetasIds = relaciones
-        .where((rel) => rel['id_local'] == local.id)
-        .map((rel) => rel['id_etiqueta'])
-        .toList();
+    for (var local in locales) {
+      final etiquetasIds =
+          relaciones
+              .where((rel) => rel['id_local'] == local.id)
+              .map((rel) => rel['id_etiqueta'])
+              .toList();
 
-    final etiquetasLocal = etiquetas
-        .where((et) => etiquetasIds.contains(et.id))
-        .toList();
+      final etiquetasLocal =
+          etiquetas.where((et) => etiquetasIds.contains(et.id)).toList();
 
-    local.etiquetas = etiquetasLocal;
+      local.etiquetas = etiquetasLocal;
+    }
+
+    return locales;
   }
 
-  return locales;
-}
-
-Future<List<Map<String, dynamic>>> fetchPuntoTuristicoEtiquetas() async {
-  final response = await http.get(Uri.parse('$baseUrl/puntos-turisticos-etiqueta'));
-  if (response.statusCode == 200) {
-    return Future.value((json.decode(response.body) as List).cast<Map<String, dynamic>>());
-  } else {
-    throw Exception('Error al cargar las relaciones punto-turistico-etiqueta');
-  }
-}
-
-Future<List<PuntoTuristico>> fetchPuntosConEtiquetas() async {
-  final puntos = await fetchPuntosTuristicos();
-  final relaciones = await fetchPuntoTuristicoEtiquetas();
-  final etiquetas = await fetchEtiquetas();
-
-  for (var punto in puntos) {
-    final etiquetasIds = relaciones
-        .where((rel) => rel['id_punto_turistico'] == punto.id)
-        .map((rel) => rel['id_etiqueta'])
-        .toList();
-
-    final etiquetasPunto = etiquetas
-        .where((et) => etiquetasIds.contains(et.id))
-        .toList();
-
-    punto.etiquetas = etiquetasPunto;
+  Future<List<Map<String, dynamic>>> fetchPuntoTuristicoEtiquetas() async {
+    final response = await http.get(
+      Uri.parse('$baseUrl/puntos-turisticos-etiqueta'),
+    );
+    if (response.statusCode == 200) {
+      return Future.value(
+        (json.decode(response.body) as List).cast<Map<String, dynamic>>(),
+      );
+    } else {
+      throw Exception(
+        'Error al cargar las relaciones punto-turistico-etiqueta',
+      );
+    }
   }
 
-  return puntos;
-}
+  Future<List<PuntoTuristico>> fetchPuntosConEtiquetas() async {
+    final puntos = await fetchPuntosTuristicos();
+    final relaciones = await fetchPuntoTuristicoEtiquetas();
+    final etiquetas = await fetchEtiquetas();
 
+    for (var punto in puntos) {
+      final etiquetasIds =
+          relaciones
+              .where((rel) => rel['id_punto_turistico'] == punto.id)
+              .map((rel) => rel['id_etiqueta'])
+              .toList();
+
+      final etiquetasPunto =
+          etiquetas.where((et) => etiquetasIds.contains(et.id)).toList();
+
+      punto.etiquetas = etiquetasPunto;
+    }
+
+    return puntos;
+  }
 }

@@ -33,10 +33,11 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 3 (Alojamientos)
-    final alojamientosLocalIds = localEtiquetas
-        .where((relation) => relation['id_etiqueta'] == 3)
-        .map((relation) => relation['id_local'])
-        .toSet(); // Usar Set para evitar duplicados
+    final alojamientosLocalIds =
+        localEtiquetas
+            .where((relation) => relation['id_etiqueta'] == 3)
+            .map((relation) => relation['id_local'])
+            .toSet(); // Usar Set para evitar duplicados
 
     // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alojamientos
     return locales
@@ -90,17 +91,18 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
               itemBuilder: (context, index) {
                 final alojamiento = alojamientos[index];
                 final imageIndex = index % _imageUrls.length;
-  final imageUrl = _imageUrls[imageIndex];
+                final imageUrl = _imageUrls[imageIndex];
 
-  return GestureDetector(
-    onTap: () => Navigator.pushNamed(
-      context,
-      '/detalles',
-      arguments: {
-        'item': alojamiento, // <--- aquí usa alimento
-        'imageUrl': imageUrl,
-      },
-    ),
+                return GestureDetector(
+                  onTap:
+                      () => Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': alojamiento, // <--- aquí usa alimento
+                          'imageUrl': imageUrl,
+                        },
+                      ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alojamiento.nombre,

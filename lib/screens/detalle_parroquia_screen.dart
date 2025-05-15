@@ -6,10 +6,12 @@ class DetallesParroquiaScreen extends StatefulWidget {
   const DetallesParroquiaScreen({Key? key}) : super(key: key);
 
   @override
-  _DetallesParroquiaScreenState createState() => _DetallesParroquiaScreenState();
+  _DetallesParroquiaScreenState createState() =>
+      _DetallesParroquiaScreenState();
 }
 
-class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with TickerProviderStateMixin {
+class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen>
+    with TickerProviderStateMixin {
   late TabController _tabController;
   int _currentIndex = 0;
 
@@ -50,70 +52,55 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
           SizedBox(
             width: double.infinity,
             height: 250,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                Image.asset(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const SizedBox.shrink();
-                  },
-                ),
-                Positioned(
-                  left: 20,
-                  bottom: 24,
-                  child: Stack(
-                    children: [
-                      // Borde blanco
-                      Text(
-                        parroquia.nombre,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          foreground: Paint()
-                            ..style = PaintingStyle.stroke
-                            ..strokeWidth = 6
-                            ..color = Colors.white,
-                        ),
-                      ),
-                      // Texto negro encima
-                      Text(
-                        parroquia.nombre,
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+            child: Image.asset(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+          // Botón de regreso
+          Positioned(
+            top: MediaQuery.of(context).padding.top + 8,
+            left: 8,
+            child: CircleAvatar(
+              backgroundColor: Colors.black.withOpacity(0.4),
+              child: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () => Navigator.pop(context),
+              ),
             ),
           ),
           // Contenido desplazable sobre la imagen
           DraggableScrollableSheet(
-            initialChildSize: 0.65,
-            minChildSize: 0.65,
+            initialChildSize: 0.7,
+            minChildSize: 0.7,
             maxChildSize: 0.95,
             builder: (context, scrollController) {
               return Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
                 ),
                 child: Column(
                   children: [
                     // Título y tabs
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0, left: 20, right: 20),
+                      padding: const EdgeInsets.only(
+                        top: 16.0,
+                        left: 20,
+                        right: 20,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             parroquia.nombre,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           const SizedBox(height: 8),
                           TabBar(
@@ -144,24 +131,36 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                                   const SizedBox(height: 8),
                                   const Text(
                                     'Descripción',
-                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(parroquia.descripcion),
                                   const SizedBox(height: 16),
                                   const Text(
                                     'Más Información',
-                                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Población: ${parroquia.poblacion}',
-                                    style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     'Temperatura Promedio: ${parroquia.temperaturaPromedio}°C',
-                                    style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontWeight: FontWeight.bold),
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 0, 0, 0),
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ],
                               ),
@@ -181,18 +180,6 @@ class _DetallesParroquiaScreenState extends State<DetallesParroquiaScreen> with 
                 ),
               );
             },
-          ),
-          // Botón de regreso
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 8,
-            child: CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.4),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
           ),
         ],
       ),

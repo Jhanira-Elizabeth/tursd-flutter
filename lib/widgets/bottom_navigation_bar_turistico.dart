@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BottomNavigationBarTuristico extends StatefulWidget {
-  final ValueChanged<int> onTabChange; // Callback para notificar el cambio de tab
+  // onTabChange para notificar el cambio de tab
+  final ValueChanged<int> onTabChange; 
   final int currentIndex;
 
   const BottomNavigationBarTuristico({

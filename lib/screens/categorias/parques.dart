@@ -37,14 +37,13 @@ class _ParquesScreenState extends State<ParquesScreen> {
   }
 
   Future<List<PuntoTuristico>> _fetchParquesConEtiqueta() async {
-    final puntos = await _apiService.fetchPuntosConEtiquetas();
-    // Filtra los puntos que tengan la etiqueta "Parques"
-    return puntos
-        .where(
-          (p) =>
-              p.etiquetas.any((e) => e.nombre.toLowerCase().contains('parque')),
-        )
-        .toList();
+    final puntos = await _apiService.fetchPuntosTuristicos();
+    // IDs de los puntos turísticos que son parques
+    final idsParques = [
+      6,
+      10,
+    ]; // Ejemplo: pon aquí los IDs de tus parques reales
+    return puntos.where((p) => idsParques.contains(p.id)).toList();
   }
 
   void _onTabChange(int index) {
@@ -100,8 +99,9 @@ class _ParquesScreenState extends State<ParquesScreen> {
                         context,
                         '/detalles',
                         arguments: {
-                          'item': parque, // <--- aquí usa alimento
+                          'item': parque,
                           'imageUrl': imageUrl,
+                          'categoria': 'Parques',
                         },
                       ),
                   child: CustomCard(

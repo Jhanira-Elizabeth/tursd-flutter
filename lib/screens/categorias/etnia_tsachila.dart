@@ -17,8 +17,10 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
   final ApiService _apiService = ApiService();
   late Future<List<dynamic>> _etniaDataFuture;
   // --- Asegúrate que esta imagen exista y esté en pubspec.yaml ---
-  final List<String> _defaultImageUrls = ['assets/images/congoma1.jpg',
-    'assets/images/otonga3.jpg'];
+  final List<String> _defaultImageUrls = [
+    'assets/images/congoma1.jpg',
+    'assets/images/otonga3.jpg',
+  ];
 
   @override
   void initState() {
@@ -29,20 +31,35 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
 
   Future<List<dynamic>> _fetchEtniaData() async {
   try {
-    // Usa los métodos que traen las etiquetas asociadas
-    final puntos = await _apiService.fetchPuntosConEtiquetas();
-    final locales = await _apiService.fetchLocalesConEtiquetas();
+    final puntos = await _apiService.fetchPuntosTuristicos();
+    final locales = await _apiService.fetchLocalesTuristicos();
 
+    // Filtra por ID directamente, sin depender de etiquetas
     final puntoTsachila = puntos.firstWhere(
       (p) => p.id == 3,
       orElse: () => PuntoTuristico(
-        id: 0, nombre: 'No encontrado', descripcion: '', latitud: 0, longitud: 0, idParroquia: 0, estado: 'inactivo', esRecomendado: false),
+        id: 0,
+        nombre: 'No encontrado',
+        descripcion: '',
+        latitud: 0,
+        longitud: 0,
+        idParroquia: 0,
+        estado: 'inactivo',
+        esRecomendado: false,
+      ),
     );
 
     final localOtonga = locales.firstWhere(
       (l) => l.id == 5,
       orElse: () => LocalTuristico(
-        id: 0, nombre: 'No encontrado', descripcion: '', direccion: '', latitud: 0, longitud: 0, estado: 'inactivo'),
+        id: 0,
+        nombre: 'No encontrado',
+        descripcion: '',
+        direccion: '',
+        latitud: 0,
+        longitud: 0,
+        estado: 'inactivo',
+      ),
     );
 
     List<dynamic> results = [];
@@ -82,20 +99,34 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
       body: FutureBuilder<List<dynamic>>(
         future: _etniaDataFuture,
         builder: (context, snapshot) {
-          print("EtniaTsachilaScreen: FutureBuilder builder - ConnectionState: ${snapshot.connectionState}");
+          print(
+            "EtniaTsachilaScreen: FutureBuilder builder - ConnectionState: ${snapshot.connectionState}",
+          );
 
           if (snapshot.connectionState == ConnectionState.waiting) {
-            print("EtniaTsachilaScreen: FutureBuilder - Mostrando CircularProgressIndicator");
+            print(
+              "EtniaTsachilaScreen: FutureBuilder - Mostrando CircularProgressIndicator",
+            );
             return const Center(child: CircularProgressIndicator());
           } else if (snapshot.hasError) {
-            print("EtniaTsachilaScreen: FutureBuilder - Error: ${snapshot.error}");
-            return Center(child: Text('Error al cargar datos: ${snapshot.error}'));
+            print(
+              "EtniaTsachilaScreen: FutureBuilder - Error: ${snapshot.error}",
+            );
+            return Center(
+              child: Text('Error al cargar datos: ${snapshot.error}'),
+            );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            print("EtniaTsachilaScreen: FutureBuilder - No hay datos o lista vacía");
-            return const Center(child: Text('No se encontraron opciones disponibles.'));
+            print(
+              "EtniaTsachilaScreen: FutureBuilder - No hay datos o lista vacía",
+            );
+            return const Center(
+              child: Text('No se encontraron opciones disponibles.'),
+            );
           } else {
             final data = snapshot.data!;
-            print("EtniaTsachilaScreen: FutureBuilder - Datos recibidos, mostrando GridView con ${data.length} items");
+            print(
+              "EtniaTsachilaScreen: FutureBuilder - Datos recibidos, mostrando GridView con ${data.length} items",
+            );
             return GridView.builder(
               padding: const EdgeInsets.all(12),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -106,48 +137,55 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
               ),
               itemCount: data.length,
               itemBuilder: (context, index) {
-  final item = data[index];
-  final imageUrl = _defaultImageUrls[index % _defaultImageUrls.length];
+                final item = data[index];
+                final imageUrl =
+                    _defaultImageUrls[index % _defaultImageUrls.length];
 
-  String title = 'Desconocido';
-  String subtitle = 'Santo Domingo';
-  VoidCallback? onTap;
+                String title = 'Desconocido';
+                String subtitle = 'Santo Domingo';
+                VoidCallback? onTap;
 
-  if (item is PuntoTuristico) {
-    title = item.nombre;
-    onTap = () {
-      Navigator.pushNamed(
-        context,
-        '/detalles',
-        arguments: {
-          'item': item,
-          'imageUrl': imageUrl, // <-- ¡Agrega esto!
-        },
-      );
-    };
-  } else if (item is LocalTuristico) {
-    title = item.nombre;
-    onTap = () {
-      Navigator.pushNamed(
-        context,
-        '/detalles',
-        arguments: {
-          'item': item,
-          'imageUrl': imageUrl, // <-- ¡Agrega esto!
-        },
-      );
-    };
-  } else {
-    return Card(child: Center(child: Text("Dato inválido: ${item.runtimeType}")));
-  }
+                if (item is PuntoTuristico) {
+                  title = item.nombre;
+                  onTap = () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detalles',
+                      arguments: {
+                        'item': item,
+                        'imageUrl': imageUrl,
+        'categoria': 'Étnia Tsáchila', 
+                      },
+                    );
+                  }; 
+                } else if (item is LocalTuristico) {
+                  title = item.nombre;
+                  onTap = () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detalles',
+                      arguments: {
+                        'item': item,
+                        'imageUrl': imageUrl,
+        'categoria': 'Étnia Tsáchila', 
+                      },
+                    );
+                  };
+                } else {
+                  return Card(
+                    child: Center(
+                      child: Text("Dato inválido: ${item.runtimeType}"),
+                    ),
+                  );
+                }
 
-  return CustomCard(
-    imageUrl: imageUrl,
-    title: title,
-    subtitle: subtitle,
-    onTap: onTap,
-  );
-}
+                return CustomCard(
+                  imageUrl: imageUrl,
+                  title: title,
+                  subtitle: subtitle,
+                  onTap: onTap,
+                );
+              },
             );
           }
         },

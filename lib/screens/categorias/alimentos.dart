@@ -40,14 +40,15 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
   }
 
   Future<List<LocalTuristico>> _fetchAlimentosLocales() async {
-  final locales = await _apiService.fetchLocalesConEtiquetas();   
+    final locales = await _apiService.fetchLocalesConEtiquetas();
     final localEtiquetas = await _apiService.fetchLocalEtiquetas();
 
     // Obtener los IDs de los locales que tienen la etiqueta con ID 2 (Alimentos)
-    final alimentosLocalIds = localEtiquetas
-        .where((relation) => relation['id_etiqueta'] == 2)
-        .map((relation) => relation['id_local'])
-        .toSet(); // Usar Set para evitar duplicados
+    final alimentosLocalIds =
+        localEtiquetas
+            .where((relation) => relation['id_etiqueta'] == 2)
+            .map((relation) => relation['id_local'])
+            .toSet(); // Usar Set para evitar duplicados
 
     // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alimentos
     return locales
@@ -99,19 +100,20 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
               ),
               itemCount: alimentos.length,
               itemBuilder: (context, index) {
-  final alimento = alimentos[index];
-  final imageIndex = index % _imageUrls.length;
-  final imageUrl = _imageUrls[imageIndex];
+                final alimento = alimentos[index];
+                final imageIndex = index % _imageUrls.length;
+                final imageUrl = _imageUrls[imageIndex];
 
-  return GestureDetector(
-    onTap: () => Navigator.pushNamed(
-      context,
-      '/detalles',
-      arguments: {
-        'item': alimento, // <--- aquí usa alimento
-        'imageUrl': imageUrl,
-      },
-),
+                return GestureDetector(
+                  onTap:
+                      () => Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': alimento, // <--- aquí usa alimento
+                          'imageUrl': imageUrl,
+                        },
+                      ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alimento.nombre,
