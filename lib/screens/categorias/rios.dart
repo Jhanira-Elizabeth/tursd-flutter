@@ -15,7 +15,7 @@ class RiosScreen extends StatefulWidget {
 class _RiosScreenState extends State<RiosScreen> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  late Future<List<LocalTuristico>> _riosFuture;
+  late Future<List<dynamic>> _riosFuture;
   final List<String> _defaultImageUrls = [
     'assets/images/cascadas_diablo.jpg',
     'assets/images/Rio3.jpg',
@@ -23,28 +23,27 @@ class _RiosScreenState extends State<RiosScreen> {
     'assets/images/Ventura1.jpg',
     'assets/images/elPulpo4.jpg',
     'assets/images/GorilaPark1.jpg',
-    'assets/images/Rio2.jpg', // Imagen por defecto para los ríos
+    'assets/images/Rio2.jpg',
   ];
 
   @override
   void initState() {
     super.initState();
-    _riosFuture = _fetchRiosLocales();
+    _riosFuture = _fetchRios();
   }
 
-  Future<List<LocalTuristico>> _fetchRiosLocales() async {
+  Future<List<dynamic>> _fetchRios() async {
     final locales = await _apiService.fetchLocalesConEtiquetas();
-    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
+    final localesRios = locales.where(
+      (local) => local.etiquetas.any((et) => et.id == 6)
+    ).toList();
 
-    // Obtener los IDs de los locales que tienen la etiqueta con ID 6 (Rios)
-    final riosLocalIds =
-        localEtiquetas
-            .where((relation) => relation['id_etiqueta'] == 6)
-            .map((relation) => relation['id_local'])
-            .toSet(); // Usar Set para evitar duplicados
+    final puntos = await _apiService.fetchPuntosConEtiquetas();
+    final puntosRios = puntos.where(
+      (punto) => punto.etiquetas.any((et) => et.id == 6)
+    ).toList();
 
-    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de ríos
-    return locales.where((local) => riosLocalIds.contains(local.id)).toList();
+    return [...localesRios, ...puntosRios];
   }
 
   void _onTabChange(int index) {
@@ -68,7 +67,7 @@ class _RiosScreenState extends State<RiosScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Ríos')),
-      body: FutureBuilder<List<LocalTuristico>>(
+      body: FutureBuilder<List<dynamic>>(
         future: _riosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -98,17 +97,15 @@ class _RiosScreenState extends State<RiosScreen> {
                 final imageUrl = _defaultImageUrls[imageIndex];
 
                 return GestureDetector(
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {'item': rio, 'imageUrl': imageUrl},
-                      ),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles',
+                    arguments: {'item': rio, 'imageUrl': imageUrl},
+                  ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: rio.nombre,
                     subtitle: "Santo Domingo",
-                    // Puedes agregar más información aquí si lo deseas
                   ),
                 );
               },

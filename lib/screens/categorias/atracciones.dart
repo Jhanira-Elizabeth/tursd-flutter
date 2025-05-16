@@ -15,7 +15,7 @@ class AtraccionesScreen extends StatefulWidget {
 class _AtraccionesScreenState extends State<AtraccionesScreen> {
   int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  late Future<List<LocalTuristico>> _atraccionesFuture;
+  late Future<List<dynamic>> _atraccionesFuture;
   final List<String> _imageUrls = [
     'assets/images/afiche_publicitario_balneario_ibiza.jpg',
     'assets/images/Elpalmar.jpg',
@@ -32,24 +32,26 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   @override
   void initState() {
     super.initState();
-    _atraccionesFuture = _fetchAtraccionesLocales();
+    _atraccionesFuture = _fetchAtracciones();
   }
 
-  Future<List<LocalTuristico>> _fetchAtraccionesLocales() async {
+  Future<List<dynamic>> _fetchAtracciones() async {
+    // Trae locales con etiquetas
     final locales = await _apiService.fetchLocalesConEtiquetas();
-    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
+    // Filtra locales con etiqueta id 4
+    final localesAtracciones = locales.where(
+      (local) => local.etiquetas.any((et) => et.id == 4)
+    ).toList();
 
-    // Obtener los IDs de los locales que tienen la etiqueta con ID 4 (Atracciones Estables)
-    final atraccionesLocalIds =
-        localEtiquetas
-            .where((relation) => relation['id_etiqueta'] == 4)
-            .map((relation) => relation['id_local'])
-            .toSet(); // Usar Set para evitar duplicados
+    // Trae puntos turísticos con etiquetas
+    final puntos = await _apiService.fetchPuntosConEtiquetas();
+    // Filtra puntos con etiqueta id 4
+    final puntosAtracciones = puntos.where(
+      (punto) => punto.etiquetas.any((et) => et.id == 4)
+    ).toList();
 
-    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de atracciones
-    return locales
-        .where((local) => atraccionesLocalIds.contains(local.id))
-        .toList();
+    // Junta ambos en una sola lista
+    return [...localesAtracciones, ...puntosAtracciones];
   }
 
   void _onTabChange(int index) {
@@ -73,7 +75,7 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Atracciones Estables')),
-      body: FutureBuilder<List<LocalTuristico>>(
+      body: FutureBuilder<List<dynamic>>(
         future: _atraccionesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -101,20 +103,18 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': atraccion, // <--- aquí usa alimento
-                          'imageUrl': imageUrl,
-                        },
-                      ),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles',
+                    arguments: {
+                      'item': atraccion,
+                      'imageUrl': imageUrl,
+                    },
+                  ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: atraccion.nombre,
                     subtitle: "Santo Domingo",
-                    // Puedes agregar más información aquí si lo deseas
                   ),
                 );
               },

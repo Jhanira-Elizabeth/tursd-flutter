@@ -60,10 +60,10 @@ class _MyAppState extends State<MyApp> {
       title: 'Turismo IA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color(0xFF9DAF3A),
+        primaryColor: const Color.fromARGB(255, 80, 18, 215),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF9DAF3A),
-          primary: const Color(0xFF9DAF3A),
+          seedColor: const Color.fromARGB(255, 80, 18, 215),
+          primary: const Color.fromARGB(255, 80, 18, 215),
         ),
         scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
         appBarTheme: const AppBarTheme(

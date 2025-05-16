@@ -25,8 +25,13 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
   @override
   void initState() {
     super.initState();
-    print("EtniaTsachilaScreen: initState - Llamando a _fetchEtniaData");
-    _etniaDataFuture = _fetchEtniaData();
+    // Cambia el 5 por el ID real de la etiqueta "Parques" si es diferente
+    _etniaDataFuture = _apiService.fetchPuntosByEtiqueta(1);
+    _etniaDataFuture = _apiService.fetchPuntosConEtiquetas().then(
+    (puntos) => puntos.where(
+      (p) => p.etiquetas.any((et) => et.id == 1)
+    ).toList(),
+  );
   }
 
   Future<List<dynamic>> _fetchEtniaData() async {
@@ -49,22 +54,9 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
       ),
     );
 
-    final localOtonga = locales.firstWhere(
-      (l) => l.id == 5,
-      orElse: () => LocalTuristico(
-        id: 0,
-        nombre: 'No encontrado',
-        descripcion: '',
-        direccion: '',
-        latitud: 0,
-        longitud: 0,
-        estado: 'inactivo',
-      ),
-    );
 
     List<dynamic> results = [];
     if (puntoTsachila.id != 0) results.add(puntoTsachila);
-    if (localOtonga.id != 0) results.add(localOtonga);
 
     return results;
   } catch (e, stacktrace) {

@@ -14,9 +14,9 @@ class AlimentosScreen extends StatefulWidget {
 }
 
 class _AlimentosScreenState extends State<AlimentosScreen> {
-  int _currentIndex = 0;
+ int _currentIndex = 0;
   final ApiService _apiService = ApiService();
-  late Future<List<LocalTuristico>> _alimentosFuture;
+  late Future<List<dynamic>> _alimentosFuture; // Cambia a dynamic
   final List<String> _imageUrls = [
     'assets/images/Marias2.jpg',
     'assets/images/afiche_publicitario_balneario_ibiza.jpg',
@@ -36,24 +36,26 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
   @override
   void initState() {
     super.initState();
-    _alimentosFuture = _fetchAlimentosLocales();
+    _alimentosFuture = _fetchAlimentos();
   }
 
-  Future<List<LocalTuristico>> _fetchAlimentosLocales() async {
+  Future<List<dynamic>> _fetchAlimentos() async {
+    // Trae locales con etiquetas
     final locales = await _apiService.fetchLocalesConEtiquetas();
-    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
+    // Filtra locales con etiqueta id 2
+    final localesAlimentos = locales.where(
+      (local) => local.etiquetas.any((et) => et.id == 2)
+    ).toList();
 
-    // Obtener los IDs de los locales que tienen la etiqueta con ID 2 (Alimentos)
-    final alimentosLocalIds =
-        localEtiquetas
-            .where((relation) => relation['id_etiqueta'] == 2)
-            .map((relation) => relation['id_local'])
-            .toSet(); // Usar Set para evitar duplicados
+    // Trae puntos turísticos con etiquetas
+    final puntos = await _apiService.fetchPuntosConEtiquetas();
+    // Filtra puntos con etiqueta id 2
+    final puntosAlimentos = puntos.where(
+      (punto) => punto.etiquetas.any((et) => et.id == 2)
+    ).toList();
 
-    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alimentos
-    return locales
-        .where((local) => alimentosLocalIds.contains(local.id))
-        .toList();
+    // Junta ambos en una sola lista
+    return [...localesAlimentos, ...puntosAlimentos];
   }
 
   void _onTabChange(int index) {
@@ -77,7 +79,7 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Alimentos')),
-      body: FutureBuilder<List<LocalTuristico>>(
+      body: FutureBuilder<List<dynamic>>(
         future: _alimentosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {

@@ -30,19 +30,10 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
 
   Future<List<LocalTuristico>> _fetchAlojamientosLocales() async {
     final locales = await _apiService.fetchLocalesConEtiquetas();
-    final localEtiquetas = await _apiService.fetchLocalEtiquetas();
-
-    // Obtener los IDs de los locales que tienen la etiqueta con ID 3 (Alojamientos)
-    final alojamientosLocalIds =
-        localEtiquetas
-            .where((relation) => relation['id_etiqueta'] == 3)
-            .map((relation) => relation['id_local'])
-            .toSet(); // Usar Set para evitar duplicados
-
-    // Filtrar la lista de locales para incluir solo aquellos cuyo ID está en la lista de alojamientos
-    return locales
-        .where((local) => alojamientosLocalIds.contains(local.id))
-        .toList();
+    // Filtra locales con etiqueta id 3 (Alojamientos)
+    return locales.where(
+      (local) => local.etiquetas.any((et) => et.id == 3)
+    ).toList();
   }
 
   void _onTabChange(int index) {
@@ -94,20 +85,18 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': alojamiento, // <--- aquí usa alimento
-                          'imageUrl': imageUrl,
-                        },
-                      ),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles',
+                    arguments: {
+                      'item': alojamiento,
+                      'imageUrl': imageUrl,
+                    },
+                  ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alojamiento.nombre,
                     subtitle: "Santo Domingo",
-                    // Puedes agregar más información aquí si lo deseas
                   ),
                 );
               },

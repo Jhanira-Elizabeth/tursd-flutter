@@ -5,6 +5,7 @@ import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
 import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
+// Pantalla principal para mostrar los parques turísticos
 class ParquesScreen extends StatefulWidget {
   const ParquesScreen({super.key});
 
@@ -12,10 +13,12 @@ class ParquesScreen extends StatefulWidget {
   _ParquesScreenState createState() => _ParquesScreenState();
 }
 
-class _ParquesScreenState extends State<ParquesScreen> {
-  int _currentIndex = 0;
-  final ApiService _apiService = ApiService();
-  late Future<List<PuntoTuristico>> _parquesFuture;
+class _ParquesScreenState extends State<ParquesScreen> { 
+  int _currentIndex = 0; // Índice de la barra de navegación inferior
+  final ApiService _apiService = ApiService(); // Instancia del servicio de API
+  late Future<List<PuntoTuristico>> _parquesFuture; // Futuro para cargar los parques
+
+  // Lista de imágenes para mostrar en las tarjetas de los parques
   final List<String> _imageUrls = [
     'assets/images/congoma1.jpg',
     'assets/images/LuzDeAmerica4.jpg',
@@ -33,19 +36,16 @@ class _ParquesScreenState extends State<ParquesScreen> {
   @override
   void initState() {
     super.initState();
-    _parquesFuture = _fetchParquesConEtiqueta();
+    // Cambia el 5 por el ID real de la etiqueta "Parques" si es diferente
+    _parquesFuture = _apiService.fetchPuntosByEtiqueta(5);
+    _parquesFuture = _apiService.fetchPuntosConEtiquetas().then(
+    (puntos) => puntos.where(
+      (p) => p.etiquetas.any((et) => et.id == 5)
+    ).toList(),
+  );
   }
 
-  Future<List<PuntoTuristico>> _fetchParquesConEtiqueta() async {
-    final puntos = await _apiService.fetchPuntosTuristicos();
-    // IDs de los puntos turísticos que son parques
-    final idsParques = [
-      6,
-      10,
-    ]; // Ejemplo: pon aquí los IDs de tus parques reales
-    return puntos.where((p) => idsParques.contains(p.id)).toList();
-  }
-
+  // Maneja el cambio de pestaña en la barra de navegación inferior
   void _onTabChange(int index) {
     setState(() {
       _currentIndex = index;
@@ -89,26 +89,22 @@ class _ParquesScreenState extends State<ParquesScreen> {
               itemCount: parques.length,
               itemBuilder: (context, index) {
                 final parque = parques[index];
-                // Usa el índice para rotar a través de la lista de imágenes
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
 
                 return GestureDetector(
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': parque,
-                          'imageUrl': imageUrl,
-                          'categoria': 'Parques',
-                        },
-                      ),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles',
+                    arguments: {
+                      'item': parque,
+                      'imageUrl': imageUrl,
+                      'categoria': 'Parques',
+                    },
+                  ),
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: parque.nombre,
-                    subtitle: "Santo Domingo",
-                    // Puedes agregar más información aquí si lo deseas
                   ),
                 );
               },
