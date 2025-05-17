@@ -24,6 +24,9 @@ class _RiosScreenState extends State<RiosScreen> {
     'assets/images/elPulpo4.jpg',
     'assets/images/GorilaPark1.jpg',
     'assets/images/Rio2.jpg',
+    'assets/images/LuzAmerica5.jpg',
+    'assets/images/Esfuerzo.jpg',
+    'assets/images/Damas.jpg',
   ];
 
   @override

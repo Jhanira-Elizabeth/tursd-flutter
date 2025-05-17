@@ -20,17 +20,9 @@ class _ParquesScreenState extends State<ParquesScreen> {
 
   // Lista de imágenes para mostrar en las tarjetas de los parques
   final List<String> _imageUrls = [
-    'assets/images/congoma1.jpg',
     'assets/images/LuzDeAmerica4.jpg',
     'assets/images/ElEsfuerzo.jpg',
-    'assets/images/Rio5.jpg',
-    'assets/images/Tapir5.jpg',
     'assets/images/JelenTenka1.jpg',
-    'assets/images/Catedral1.jpg',
-    'assets/images/Bomboli7.jpg',
-    'assets/images/jardin_botanico.jpg',
-    'assets/images/Parque Zaracay1.jpg',
-    'assets/images/IndioColorado7.jpg',
   ];
 
   @override

@@ -1,14 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/punto_turistico.dart';
 import '../widgets/custom_card.dart';
-import '../widgets/bottom_navigation_bar_turistico.dart'; // Import the widget
-import 'categorias/parques.dart'; // Import the ParquesScreen
-import 'categorias/atracciones.dart';
-import 'categorias/etnia_tsachila.dart';
-import 'categorias/parroquias.dart';
-import 'categorias/alojamientos.dart';
-import 'categorias/alimentos.dart';
-import 'categorias/rios.dart';
+import '../widgets/bottom_navigation_bar_turistico.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,15 +11,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0; // Inicio está seleccionado
-  // Example data - replace with your actual data source
+  int _currentIndex = 0;
+
+  // IDs recomendados para cada tipo
+  final List<int> idsPuntosRecomendados = [3, 5];
+  final List<int> idsLocalesRecomendados = [3, 6];
+
+  // Mapa de imágenes personalizadas por tipo y ID
+  final Map<String, String> imagenesRecomendados = {
+  'punto_3': 'assets/images/congoma1.jpg',           // Ejemplo, cambia el nombre si tienes la imagen real
+  'punto_5': 'assets/images/Tapir5.jpg',         // Ejemplo, cambia el nombre si tienes la imagen real
+  'local_3': 'assets/images/cascadas_diablo.jpg',    // Ejemplo, cambia el nombre si tienes la imagen real
+  'local_4': 'assets/images/afiche_publicitario_balneario_ibiza.jpg',    // Ejemplo, cambia el nombre si tienes la imagen real
+  'local_16': 'assets/images/VenturaMiniGolf1.jpg', // Ejemplo, cambia el nombre si tienes la imagen real
+};
+
+  // Datos de ejemplo
   final List<PuntoTuristico> puntosRecomendados = [];
+  final List<LocalTuristico> localesRecomendados = [];
+
   final List<Map<String, dynamic>> categorias = [
     {
       'nombre': 'Etnia Tsáchila',
       'imagen': 'assets/images/Mushily1.jpg',
       'route': '/etniatsachila',
-    }, // Use correct route
+    },
     {
       'nombre': 'Atracciones',
       'imagen': 'assets/images/GorilaPark1.jpg',
@@ -51,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
       'nombre': 'Parques',
       'imagen': 'assets/images/ParqueJuventud1.jpg',
       'route': '/parques',
-    }, // Añadido
+    },
     {
       'nombre': 'Ríos',
       'imagen': 'assets/images/SanGabriel1.jpg',
@@ -62,73 +71,75 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Here you would typically load your data
     _cargarPuntosTuristicos();
+    _cargarLocalesRecomendados();
   }
 
   void _cargarPuntosTuristicos() {
-    // Mock data for demonstration
-    setState(() {
-      puntosRecomendados.addAll([
-        PuntoTuristico(
-          id: 1,
-          nombre: 'Casa del Hornado',
-          imagenUrl: 'assets/images/CasaHornado1.jpg',
-          descripcion: 'La mejor comida de Santo Domingo',
-          latitud: -4.7833,
-          longitud: -79.6167,
-          idParroquia: 1,
-          estado: 'activo',
-          esRecomendado: true,
-        ),
-        PuntoTuristico(
-          id: 2,
-          nombre: 'Hosteria Cucardas',
-          imagenUrl:
-              'assets/images/hosteria_cucardas_logo.jpg', //  imageUrl from assets
-          descripcion: 'Hermoso Hospedaje.',
-          latitud: -4.8000,
-          longitud: -79.6500,
-          idParroquia: 1,
-          estado: 'activo',
-          esRecomendado: true,
-        ),
-        PuntoTuristico(
-          id: 3,
-          nombre: 'Turismo Tsáchila Mushily',
-          imagenUrl: 'assets/images/Mushily1.jpg',
-          descripcion: 'Cerca de nuestras raíces.',
-          latitud: -4.7500,
-          longitud: -79.5833,
-          idParroquia: 1,
-          estado: 'activo',
-          esRecomendado: false,
-        ),
-        PuntoTuristico(
-          id: 4,
-          nombre: 'Parque Jelen Tenka',
-          imagenUrl: 'assets/images/JelenTenka7.jpg',
-          descripcion: 'Cerca de nuestras raíces.',
-          latitud: -4.7500,
-          longitud: -79.5833,
-          idParroquia: 1,
-          estado: 'activo',
-          esRecomendado: false,
-        ),
-        PuntoTuristico(
-          id: 5,
-          nombre: 'Parque Zaracay',
-          imagenUrl: 'assets/images/Parque Zaracay1.jpg',
-          descripcion: 'Cerca de nuestras raíces.',
-          latitud: -4.7500,
-          longitud: -79.5833,
-          idParroquia: 1,
-          estado: 'activo',
-          esRecomendado: false,
-        ),
-      ]);
-    });
-  }
+  setState(() {
+    puntosRecomendados.addAll([
+      PuntoTuristico(
+        id: 3,
+        nombre: 'Comuna Tsáchila Congoma',
+        imagenUrl: 'assets/images/congoma1.jpg', // Usa el nombre real de tu imagen
+        descripcion: 'Comunidad ancestral Tsáchila que conserva tradiciones culturales únicas, con actividades interactivas para los visitantes.',
+        latitud: -0.390846,
+        longitud: -79.351443,
+        idParroquia: 39,
+        estado: 'activo',
+        esRecomendado: true,
+      ),
+      PuntoTuristico(
+        id: 5,
+        nombre: 'Zoológico La Isla del Tapir',
+        imagenUrl: 'assets/images/tapir5.jpg', // Usa el nombre real de tu imagen
+        descripcion: 'Es un lugar ecológico y recreativo.\nproyectado a la conservación de la Flora y Fauna.',
+        latitud: -0.117760,
+        longitud: -79.258118,
+        idParroquia: 37,
+        estado: 'activo',
+        esRecomendado: true,
+      ),
+    ]);
+  });
+}
+
+void _cargarLocalesRecomendados() {
+  setState(() {
+    localesRecomendados.addAll([
+      LocalTuristico(
+        id: 3,
+        nombre: 'Cascadas del Diablo',
+        imagenUrl: 'assets/images/cascadas_diablo.jpg', // Usa el nombre real de tu imagen
+        descripcion: 'Se debe escalar una montaña de senderos angostos. La ruta se inicia en el kilómetro 38 de la vía Santo Domingo - Quito.',
+        direccion: 'Ubicado el recinto Unión del Toachi, kilometro 38 de la vía Santo Domingo - Quito.',
+        latitud: -0.328215,
+        longitud: -78.948441,
+        estado: 'activo',
+      ),
+      LocalTuristico(
+        id: 4,
+        nombre: 'Balneario Ibiza',
+        imagenUrl: 'assets/images/afiche_publicitario_balneario_ibiza.jpg', // Usa el nombre real de tu imagen
+        descripcion: 'Lugar ideal para disfrutar de la naturaleza con piscina, jacuzzi, eventos y karaoke.',
+        direccion: 'Parroquia Alluriquín, km 23 vía Santo Domingo - Quito',
+        latitud: -0.310870,
+        longitud: -79.030298,
+        estado: 'activo',
+      ),
+      LocalTuristico(
+        id: 16,
+        nombre: 'Aventure mini Golf',
+        imagenUrl: 'assets/images/VenturaMiniGolf1.jpg', // Usa el nombre real de tu imagen
+        descripcion: 'Este centro de entretenimiento, impulsado por la empresa privada, ofrece opciones como una cancha de pádel, campos de minigolf y un mirador con vistas al río Toachi, promoviendo el disfrute y el desarrollo turístico en la región.',
+        direccion: 'Santo Domingo',
+        latitud: -0.253312,
+        longitud: -79.134135,
+        estado: 'activo',
+      ),
+    ]);
+  });
+}
 
   void _onTabChange(int index) {
     setState(() {
@@ -149,6 +160,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+final List<dynamic> recomendados = [
+  ...puntosRecomendados,
+  ...localesRecomendados,
+];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio'),
@@ -162,7 +177,7 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Search bar
+              // Barra de búsqueda (solo visual)
               Container(
                 height: 48,
                 decoration: BoxDecoration(
@@ -185,69 +200,63 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 24),
-              // Recommended section with "Ver Todos" button
+              // Sección de recomendados
               _buildSectionHeader(
                 'Recomendados',
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
-                    '/recomendados',
-                    arguments: puntosRecomendados,
-                  );
+  '/recomendados',
+  arguments: [...puntosRecomendados, ...localesRecomendados],
+);
                 },
               ),
+              
               const SizedBox(height: 16),
-              // Recommended cards (horizontal scrolling)
+              // Carrusel de recomendados
               SizedBox(
-                height: 220,
-                child:
-                    puntosRecomendados.isEmpty
-                        ? const Center(child: CircularProgressIndicator())
-                        : ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: puntosRecomendados.length.clamp(0, 5),
-                          itemBuilder: (context, index) {
-                            final punto = puntosRecomendados[index];
-                            return Padding(
-                              padding: EdgeInsets.only(
-                                right:
-                                    index < puntosRecomendados.length - 1
-                                        ? 12.0
-                                        : 0.0,
-                              ), // Add right padding except the last item
-                              child: SizedBox(
-                                width: 160, // Set the width of the card
-                                child: CustomCard(
-                                  imageUrl: _getImageUrl(punto.imagenUrl),
-                                  title: punto.nombre,
-                                  onTap: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      '/detalles',
-                                      arguments: {
-                                        'item': punto,
-                                      }, // Envuelve el objeto PuntoTuristico en un Map
-                                    );
-                                  },
-                                ),
+  height: 220,
+  child: recomendados.isEmpty
+      ? const Center(child: CircularProgressIndicator())
+      : ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: recomendados.length.clamp(0, 5),
+          itemBuilder: (context, index) {
+            final item = recomendados[index];
+            return Padding(
+              padding: EdgeInsets.only(
+                right: index < recomendados.length - 1 ? 12.0 : 0.0,
+              ),
+              child: SizedBox(
+                width: 160,
+                child: CustomCard(
+                  imageUrl: _getImageUrl(item),
+                  title: item.nombre,
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detalles',
+                      arguments: {'item': item},
+                    );
+                                },
                               ),
-                            );
-                          },
-                        ),
+                            ),
+                          );
+                        },
+                      ),
               ),
               const SizedBox(height: 24),
-              // Categories section with "Ver todos" button
+              // Sección de categorías
               _buildSectionHeader(
                 'Categorías',
                 onPressed: () {
-                  // Navigate to categories screen
                   Navigator.pushNamed(context, '/categorias');
                 },
               ),
               const SizedBox(height: 16),
-              // Categories as a horizontal list of CustomCards
+              // Carrusel de categorías
               SizedBox(
-                height: 220, // Adjust as needed
+                height: 220,
                 child: ListView.builder(
                   scrollDirection: Axis.horizontal,
                   itemCount: categorias.length,
@@ -256,13 +265,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
                       child: SizedBox(
-                        width: 160, // Width of each card
+                        width: 160,
                         child: CustomCard(
                           imageUrl: categoria['imagen'],
                           title: categoria['nombre'],
                           onTap: () {
-                            // Handle category selection
-                            print('Selected category: ${categoria['nombre']}');
                             Navigator.pushNamed(context, categoria['route']);
                           },
                         ),
@@ -282,7 +289,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper method to build section headers with "Ver todos" button
+  // Construye el header de cada sección con botón "Ver todos"
   Widget _buildSectionHeader(String title, {required VoidCallback onPressed}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -292,7 +299,7 @@ class _HomeScreenState extends State<HomeScreen> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 0, 0, 0), // Green color from your design
+            color: Color.fromARGB(255, 0, 0, 0),
           ),
         ),
         TextButton(
@@ -306,16 +313,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Helper function to handle null or empty image URLs
-  String _getImageUrl(String? imageUrl) {
-    if (imageUrl == null || imageUrl.isEmpty) {
-      return 'assets/images/IndioColorado3.jpg'; // Default asset image
+  // Devuelve la imagen personalizada por tipo y ID, o la del modelo, o una por defecto
+  String _getImageUrl(dynamic item) {
+    if (item == null) return 'assets/images/IndioColorado3.jpg';
+
+    String key = '';
+    if (item.runtimeType.toString().contains('PuntoTuristico')) {
+      key = 'punto_${item.id}';
+    } else if (item.runtimeType.toString().contains('LocalTuristico')) {
+      key = 'local_${item.id}';
     }
-    // Check if it is an asset path
-    if (imageUrl.startsWith('assets/')) {
-      return imageUrl;
+
+    if (imagenesRecomendados.containsKey(key)) {
+      return imagenesRecomendados[key]!;
     }
-    //  handle web URLs if needed.
-    return imageUrl;
+    if (item.imagenUrl != null && item.imagenUrl.isNotEmpty) {
+      return item.imagenUrl;
+    }
+    return 'assets/images/IndioColorado3.jpg';
   }
 }

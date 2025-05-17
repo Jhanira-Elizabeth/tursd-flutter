@@ -74,8 +74,10 @@ class _MyAppState extends State<MyApp> {
       ),
       initialRoute: '/',
       routes: {
-        '/': (context) => _showSplash ? const SplashScreen() : const HomeScreen(),
-  '/home': (context) => const HomeScreen(),
+        '/':
+            (context) =>
+                _showSplash ? const SplashScreen() : const HomeScreen(),
+        '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
         '/recomendados': (context) => const RecomendadosScreen(),
         '/mapa': (context) => const MapaScreen(),

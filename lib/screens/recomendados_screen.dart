@@ -33,10 +33,33 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Recibe los puntos turísticos desde los argumentos
-    final puntos =
-        ModalRoute.of(context)!.settings.arguments as List<PuntoTuristico>;
-    print('Puntos recibidos en recomendados: ${puntos.length}');
+    final recomendados =
+        ModalRoute.of(context)!.settings.arguments as List<dynamic>;
+    print('Recomendados recibidos: ${recomendados.length}');
+
+    String _getImageUrl(dynamic item) {
+      if (item == null) return 'assets/images/IndioColorado3.jpg';
+      String key = '';
+      if (item.runtimeType.toString().contains('PuntoTuristico')) {
+        key = 'punto_${item.id}';
+      } else if (item.runtimeType.toString().contains('LocalTuristico')) {
+        key = 'local_${item.id}';
+      }
+      final imagenesRecomendados = {
+        'punto_3': 'assets/images/congoma1.jpg',
+        'punto_5': 'assets/images/Tapir5.jpg',
+        'local_3': 'assets/images/cascadas_diablo.jpg',
+        'local_4': 'assets/images/afiche_publicitario_balneario_ibiza.jpg',
+        'local_16': 'assets/images/VenturaMiniGolf1.jpg',
+      };
+      if (imagenesRecomendados.containsKey(key)) {
+        return imagenesRecomendados[key]!;
+      }
+      if (item.imagenUrl != null && item.imagenUrl.isNotEmpty) {
+        return item.imagenUrl;
+      }
+      return 'assets/images/IndioColorado3.jpg';
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -50,38 +73,31 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
         ),
       ),
       body:
-          puntos.isEmpty
-              ? const Center(
-                child: Text('No hay puntos turísticos disponibles.'),
-              )
+          recomendados.isEmpty
+              ? const Center(child: Text('No hay recomendados disponibles.'))
               : GridView.builder(
-                padding: const EdgeInsets.all(
-                  16,
-                ), // Espaciado alrededor de la cuadrícula
+                padding: const EdgeInsets.all(16),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio:
-                      3 / 4, // Relación de aspecto para las tarjetas
+                  childAspectRatio: 3 / 4,
                 ),
-                itemCount: puntos.length,
+                itemCount: recomendados.length,
                 itemBuilder: (context, index) {
-                  final punto = puntos[index];
+                  final item = recomendados[index];
                   return CustomCard(
-                    imageUrl:
-                        punto.imagenUrl ??
-                        'https://via.placeholder.com/181x147', // Imagen o placeholder
-                    title: punto.nombre,
+                    imageUrl: _getImageUrl(item),
+                    title: item.nombre,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
                         '/detalles',
                         arguments: {
-                          'item': punto,
-                          'imageUrl':
-                              punto.imagenUrl ??
-                              'https://via.placeholder.com/181x147',
+                          'item': item,
+                          'imageUrl': _getImageUrl(
+                            item,
+                          ),
                         },
                       );
                     },

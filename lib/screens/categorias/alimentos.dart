@@ -1,4 +1,3 @@
-// alimentos.dart
 import 'package:flutter/material.dart';
 import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';

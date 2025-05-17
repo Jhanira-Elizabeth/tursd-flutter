@@ -116,11 +116,18 @@ class ApiService {
 
   // Obtiene actividades de un punto turístico
   Future<List<Actividad>> fetchActividadesByPunto(int puntoId) async {
-    final response = await http.get(
-      Uri.parse('$baseUrl/actividades?id_punto_turistico=$puntoId'),
-    );
-    return _handleListResponse(response, (json) => Actividad.fromJson(json));
+  final response = await http.get(Uri.parse('$baseUrl/actividades'));
+  
+  if (response.statusCode == 200) {
+    final List<dynamic> data = json.decode(response.body);
+    return data
+        .map((json) => Actividad.fromJson(json))
+        .where((actividad) => actividad.idPuntoTuristico == puntoId)
+        .toList();
+  } else {
+    throw Exception('Error al cargar actividades: ${response.statusCode}');
   }
+}
 
   // =======================
   // LOCALES TURÍSTICOS
@@ -194,6 +201,7 @@ class ApiService {
     );
     return _handleListResponse(response, (json) => Servicio.fromJson(json));
   }
+  
 
   // =======================
   // HORARIOS DE ATENCIÓN
@@ -284,4 +292,12 @@ Future<List<PuntoTuristico>> fetchPuntosConEtiquetas() async {
 
   return puntos;
 }
+
+Future<List<Actividad>> fetchActividadesByPuntoId(int puntoId) async {
+  final response = await http.get(Uri.parse('$baseUrl/actividades'));
+  final todas = await _handleListResponse(response, (json) => Actividad.fromJson(json));
+  return todas.where((a) => a.idPuntoTuristico == puntoId).toList();
+}
+
+
 }

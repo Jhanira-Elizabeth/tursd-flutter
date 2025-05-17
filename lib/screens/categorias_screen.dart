@@ -13,13 +13,42 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   int _currentIndex = 0; // Por defecto, seleccionamos 'Inicio'
 
   final List<Map<String, dynamic>> categorias = [
-    {'nombre': 'Etnia Tsáchila', 'imagen': 'assets/images/Mushily1.jpg'},
-    {'nombre': 'Parroquias', 'imagen': 'assets/images/ValleHermoso1.jpg'},
-    {'nombre': 'Atracciones', 'imagen': 'assets/images/GorilaPark1.jpg'},
-    {'nombre': 'Alojamiento', 'imagen': 'assets/images/HotelRefugio1.jpg'},
-    {'nombre': 'Alimentacion', 'imagen': 'assets/images/OhQueRico1.jpg'},
-    {'nombre': 'Parques', 'imagen': 'assets/images/ParqueJuventud1.jpg'},
-    {'nombre': 'Rios', 'imagen': 'assets/images/SanGabriel1.jpg'},
+    {
+      'nombre': 'Etnia Tsáchila',
+      'imagen': 'assets/images/Mushily1.jpg',
+      'route': '/etniatsachila', // <--- Usa la ruta correcta SIN tilde
+    },
+    {
+      'nombre': 'Atracciones',
+      'imagen': 'assets/images/GorilaPark1.jpg',
+      'route': '/atracciones',
+    },
+    {
+      'nombre': 'Parroquias',
+      'imagen': 'assets/images/ValleHermoso1.jpg',
+      'route': '/parroquias',
+    },
+    
+    {
+      'nombre': 'Alojamiento',
+      'imagen': 'assets/images/HotelRefugio1.jpg',
+      'route': '/alojamiento',
+    },
+    {
+      'nombre': 'Alimentos',
+      'imagen': 'assets/images/OhQueRico1.jpg',
+      'route': '/alimentacion',
+    },
+    {
+      'nombre': 'Parques',
+      'imagen': 'assets/images/ParqueJuventud1.jpg',
+      'route': '/parques',
+    },
+    {
+      'nombre': 'Rios',
+      'imagen': 'assets/images/SanGabriel1.jpg',
+      'route': '/rios',
+    },
   ];
 
   void _onTabChange(int index) {
@@ -65,7 +94,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             imageUrl: categoria['imagen'],
             title: categoria['nombre'],
             onTap: () {
-              Navigator.pushNamed(context, ruta);
+              Navigator.pushNamed(context, categoria['route']);
             },
           );
         },
