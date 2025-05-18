@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../models/punto_turistico.dart';
 import '../widgets/custom_card.dart'; // Importa el CustomCard
 import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa la barra de navegación
 

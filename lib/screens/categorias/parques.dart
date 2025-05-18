@@ -3,7 +3,6 @@ import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
-import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
 // Pantalla principal para mostrar los parques turísticos
 class ParquesScreen extends StatefulWidget {
