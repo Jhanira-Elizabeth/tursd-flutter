@@ -38,17 +38,23 @@ dependencies:
   url_launcher: ^6.1.5
   dialog_flowtter: ^0.3.3
   provider: ^6.1.0 
-  dialogflow_grpc: any
-  protobuf: ^2.0.0
-  grpc: ^3.0.0
-  flutter_dotenv: ^5.0.2
-
+  #dialogflow_grpc: ^0.3.2
+  # protobuf: ^2.0.0
+  # grpc: ^3.0.0
+  # flutter_dotenv: ^5.0.2
+  # googleapis: ^11.0.0
+  # googleapis_auth: ^1.4.0
+  # firebase_core: ^2.18.0
+  # firebase_auth: ^4.12.0
+  # google_sign_in: ^6.1.0
+  # uuid: ^3.0.7  # Para generar IDs únicos
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
+  protoc_plugin: 20.0.1
   flutter_test:
     sdk: flutter
 
@@ -70,6 +76,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    - assets/credential_tursd.json
     - assets/.env
     - assets/images/
     - assets/images/Bomboli8.jpg

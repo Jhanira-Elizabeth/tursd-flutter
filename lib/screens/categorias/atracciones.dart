@@ -120,7 +120,6 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: atraccion.nombre,
-                    subtitle: "Santo Domingo",
                   ),
                 );
               },

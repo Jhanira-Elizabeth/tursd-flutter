@@ -108,7 +108,6 @@ class _RiosScreenState extends State<RiosScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: rio.nombre,
-                    subtitle: "Santo Domingo",
                   ),
                 );
               },

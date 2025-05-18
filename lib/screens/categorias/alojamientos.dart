@@ -3,7 +3,6 @@ import '../../models/punto_turistico.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
-import '../detalle_screen.dart'; // Importa tu DetallesScreen
 
 class AlojamientosScreen extends StatefulWidget {
   const AlojamientosScreen({super.key});
@@ -96,7 +95,6 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alojamiento.nombre,
-                    subtitle: "Santo Domingo",
                   ),
                 );
               },

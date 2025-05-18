@@ -233,12 +233,29 @@ final List<dynamic> recomendados = [
                   imageUrl: _getImageUrl(item),
                   title: item.nombre,
                   onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: {'item': item},
-                    );
-                                },
+  String? detalleImagenUrl;
+  String key = '';
+  if (item is PuntoTuristico) {
+    key = 'punto_${item.id}';
+  } else if (item is LocalTuristico) {
+    key = 'local_${item.id}';
+  }
+  if (imagenesRecomendados.containsKey(key)) {
+    detalleImagenUrl = imagenesRecomendados[key];
+  } else {
+    detalleImagenUrl = item.imagenUrl;
+  }
+
+  Navigator.pushNamed(
+    context,
+    '/detalles',
+    arguments: {
+      'item': item,
+      'imageUrl': detalleImagenUrl,
+      // Puedes pasar información adicional si es necesario
+    },
+  );
+},
                               ),
                             ),
                           );
