@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'services/auth_service.dart'; // Asegúrate de crear este archivo
 import 'models/punto_turistico.dart';
 import 'services/api_service.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
@@ -20,9 +22,19 @@ import 'screens/categorias/rios.dart';
 import 'screens/categorias/alimentos.dart';
 import 'screens/detalle_screen.dart';
 import 'screens/detalle_parroquia_screen.dart';
+import 'screens/login_screen.dart'; // Crea esta pantalla
+import 'package:firebase_auth/firebase_auth.dart' show User;
+import 'dart:io';
+import 'firebase_options.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env"); // Carga las variables de entorno
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(MyApp());
 }
 
 class MyApp extends StatefulWidget {
@@ -34,6 +46,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _showSplash = true;
+  final AuthService _auth = AuthService();
 
   @override
   void initState() {
@@ -49,7 +62,9 @@ class _MyAppState extends State<MyApp> {
     } else {
       await prefs.setBool('alreadyOpened', true);
       Future.delayed(const Duration(seconds: 2), () {
-        setState(() => _showSplash = false);
+        if (mounted) {
+          setState(() => _showSplash = false);
+        }
       });
     }
   }
@@ -76,7 +91,16 @@ class _MyAppState extends State<MyApp> {
       routes: {
         '/':
             (context) =>
-                _showSplash ? const SplashScreen() : const HomeScreen(),
+                _showSplash
+                    ? const SplashScreen()
+                    : StreamBuilder<User?>(
+                      stream: _auth.authStateChanges,
+                      builder: (context, snapshot) {
+                        return snapshot.hasData
+                            ? const HomeScreen()
+                            : LoginScreen();
+                      },
+                    ),
         '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
         '/recomendados': (context) => const RecomendadosScreen(),

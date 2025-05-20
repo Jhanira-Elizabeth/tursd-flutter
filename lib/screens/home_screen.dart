@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../models/punto_turistico.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
+import '../services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -12,6 +14,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
+  // Instancia del servicio de autenticación
+  final AuthService _authService = AuthService(); 
 
   // IDs recomendados para cada tipo
   final List<int> idsPuntosRecomendados = [3, 5];
@@ -158,9 +162,26 @@ void _cargarLocalesRecomendados() {
     });
   }
 
+  Future<void> _handleSignOut() async {
+    try {
+      await _authService.signOut();
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/');
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al cerrar sesión: ${e.toString()}')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-final List<dynamic> recomendados = [
+    // Obtener el usuario actual
+    final user = FirebaseAuth.instance.currentUser; 
+    final List<dynamic> recomendados = [
   ...puntosRecomendados,
   ...localesRecomendados,
 ];
@@ -170,6 +191,14 @@ final List<dynamic> recomendados = [
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
+        actions: [
+          // Mostrar botón de logout solo si hay usuario autenticado
+          if (user != null)
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _handleSignOut,
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
