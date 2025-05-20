@@ -52,21 +52,24 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   ];
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -86,17 +89,18 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         ),
         itemCount: categorias.length,
         itemBuilder: (context, index) {
-          final categoria = categorias[index];
-          final ruta =
-              '/${categoria['nombre'].toString().toLowerCase().replaceAll(' ', '')}';
+                final categoria = categorias[index];
+                // Generamos un ID único basado en el nombre de la categoría
+                final categoriaId = categoria['nombre'].toString().toLowerCase().replaceAll(' ', '');
 
-          return CustomCard(
-            imageUrl: categoria['imagen'],
-            title: categoria['nombre'],
-            onTap: () {
-              Navigator.pushNamed(context, categoria['route']);
-            },
-          );
+                return CustomCard(
+                  imageUrl: categoria['imagen'],
+                  title: categoria['nombre'],
+                  onTap: () {
+                    Navigator.pushNamed(context, categoria['route']);
+                  },
+                  puntoTuristicoId: categoriaId.hashCode, // Usamos el hashCode del string como ID (solo para esta pantalla)
+                );
         },
       ),
       bottomNavigationBar: BottomNavigationBarTuristico(

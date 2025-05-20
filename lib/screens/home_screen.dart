@@ -15,7 +15,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
   // Instancia del servicio de autenticación
-  final AuthService _authService = AuthService(); 
+  final AuthService _authService = AuthService();
 
   // IDs recomendados para cada tipo
   final List<int> idsPuntosRecomendados = [3, 5];
@@ -23,12 +23,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Mapa de imágenes personalizadas por tipo y ID
   final Map<String, String> imagenesRecomendados = {
-  'punto_3': 'assets/images/congoma1.jpg',           // Ejemplo, cambia el nombre si tienes la imagen real
-  'punto_5': 'assets/images/Tapir5.jpg',         // Ejemplo, cambia el nombre si tienes la imagen real
-  'local_3': 'assets/images/cascadas_diablo.jpg',    // Ejemplo, cambia el nombre si tienes la imagen real
-  'local_4': 'assets/images/afiche_publicitario_balneario_ibiza.jpg',    // Ejemplo, cambia el nombre si tienes la imagen real
-  'local_16': 'assets/images/VenturaMiniGolf1.jpg', // Ejemplo, cambia el nombre si tienes la imagen real
-};
+    'punto_3': 'assets/images/congoma1.jpg',
+    'punto_5': 'assets/images/Tapir5.jpg',
+    'local_3': 'assets/images/cascadas_diablo.jpg',
+    'local_4': 'assets/images/afiche_publicitario_balneario_ibiza.jpg',
+    'local_16': 'assets/images/VenturaMiniGolf1.jpg',
+  };
 
   // Datos de ejemplo
   final List<PuntoTuristico> puntosRecomendados = [];
@@ -80,82 +80,91 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _cargarPuntosTuristicos() {
-  setState(() {
-    puntosRecomendados.addAll([
-      PuntoTuristico(
-        id: 3,
-        nombre: 'Comuna Tsáchila Congoma',
-        imagenUrl: 'assets/images/congoma1.jpg', // Usa el nombre real de tu imagen
-        descripcion: 'Comunidad ancestral Tsáchila que conserva tradiciones culturales únicas, con actividades interactivas para los visitantes.',
-        latitud: -0.390846,
-        longitud: -79.351443,
-        idParroquia: 39,
-        estado: 'activo',
-        esRecomendado: true,
-      ),
-      PuntoTuristico(
-        id: 5,
-        nombre: 'Zoológico La Isla del Tapir',
-        imagenUrl: 'assets/images/tapir5.jpg', // Usa el nombre real de tu imagen
-        descripcion: 'Es un lugar ecológico y recreativo.\nproyectado a la conservación de la Flora y Fauna.',
-        latitud: -0.117760,
-        longitud: -79.258118,
-        idParroquia: 37,
-        estado: 'activo',
-        esRecomendado: true,
-      ),
-    ]);
-  });
-}
+    setState(() {
+      puntosRecomendados.addAll([
+        PuntoTuristico(
+          id: 3,
+          nombre: 'Comuna Tsáchila Congoma',
+          imagenUrl: 'assets/images/congoma1.jpg',
+          descripcion:
+              'Comunidad ancestral Tsáchila que conserva tradiciones culturales únicas, con actividades interactivas para los visitantes.',
+          latitud: -0.390846,
+          longitud: -79.351443,
+          idParroquia: 39,
+          estado: 'activo',
+          esRecomendado: true,
+        ),
+        PuntoTuristico(
+          id: 5,
+          nombre: 'Zoológico La Isla del Tapir',
+          imagenUrl: 'assets/images/tapir5.jpg',
+          descripcion:
+              'Es un lugar ecológico y recreativo.\nproyectado a la conservación de la Flora y Fauna.',
+          latitud: -0.117760,
+          longitud: -79.258118,
+          idParroquia: 37,
+          estado: 'activo',
+          esRecomendado: true,
+        ),
+      ]);
+    });
+  }
 
-void _cargarLocalesRecomendados() {
-  setState(() {
-    localesRecomendados.addAll([
-      LocalTuristico(
-        id: 3,
-        nombre: 'Cascadas del Diablo',
-        imagenUrl: 'assets/images/cascadas_diablo.jpg', // Usa el nombre real de tu imagen
-        descripcion: 'Se debe escalar una montaña de senderos angostos. La ruta se inicia en el kilómetro 38 de la vía Santo Domingo - Quito.',
-        direccion: 'Ubicado el recinto Unión del Toachi, kilometro 38 de la vía Santo Domingo - Quito.',
-        latitud: -0.328215,
-        longitud: -78.948441,
-        estado: 'activo',
-      ),
-      LocalTuristico(
-        id: 4,
-        nombre: 'Balneario Ibiza',
-        imagenUrl: 'assets/images/afiche_publicitario_balneario_ibiza.jpg', // Usa el nombre real de tu imagen
-        descripcion: 'Lugar ideal para disfrutar de la naturaleza con piscina, jacuzzi, eventos y karaoke.',
-        direccion: 'Parroquia Alluriquín, km 23 vía Santo Domingo - Quito',
-        latitud: -0.310870,
-        longitud: -79.030298,
-        estado: 'activo',
-      ),
-      LocalTuristico(
-        id: 16,
-        nombre: 'Aventure mini Golf',
-        imagenUrl: 'assets/images/VenturaMiniGolf1.jpg', // Usa el nombre real de tu imagen
-        descripcion: 'Este centro de entretenimiento, impulsado por la empresa privada, ofrece opciones como una cancha de pádel, campos de minigolf y un mirador con vistas al río Toachi, promoviendo el disfrute y el desarrollo turístico en la región.',
-        direccion: 'Santo Domingo',
-        latitud: -0.253312,
-        longitud: -79.134135,
-        estado: 'activo',
-      ),
-    ]);
-  });
-}
+  void _cargarLocalesRecomendados() {
+    setState(() {
+      localesRecomendados.addAll([
+        LocalTuristico(
+          id: 3,
+          nombre: 'Cascadas del Diablo',
+          imagenUrl: 'assets/images/cascadas_diablo.jpg',
+          descripcion:
+              'Se debe escalar una montaña de senderos angostos. La ruta se inicia en el kilómetro 38 de la vía Santo Domingo - Quito.',
+          direccion:
+              'Ubicado el recinto Unión del Toachi, kilometro 38 de la vía Santo Domingo - Quito.',
+          latitud: -0.328215,
+          longitud: -78.948441,
+          estado: 'activo',
+        ),
+        LocalTuristico(
+          id: 4,
+          nombre: 'Balneario Ibiza',
+          imagenUrl: 'assets/images/afiche_publicitario_balneario_ibiza.jpg',
+          descripcion:
+              'Lugar ideal para disfrutar de la naturaleza con piscina, jacuzzi, eventos y karaoke.',
+          direccion: 'Parroquia Alluriquín, km 23 vía Santo Domingo - Quito',
+          latitud: -0.310870,
+          longitud: -79.030298,
+          estado: 'activo',
+        ),
+        LocalTuristico(
+          id: 16,
+          nombre: 'Aventure mini Golf',
+          imagenUrl: 'assets/images/VenturaMiniGolf1.jpg',
+          descripcion:
+              'Este centro de entretenimiento, impulsado por la empresa privada, ofrece opciones como una cancha de pádel, campos de minigolf y un mirador con vistas al río Toachi, promoviendo el disfrute y el desarrollo turístico en la región.',
+          direccion: 'Santo Domingo',
+          latitud: -0.253312,
+          longitud: -79.134135,
+          estado: 'activo',
+        ),
+      ]);
+    });
+  }
 
   void _onTabChange(int index) {
     setState(() {
       _currentIndex = index;
       switch (index) {
         case 0:
-          // Ya estamos en Inicio
+          Navigator.pushReplacementNamed(context, '/home');
           break;
         case 1:
           Navigator.pushReplacementNamed(context, '/mapa');
           break;
-        case 2:
+        case 2: // Favoritos
+          Navigator.pushReplacementNamed(context, '/favoritos');
+          break;
+        case 3:
           Navigator.pushReplacementNamed(context, '/chatbot');
           break;
       }
@@ -179,12 +188,11 @@ void _cargarLocalesRecomendados() {
 
   @override
   Widget build(BuildContext context) {
-    // Obtener el usuario actual
-    final user = FirebaseAuth.instance.currentUser; 
+    final user = FirebaseAuth.instance.currentUser;
     final List<dynamic> recomendados = [
-  ...puntosRecomendados,
-  ...localesRecomendados,
-];
+      ...puntosRecomendados,
+      ...localesRecomendados,
+    ];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Inicio'),
@@ -192,12 +200,11 @@ void _cargarLocalesRecomendados() {
         foregroundColor: Colors.black,
         elevation: 0,
         actions: [
-          // Mostrar botón de logout solo si hay usuario autenticado
           if (user != null)
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _handleSignOut,
-          ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: _handleSignOut,
+            ),
         ],
       ),
       body: SingleChildScrollView(
@@ -206,7 +213,6 @@ void _cargarLocalesRecomendados() {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Barra de búsqueda (solo visual)
               Container(
                 height: 48,
                 decoration: BoxDecoration(
@@ -229,62 +235,66 @@ void _cargarLocalesRecomendados() {
                 ),
               ),
               const SizedBox(height: 24),
-              // Sección de recomendados
               _buildSectionHeader(
                 'Recomendados',
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
-  '/recomendados',
-  arguments: [...puntosRecomendados, ...localesRecomendados],
-);
+                    '/recomendados',
+                    arguments: [...puntosRecomendados, ...localesRecomendados],
+                  );
                 },
               ),
-              
               const SizedBox(height: 16),
-              // Carrusel de recomendados
               SizedBox(
-  height: 220,
-  child: recomendados.isEmpty
-      ? const Center(child: CircularProgressIndicator())
-      : ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: recomendados.length.clamp(0, 5),
-          itemBuilder: (context, index) {
-            final item = recomendados[index];
-            return Padding(
-              padding: EdgeInsets.only(
-                right: index < recomendados.length - 1 ? 12.0 : 0.0,
-              ),
-              child: SizedBox(
-                width: 160,
-                child: CustomCard(
-                  imageUrl: _getImageUrl(item),
-                  title: item.nombre,
-                  onTap: () {
-  String? detalleImagenUrl;
-  String key = '';
-  if (item is PuntoTuristico) {
-    key = 'punto_${item.id}';
-  } else if (item is LocalTuristico) {
-    key = 'local_${item.id}';
-  }
-  if (imagenesRecomendados.containsKey(key)) {
-    detalleImagenUrl = imagenesRecomendados[key];
-  } else {
-    detalleImagenUrl = item.imagenUrl;
-  }
+                height: 220,
+                child: recomendados.isEmpty
+                    ? const Center(child: CircularProgressIndicator())
+                    : ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: recomendados.length.clamp(0, 5),
+                        itemBuilder: (context, index) {
+                          final item = recomendados[index];
+                          int itemId = 0;
+                          if (item is PuntoTuristico) {
+                            itemId = item.id;
+                          } else if (item is LocalTuristico) {
+                            itemId = item.id;
+                          }
+                          return Padding(
+                            padding: EdgeInsets.only(
+                              right: index < recomendados.length - 1 ? 12.0 : 0.0,
+                            ),
+                            child: SizedBox(
+                              width: 160,
+                              child: CustomCard(
+                                imageUrl: _getImageUrl(item),
+                                title: item.nombre,
+                                onTap: () {
+                                  String? detalleImagenUrl;
+                                  String key = '';
+                                  if (item is PuntoTuristico) {
+                                    key = 'punto_${item.id}';
+                                  } else if (item is LocalTuristico) {
+                                    key = 'local_${item.id}';
+                                  }
+                                  if (imagenesRecomendados.containsKey(key)) {
+                                    detalleImagenUrl =
+                                        imagenesRecomendados[key];
+                                  } else {
+                                    detalleImagenUrl = item.imagenUrl;
+                                  }
 
-  Navigator.pushNamed(
-    context,
-    '/detalles',
-    arguments: {
-      'item': item,
-      'imageUrl': detalleImagenUrl,
-      // Puedes pasar información adicional si es necesario
-    },
-  );
-},
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/detalles',
+                                    arguments: {
+                                      'item': item,
+                                      'imageUrl': detalleImagenUrl,
+                                    },
+                                  );
+                                },
+                                puntoTuristicoId: itemId, // Pasamos el ID aquí
                               ),
                             ),
                           );
@@ -292,7 +302,6 @@ void _cargarLocalesRecomendados() {
                       ),
               ),
               const SizedBox(height: 24),
-              // Sección de categorías
               _buildSectionHeader(
                 'Categorías',
                 onPressed: () {
@@ -300,7 +309,6 @@ void _cargarLocalesRecomendados() {
                 },
               ),
               const SizedBox(height: 16),
-              // Carrusel de categorías
               SizedBox(
                 height: 220,
                 child: ListView.builder(
@@ -308,6 +316,11 @@ void _cargarLocalesRecomendados() {
                   itemCount: categorias.length,
                   itemBuilder: (context, index) {
                     final categoria = categorias[index];
+                    // Generamos un ID único basado en el nombre de la categoría
+                    final categoriaId = categoria['nombre']
+                        .toString()
+                        .toLowerCase()
+                        .replaceAll(' ', '');
                     return Padding(
                       padding: const EdgeInsets.only(right: 12.0),
                       child: SizedBox(
@@ -318,6 +331,7 @@ void _cargarLocalesRecomendados() {
                           onTap: () {
                             Navigator.pushNamed(context, categoria['route']);
                           },
+                          puntoTuristicoId: categoriaId.hashCode, // Pasamos el hashCode como ID
                         ),
                       ),
                     );
@@ -335,7 +349,6 @@ void _cargarLocalesRecomendados() {
     );
   }
 
-  // Construye el header de cada sección con botón "Ver todos"
   Widget _buildSectionHeader(String title, {required VoidCallback onPressed}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -359,7 +372,6 @@ void _cargarLocalesRecomendados() {
     );
   }
 
-  // Devuelve la imagen personalizada por tipo y ID, o la del modelo, o una por defecto
   String _getImageUrl(dynamic item) {
     if (item == null) return 'assets/images/IndioColorado3.jpg';
 

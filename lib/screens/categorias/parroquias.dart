@@ -34,21 +34,24 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
   }
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -92,6 +95,7 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: parroquia.nombre,
+                    puntoTuristicoId: parroquia.id,
                   ),
                 );
               },

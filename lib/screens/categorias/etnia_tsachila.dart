@@ -66,21 +66,24 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
 }
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -135,9 +138,11 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
                 String title = 'Desconocido';
                 String subtitle = 'Santo Domingo';
                 VoidCallback? onTap;
+                int? puntoId; // Variable para almacenar el ID
 
                 if (item is PuntoTuristico) {
                   title = item.nombre;
+                  puntoId = item.id; // Asigna el ID del PuntoTuristico
                   onTap = () {
                     Navigator.pushNamed(
                       context,
@@ -145,12 +150,13 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
                       arguments: {
                         'item': item,
                         'imageUrl': imageUrl,
-        'categoria': 'Étnia Tsáchila', 
+                        'categoria': 'Étnia Tsáchila',
                       },
                     );
-                  }; 
+                  };
                 } else if (item is LocalTuristico) {
                   title = item.nombre;
+                  puntoId = item.id; // Asigna el ID del LocalTuristico
                   onTap = () {
                     Navigator.pushNamed(
                       context,
@@ -158,7 +164,7 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
                       arguments: {
                         'item': item,
                         'imageUrl': imageUrl,
-        'categoria': 'Étnia Tsáchila', 
+                        'categoria': 'Étnia Tsáchila',
                       },
                     );
                   };
@@ -175,6 +181,7 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
                   title: title,
                   subtitle: subtitle,
                   onTap: onTap,
+                  puntoTuristicoId: puntoId!, // Pasamos el ID, asegurándonos que no sea nulo
                 );
               },
             );

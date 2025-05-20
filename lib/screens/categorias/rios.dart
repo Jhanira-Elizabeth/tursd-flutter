@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../../models/punto_turistico.dart';
 
 class RiosScreen extends StatefulWidget {
   const RiosScreen({super.key});
@@ -48,21 +49,24 @@ class _RiosScreenState extends State<RiosScreen> {
   }
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +100,24 @@ class _RiosScreenState extends State<RiosScreen> {
                 final rio = rios[index];
                 final imageIndex = index % _defaultImageUrls.length;
                 final imageUrl = _defaultImageUrls[imageIndex];
+                int itemId;
+                String nombre;
+                String? descripcion;
+
+                if (rio is PuntoTuristico) {
+                  itemId = rio.id;
+                  nombre = rio.nombre;
+                  descripcion = rio.descripcion;
+                } else if (rio is LocalTuristico) {
+                  itemId = rio.id;
+                  nombre = rio.nombre;
+                  descripcion = rio.descripcion;
+                } else {
+                  // Manejar caso inesperado
+                  itemId = -1;
+                  nombre = 'Error';
+                  descripcion = 'Tipo de elemento desconocido';
+                }
 
                 return GestureDetector(
                   onTap: () => Navigator.pushNamed(
@@ -105,7 +127,9 @@ class _RiosScreenState extends State<RiosScreen> {
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,
-                    title: rio.nombre,
+                    title: nombre,
+                    subtitle: descripcion,
+                    puntoTuristicoId: itemId, // Pasamos el ID aquí
                   ),
                 );
               },

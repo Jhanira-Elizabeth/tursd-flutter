@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../../models/punto_turistico.dart';
 
 class AtraccionesScreen extends StatefulWidget {
   const AtraccionesScreen({super.key});
@@ -59,21 +60,24 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
   }
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +105,21 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
                 childAspectRatio: 0.75,
               ),
               itemCount: atracciones.length,
-              itemBuilder: (context, index) {
+             itemBuilder: (context, index) {
                 final atraccion = atracciones[index];
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
+                int? puntoId; // Variable para almacenar el ID
+
+                String title = 'Desconocido';
+
+                if (atraccion is PuntoTuristico) {
+                  title = atraccion.nombre;
+                  puntoId = atraccion.id;
+                } else if (atraccion is LocalTuristico) {
+                  title = atraccion.nombre;
+                  puntoId = atraccion.id;
+                }
 
                 return GestureDetector(
                   onTap: () => Navigator.pushNamed(
@@ -117,7 +132,8 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,
-                    title: atraccion.nombre,
+                    title: title,
+                    puntoTuristicoId: puntoId!, // Pasamos el ID
                   ),
                 );
               },

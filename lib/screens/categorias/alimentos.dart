@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/custom_card.dart';
+import '../../models/punto_turistico.dart';
 
 class AlimentosScreen extends StatefulWidget {
   const AlimentosScreen({super.key});
@@ -11,7 +12,7 @@ class AlimentosScreen extends StatefulWidget {
 }
 
 class _AlimentosScreenState extends State<AlimentosScreen> {
- int _currentIndex = 0;
+  int _currentIndex = 0;
   final ApiService _apiService = ApiService();
   late Future<List<dynamic>> _alimentosFuture; // Cambia a dynamic
   final List<String> _imageUrls = [
@@ -40,37 +41,40 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
     // Trae locales con etiquetas
     final locales = await _apiService.fetchLocalesConEtiquetas();
     // Filtra locales con etiqueta id 2
-    final localesAlimentos = locales.where(
-      (local) => local.etiquetas.any((et) => et.id == 2)
-    ).toList();
+    final localesAlimentos = locales
+        .where((local) => local.etiquetas.any((et) => et.id == 2))
+        .toList();
 
     // Trae puntos turísticos con etiquetas
     final puntos = await _apiService.fetchPuntosConEtiquetas();
     // Filtra puntos con etiqueta id 2
-    final puntosAlimentos = puntos.where(
-      (punto) => punto.etiquetas.any((et) => et.id == 2)
-    ).toList();
+    final puntosAlimentos = puntos
+        .where((punto) => punto.etiquetas.any((et) => et.id == 2))
+        .toList();
 
     // Junta ambos en una sola lista
     return [...localesAlimentos, ...puntosAlimentos];
   }
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -102,21 +106,39 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
                 final alimento = alimentos[index];
                 final imageIndex = index % _imageUrls.length;
                 final imageUrl = _imageUrls[imageIndex];
+                int itemId;
+                String nombre;
+                String? descripcion;
+
+                if (alimento is PuntoTuristico) {
+                  itemId = alimento.id;
+                  nombre = alimento.nombre;
+                  descripcion = alimento.descripcion;
+                } else if (alimento is LocalTuristico) {
+                  itemId = alimento.id;
+                  nombre = alimento.nombre;
+                  descripcion = alimento.descripcion;
+                } else {
+                  // Manejar caso inesperado, aunque no debería ocurrir
+                  itemId = -1; // O algún valor por defecto
+                  nombre = 'Error';
+                  descripcion = 'Tipo de alimento desconocido';
+                }
 
                 return GestureDetector(
-                  onTap:
-                      () => Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': alimento, // <--- aquí usa alimento
-                          'imageUrl': imageUrl,
-                        },
-                      ),
+                  onTap: () => Navigator.pushNamed(
+                    context,
+                    '/detalles',
+                    arguments: {
+                      'item': alimento,
+                      'imageUrl': imageUrl,
+                    },
+                  ),
                   child: CustomCard(
                     imageUrl: imageUrl,
-                    title: alimento.nombre,
-                    // ... otras propiedades del CustomCard
+                    title: nombre,
+                    subtitle: descripcion,
+                    puntoTuristicoId: itemId, // <--- Pasamos el ID aquí
                   ),
                 );
               },

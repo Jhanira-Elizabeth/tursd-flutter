@@ -48,7 +48,7 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
           height: 150.0,
           width: double.infinity,
           child: punto.imagenUrl != null && punto.imagenUrl!.isNotEmpty
-              ? Image.network(
+              ? Image.asset(
                   punto.imagenUrl!,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) => Container(

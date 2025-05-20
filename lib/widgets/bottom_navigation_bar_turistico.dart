@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class BottomNavigationBarTuristico extends StatefulWidget {
   // onTabChange para notificar el cambio de tab
-  final ValueChanged<int> onTabChange; 
+  final ValueChanged<int> onTabChange;
   final int currentIndex;
 
   const BottomNavigationBarTuristico({
@@ -12,10 +12,12 @@ class BottomNavigationBarTuristico extends StatefulWidget {
   });
 
   @override
-  _BottomNavigationBarTuristicoState createState() => _BottomNavigationBarTuristicoState();
+  _BottomNavigationBarTuristicoState createState() =>
+      _BottomNavigationBarTuristicoState();
 }
 
-class _BottomNavigationBarTuristicoState extends State<BottomNavigationBarTuristico> {
+class _BottomNavigationBarTuristicoState
+    extends State<BottomNavigationBarTuristico> {
   @override
   Widget build(BuildContext context) {
     return BottomNavigationBar(
@@ -31,6 +33,11 @@ class _BottomNavigationBarTuristicoState extends State<BottomNavigationBarTurist
         BottomNavigationBarItem(
           icon: Icon(Icons.map),
           label: 'Mapa',
+        ),
+        BottomNavigationBarItem(
+          icon:
+              Icon(Icons.favorite_border), // Icono de corazón vacío por defecto
+          label: 'Favoritos',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.chat_bubble_outline),

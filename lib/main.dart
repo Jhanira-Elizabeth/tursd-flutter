@@ -27,6 +27,7 @@ import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'dart:io';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'screens/favorites_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -89,22 +90,18 @@ class _MyAppState extends State<MyApp> {
       ),
       initialRoute: '/',
       routes: {
-        '/':
-            (context) =>
-                _showSplash
-                    ? const SplashScreen()
-                    : StreamBuilder<User?>(
-                      stream: _auth.authStateChanges,
-                      builder: (context, snapshot) {
-                        return snapshot.hasData
-                            ? const HomeScreen()
-                            : LoginScreen();
-                      },
-                    ),
+        '/': (context) => _showSplash
+            ? const SplashScreen()
+            : StreamBuilder<User?>(
+                stream: _auth.authStateChanges,
+                builder: (context, snapshot) {
+                  return snapshot.hasData ? const HomeScreen() : LoginScreen();
+                },
+              ),
         '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
-        '/recomendados': (context) => const RecomendadosScreen(),
-        '/mapa': (context) => const MapaScreen(),
+        '/recomendados': (context) => const RecomendadosScreen(), // Usando la clase existente
+        '/mapa': (context) => const MapaScreen(), // Usando la clase existente
         '/chatbot': (context) => chatbot.ChatbotScreen(),
         '/etniatsachila': (context) => const EtniaTsachilaScreen(),
         '/parroquias': (context) => const ParroquiasScreen(),
@@ -114,12 +111,12 @@ class _MyAppState extends State<MyApp> {
         '/atracciones': (context) => const AtraccionesScreen(),
         '/rios': (context) => const RiosScreen(),
         '/detalles': (context) {
-          final arguments =
-              ModalRoute.of(context)!.settings.arguments
-                  as Map<String, dynamic>?;
+          final arguments = ModalRoute.of(context)!.settings.arguments
+              as Map<String, dynamic>?;
           return DetallesScreen(itemData: arguments);
         },
         '/detalles_parroquia': (context) => const DetallesParroquiaScreen(),
+        '/favoritos': (context) => const FavoritesScreen(),
       },
     );
   }
@@ -186,10 +183,9 @@ class _MapaPageState extends State<MapaPage> {
                   position: LatLng(punto.latitud, punto.longitud),
                   infoWindow: InfoWindow(
                     title: punto.nombre,
-                    snippet:
-                        punto.descripcion.length > 50
-                            ? '${punto.descripcion.substring(0, 47)}...'
-                            : punto.descripcion,
+                    snippet: punto.descripcion.length > 50
+                        ? '${punto.descripcion.substring(0, 47)}...'
+                        : punto.descripcion,
                     onTap: () {
                       Navigator.pushNamed(
                         context,
@@ -278,21 +274,24 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
   int _currentIndex = 0;
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   void initState() {
@@ -315,39 +314,38 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body:
-          puntos.isEmpty
-              ? const Center(
-                child: Text('No hay puntos turísticos disponibles.'),
-              )
-              : GridView.builder(
-                padding: const EdgeInsets.all(16),
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 12,
-                  mainAxisSpacing: 12,
-                  childAspectRatio: 3 / 4,
-                ),
-                itemCount: puntos.length,
-                itemBuilder: (context, index) {
-                  final punto = puntos[index];
-                  return CustomCard(
-                    imageUrl:
-                        punto.imagenUrl ??
-                        'https://via.placeholder.com/181x147',
-                    title: punto.nombre,
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': punto,
-                        }, // Envuelve el PuntoTuristico en un mapa
-                      );
-                    },
-                  );
-                },
+      body: puntos.isEmpty
+          ? const Center(
+              child: Text('No hay puntos turísticos disponibles.'),
+            )
+          : GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 3 / 4,
               ),
+              itemCount: puntos.length,
+              itemBuilder: (context, index) {
+  final punto = puntos[index];
+  return CustomCard(
+    imageUrl:
+        punto.imagenUrl ?? 'https://via.placeholder.com/181x147',
+    title: punto.nombre,
+    onTap: () {
+     Navigator.pushNamed(
+        context,
+        '/detalles',
+        arguments: {
+          'item': punto,
+        }, // Envuelve el PuntoTuristico en un mapa
+                    );
+                  },
+                  puntoTuristicoId: punto.id, // ¡Aquí agregamos el ID!
+                );
+              },
+            ),
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,

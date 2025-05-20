@@ -40,21 +40,24 @@ class _PuntoTuristicoListaScreenState extends State<PuntoTuristicoListaScreen> {
   ];
 
   void _onTabChange(int index) {
-    setState(() {
-      _currentIndex = index;
-      switch (index) {
-        case 0:
-          Navigator.pushReplacementNamed(context, '/home');
-          break;
-        case 1:
-          Navigator.pushReplacementNamed(context, '/mapa');
-          break;
-        case 2:
-          Navigator.pushReplacementNamed(context, '/chatbot');
-          break;
-      }
-    });
-  }
+  setState(() {
+    _currentIndex = index;
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/mapa');
+        break;
+      case 2: // Favoritos
+        Navigator.pushReplacementNamed(context, '/favoritos');
+        break;
+      case 3:
+        Navigator.pushReplacementNamed(context, '/chatbot');
+        break;
+    }
+  });
+}
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +74,7 @@ class _PuntoTuristicoListaScreenState extends State<PuntoTuristicoListaScreen> {
                 width: 80,
                 height: 80,
                 child: punto.imagenUrl != null && punto.imagenUrl!.isNotEmpty
-                    ? Image.network(
+                    ? Image.asset(
                         punto.imagenUrl!,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) => const Icon(Icons.image),

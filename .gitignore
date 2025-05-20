@@ -93,3 +93,58 @@ Otros:
 
 Thumbs.db
 ehthumbs.db
+
+# Archivos específicos de Flutter/Dart
+.fvm/
+.flutter/
+flutter_*.json
+*.lock
+pubspec.lock  # Aunque es útil para desarrollo, algunos prefieren ignorarlo
+
+# Archivos generados por build runners
+*.g.dart
+*.freezed.dart
+*.part
+*.inject.summary
+*.inject.dart
+
+# Configuraciones de Firebase (ya que estás usando Firebase)
+firebase_options.dart  # Si contiene claves sensibles
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Archivos de entorno y credenciales
+*.env*
+*.secret*
+secrets.dart
+credentials.json
+*.key
+*.cer
+*.p12
+
+# Archivos de usuario de IDEs
+.vscode/  # Descomenta esta línea si no quieres compartir configuraciones de VSCode
+.idea/workspace.xml
+.idea/modules.xml
+.idea/tasks.xml
+.idea/libraries/
+
+# Archivos temporales y de sistema
+*.tmp
+*.bak
+*.backup
+*.sublime-workspace
+*.sublime-project
+*.log
+
+# Archivos de macOS
+.DS_Store
+._*
+
+# Archivos de Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archivos de desarrollo específicos de tu proyecto
+assets/credential_tursd.json  # Ya lo tienes, pero es importante mantenerlo
