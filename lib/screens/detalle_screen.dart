@@ -5,7 +5,7 @@ import '../../models/punto_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../services/favorite_service.dart'; // Import FavoriteService
+import '../../services/favorite_service.dart'; 
 
 class DetallesScreen extends StatefulWidget {
   final Map<String, dynamic>? itemData;
@@ -25,13 +25,13 @@ class _DetallesScreenState extends State<DetallesScreen>
   dynamic _item;
   late String _imageUrl;
   final ApiService _apiService = ApiService();
-  final FavoriteService _favoriteService = FavoriteService(); // Initialize FavoriteService
+  final FavoriteService _favoriteService = FavoriteService(); 
   late Future<List<HorarioAtencion>> _horariosFuture;
   late Future<List<Servicio>> _serviciosFuture;
   late Future<List<Actividad>> _actividadesFuture;
   String? _barrioSector;
   String? _dueno;
-  bool _isFavorite = false; // New state variable for favorite status
+  bool _isFavorite = false;
 
   @override
   void initState() {
@@ -44,7 +44,7 @@ class _DetallesScreenState extends State<DetallesScreen>
       _horariosFuture = _fetchHorarios();
       _serviciosFuture = _fetchServicios();
       _actividadesFuture = _fetchActividades();
-      _checkFavoriteStatus(); // Check favorite status on init
+      _checkFavoriteStatus(); 
     } else {
       _horariosFuture = Future.value([]);
       _serviciosFuture = Future.value([]);
@@ -54,7 +54,6 @@ class _DetallesScreenState extends State<DetallesScreen>
     _simulateDueno();
   }
 
-  // Method to check if the item is a favorite
   void _checkFavoriteStatus() async {
     if (_item == null) return;
 
@@ -70,7 +69,7 @@ class _DetallesScreenState extends State<DetallesScreen>
     });
   }
 
-  // Method to toggle favorite status
+  
   void _toggleFavorite() async {
     if (_item == null) return;
 
@@ -81,14 +80,14 @@ class _DetallesScreenState extends State<DetallesScreen>
       } else {
         await _favoriteService.addPuntoTuristicoToFavorites(_item.id);
       }
-      success = true; // Assuming the operations are always successful for now
+      success = true;
     } else if (_item is LocalTuristico) {
       if (_isFavorite) {
         await _favoriteService.removeLocalTuristicoFromFavorites(_item.id);
       } else {
         await _favoriteService.addLocalTuristicoToFavorites(_item.id);
       }
-      success = true; // Assuming the operations are always successful for now
+      success = true; 
     }
 
     if (success) {
@@ -121,7 +120,7 @@ class _DetallesScreenState extends State<DetallesScreen>
         case 1:
           Navigator.pushReplacementNamed(context, '/mapa');
           break;
-        case 2: // Favoritos
+        case 2: 
           Navigator.pushReplacementNamed(context, '/favoritos');
           break;
         case 3:
@@ -241,11 +240,10 @@ class _DetallesScreenState extends State<DetallesScreen>
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          // Cabecera con imagen y título
           SizedBox(
             width: double.infinity,
             height:
-                imageHeight, // Usar la altura calculada en lugar de valor fijo
+                imageHeight, 
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -256,7 +254,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                     return const SizedBox.shrink();
                   },
                 ),
-                // Añadir un gradiente para mejorar la visibilidad del texto sobre la imagen
+        
                 Positioned.fill(
                   child: Container(
                     decoration: BoxDecoration(
@@ -281,10 +279,9 @@ class _DetallesScreenState extends State<DetallesScreen>
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Nombre principal con borde blanco
                       SizedBox(
                         width: MediaQuery.of(context).size.width *
-                            0.85, // Limita el ancho al 85% de la pantalla
+                            0.85,  
                         child: Text(
                           nombre,
                           style: TextStyle(
@@ -299,9 +296,9 @@ class _DetallesScreenState extends State<DetallesScreen>
                               ),
                             ],
                           ),
-                          maxLines: 2, // Permite hasta 2 líneas
+                          maxLines: 2, 
                           overflow: TextOverflow
-                              .ellipsis, // Agrega "..." si el texto es más largo
+                              .ellipsis, 
                         ),
                       ),
                       // Subcategoría (por ejemplo, "Tsáchila")
@@ -338,7 +335,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                 ),
                 // Botón de Favoritos
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 30,
+                  top: MediaQuery.of(context).padding.top + 270,
                   right: 8,
                   child: CircleAvatar(
                     backgroundColor: Colors.black.withOpacity(0.4),
@@ -347,7 +344,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                         _isFavorite ? Icons.favorite : Icons.favorite_border,
                         color: _isFavorite ? Colors.redAccent : Colors.white,
                       ),
-                      onPressed: _toggleFavorite, // Call the toggle method
+                      onPressed: _toggleFavorite, 
                     ),
                   ),
                 ),
@@ -368,7 +365,6 @@ class _DetallesScreenState extends State<DetallesScreen>
                 ),
                 child: Column(
                   children: [
-                    // Indicador visual de arrastre
                     Container(
                       margin: const EdgeInsets.symmetric(vertical: 8),
                       width: 40,
@@ -378,7 +374,6 @@ class _DetallesScreenState extends State<DetallesScreen>
                         borderRadius: BorderRadius.circular(2.5),
                       ),
                     ),
-                    // Título y tabs
                     Padding(
                       padding: const EdgeInsets.only(
                         top: 16.0,
@@ -414,7 +409,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                                     'Categoría: $categoriaMostrar',
                                     style: TextStyle(
                                       color:
-                                          textColor, // Use textColor here for consistency with dark mode
+                                          textColor,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),
@@ -701,9 +696,9 @@ class _DetallesScreenState extends State<DetallesScreen>
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor:
-                                            tabColor, // Color del botón
+                                            tabColor, 
                                         foregroundColor: Colors
-                                            .white, // Color del texto del botón
+                                            .white, 
                                       ),
                                       child: const Text('Abrir en Google Maps'),
                                     ),
@@ -741,9 +736,6 @@ class _DetallesScreenState extends State<DetallesScreen>
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,
-        // Asegúrate de que BottomNavigationBarTuristico también se adapte al modo oscuro
-        // Si es un widget personalizado, necesitarás pasarle los colores adecuados o hacer que
-        // consulte el tema de forma interna.
       ),
     );
   }

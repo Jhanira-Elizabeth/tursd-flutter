@@ -1,7 +1,8 @@
-// custom_card.dart
 import 'package:flutter/material.dart';
 import 'package:tursd/services/favorite_service.dart';
 import 'package:tursd/models/punto_turistico.dart';
+import 'package:provider/provider.dart'; 
+import '../providers/theme_provider.dart'; 
 
 
 class CustomCard extends StatefulWidget {

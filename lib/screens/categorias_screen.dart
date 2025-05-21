@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Importa Provider
 import '../widgets/custom_card.dart'; // Importa el CustomCard widget
 import '../widgets/bottom_navigation_bar_turistico.dart'; // Importa el widget
+import '../providers/theme_provider.dart'; // Importa tu ThemeProvider
 
 class CategoriasScreen extends StatefulWidget {
-  CategoriasScreen({super.key});
+  const CategoriasScreen({super.key}); // Usa const si no hay estado inicial
 
   @override
   _CategoriasScreenState createState() => _CategoriasScreenState();
@@ -16,7 +18,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     {
       'nombre': 'Etnia Tsáchila',
       'imagen': 'assets/images/Mushily1.jpg',
-      'route': '/etniatsachila', // <--- Usa la ruta correcta SIN tilde
+      'route': '/etniatsachila',
     },
     {
       'nombre': 'Atracciones',
@@ -26,7 +28,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     {
       'nombre': 'Parroquias',
       'imagen': 'assets/images/ValleHermoso1.jpg',
-      'route': 'assets/images/ParroquiaNuevo.jpg',
+      'route': 'assets/images/ParroquiaNuevo.jpg', // Este es el que debe corregirse al navegar
     },
     {
       'nombre': 'Alojamiento',
@@ -50,6 +52,24 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     },
   ];
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Determinar el currentIndex basado en la ruta actual si es necesario.
+    final currentRoute = ModalRoute.of(context)?.settings.name;
+    if (currentRoute == '/home') {
+      _currentIndex = 0;
+    } else if (currentRoute == '/mapa') {
+      _currentIndex = 1;
+    } else if (currentRoute == '/favoritos') {
+      _currentIndex = 2;
+    } else if (currentRoute == '/chatbot') {
+      _currentIndex = 3;
+    } else if (currentRoute == '/categorias') {
+      _currentIndex = 0; // Si esta pantalla no es una pestaña principal, puede apuntar a 'Home'
+    }
+  }
+
   void _onTabChange(int index) {
     setState(() {
       _currentIndex = index;
@@ -72,22 +92,38 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Check if the current theme is dark mode
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-
-    // Define colors based on the current theme
-    final appBarBackgroundColor = isDarkMode ? Colors.grey[900] : Colors.white; // Dark grey for dark mode, white for light
-    final appBarForegroundColor = isDarkMode ? Colors.white : Colors.black; // White text for dark mode, black for light
-    final scaffoldBackgroundColor = isDarkMode ? Colors.black : Colors.white; // Black for dark mode, white for light
-    final gridPaddingColor = isDarkMode ? Colors.grey[850] : Colors.white; // Slightly lighter dark for padding
+    final theme = Theme.of(context);
+    final themeProvider = Provider.of<ThemeProvider>(context); // Accede al ThemeProvider
 
     return Scaffold(
-      backgroundColor: scaffoldBackgroundColor, // Apply dynamic background color to Scaffold
+      backgroundColor: theme.colorScheme.background, // Usa el color de fondo del tema
       appBar: AppBar(
-        title: const Text('Categorías'),
-        backgroundColor: appBarBackgroundColor, // Apply dynamic background color to AppBar
-        foregroundColor: appBarForegroundColor, // Apply dynamic foreground color to AppBar
-        elevation: 0, // Keep consistent with previous app bars if desired
+        title: Text(
+          'Categorías',
+          style: theme.appBarTheme.titleTextStyle, // Usa el estilo de texto del AppBar del tema
+        ),
+        backgroundColor: theme.appBarTheme.backgroundColor, // Usa el color de fondo del AppBar del tema
+        foregroundColor: theme.appBarTheme.foregroundColor, // Usa el color de primer plano del AppBar del tema
+        elevation: theme.appBarTheme.elevation, // Usa la elevación del AppBar del tema
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back,
+            color: theme.appBarTheme.iconTheme?.color, // Usa el color de icono del AppBar del tema
+          ),
+          onPressed: () => Navigator.pop(context),
+        ),
+        actions: [
+          // Botón para cambiar el tema
+          IconButton(
+            icon: Icon(
+              themeProvider.themeMode == ThemeMode.dark ? Icons.wb_sunny : Icons.nightlight_round,
+              color: theme.appBarTheme.iconTheme?.color, // Usa el color de icono del AppBar del tema
+            ),
+            onPressed: () {
+              themeProvider.toggleTheme();
+            },
+          ),
+        ],
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
@@ -95,29 +131,29 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
           crossAxisCount: 2,
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: 3 / 4, // Use the same aspect ratio
+          childAspectRatio: 3 / 4,
         ),
         itemCount: categorias.length,
         itemBuilder: (context, index) {
           final categoria = categorias[index];
-          // Generamos un ID único basado en el nombre de la categoría
-          final categoriaId = categoria['nombre'].toString().toLowerCase().replaceAll(' ', '');
-
           return CustomCard(
             imageUrl: categoria['imagen'],
             title: categoria['nombre'],
             onTap: () {
-              Navigator.pushNamed(context, categoria['route']);
+              // Corrección para la ruta de Parroquias si era un error y debe ser una ruta
+              if (categoria['route'] == 'assets/images/ParroquiaNuevo.jpg') {
+                Navigator.pushNamed(context, '/parroquias'); // Asume que '/parroquias' es la ruta correcta
+              } else {
+                Navigator.pushNamed(context, categoria['route']);
+              }
             },
-            item: categoria, // <--- CAMBIO CLAVE: Pasamos el mapa 'categoria' como el 'item'
+            item: categoria,
           );
         },
       ),
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,
-        // Assuming BottomNavigationBarTuristico also adapts to dark mode internally
-        // If not, you'd need to pass theme-related properties to it here.
       ),
     );
   }
