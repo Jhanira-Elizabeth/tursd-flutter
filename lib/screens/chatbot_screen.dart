@@ -47,47 +47,64 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
     return "Tú dijiste: \"$userText\".  Aquí tienes información relevante.";
   }
 
- void _onTabChange(int index) {
-  setState(() {
-    _currentIndex = index;
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/mapa');
-        break;
-      case 2: // Favoritos
-        Navigator.pushReplacementNamed(context, '/favoritos');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/chatbot');
-        break;
-    }
-  });
-}
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2: // Favoritos
+          Navigator.pushReplacementNamed(context, '/favoritos');
+          break;
+        case 3:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Define colores basados en el modo oscuro/claro
+    final appBarColor = isDarkMode ? const Color(0xFF1A237E) : const Color(0xFF007BFF); // Azul oscuro para dark, azul brillante para light
+    final backgroundColor = isDarkMode ? Colors.grey[900] : const Color(0xFFE0F7FA); // Fondo oscuro para dark, claro para light
+    final backgroundGradientEndColor = isDarkMode ? Colors.grey[850] : Colors.white;
+    final userMessageColor = isDarkMode ? const Color(0xFF42A5F5) : const Color(0xFF007BFF); // Azul más suave para dark, brillante para light
+    final botMessageColor = isDarkMode ? Colors.grey[700] : const Color(0xFFF8F9FA); // Gris oscuro para dark, muy claro para light
+    final userTextColor = Colors.white; // Texto del usuario siempre blanco
+    final botTextColor = isDarkMode ? Colors.white : Colors.black87; // Texto del bot blanco para dark, oscuro para light
+    final inputContainerColor = isDarkMode ? Colors.grey[800] : Colors.white; // Fondo de la barra de entrada
+    final inputFillColor = isDarkMode ? Colors.grey[750] : const Color(0xFFF8F9FA); // Fondo del TextField
+    final hintTextColor = isDarkMode ? Colors.grey[400] : Colors.grey.shade600; // Color del hint text
+    final sendButtonColor = isDarkMode ? const Color(0xFF42A5F5) : const Color(0xFF007BFF); // Color del botón de enviar
+    final boxShadowColor = isDarkMode ? Colors.black.withOpacity(0.3) : Colors.black.withOpacity(0.1);
+
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('ChatBot'),
-        backgroundColor: const Color(0xFF007BFF), // Azul, moderno
-        elevation: 0, // Sin sombra
+        backgroundColor: appBarColor, // Adaptar el color de la AppBar
+        elevation: 0,
         titleTextStyle: const TextStyle(
           color: Colors.white,
-          fontWeight: FontWeight.w600, // Ligeramente más grueso
+          fontWeight: FontWeight.w600,
           fontSize: 20,
         ),
       ),
       body: Container(
-        // Color de fondo para el cuerpo
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE0F7FA), // Un azul muy claro
-              Colors.white,
+              backgroundColor!, // Usa el color de fondo adaptado
+              backgroundGradientEndColor!, // Usa el color de fin del gradiente adaptado
             ],
           ),
         ),
@@ -109,13 +126,12 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: msg.isUser
-                            ? const Color(0xFF007BFF) // Azul para el usuario
-                            : const Color(0xFFF8F9FA), // Gris muy claro para el bot
-                        borderRadius: BorderRadius.circular(24), // Más redondeado
+                            ? userMessageColor // Color de mensaje de usuario adaptado
+                            : botMessageColor, // Color de mensaje de bot adaptado
+                        borderRadius: BorderRadius.circular(24),
                         boxShadow: [
-                          // Sutil sombra
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color: boxShadowColor, // Color de sombra adaptado
                             blurRadius: 6,
                             offset: const Offset(0, 2),
                           ),
@@ -124,7 +140,9 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       child: Text(
                         msg.text,
                         style: TextStyle(
-                          color: msg.isUser ? Colors.white : Colors.black87,
+                          color: msg.isUser
+                              ? userTextColor
+                              : botTextColor, // Color de texto adaptado
                           fontSize: 16,
                         ),
                       ),
@@ -137,11 +155,10 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: inputContainerColor, // Color de la barra de entrada adaptado
                 boxShadow: [
-                  // Sombra superior para separar la entrada
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: boxShadowColor, // Color de sombra adaptado
                     blurRadius: 4,
                     offset: const Offset(0, -2),
                   ),
@@ -155,23 +172,22 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
                       onSubmitted: _sendMessage,
                       decoration: InputDecoration(
                         hintText: 'Escribe tu mensaje...',
-                        hintStyle: TextStyle(color: Colors.grey.shade600),
+                        hintStyle: TextStyle(color: hintTextColor), // Color del hint text adaptado
                         filled: true,
-                        fillColor: const Color(0xFFF8F9FA), // Gris claro
+                        fillColor: inputFillColor, // Color del fondo del TextField adaptado
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(30),
                           borderSide: BorderSide.none,
                         ),
                         contentPadding: const EdgeInsets.symmetric(vertical: 14),
                       ),
+                      style: TextStyle(color: botTextColor), // Color del texto del TextField adaptado
                     ),
                   ),
                   const SizedBox(width: 8),
                   // Botón de enviar
                   IconButton(
-                    icon: const Icon(Icons.send,
-                        color:
-                            Color(0xFF007BFF)), // Azul de acento para el botón
+                    icon: Icon(Icons.send, color: sendButtonColor), // Color del botón de enviar adaptado
                     onPressed: () => _sendMessage(_controller.text),
                   ),
                 ],
@@ -183,6 +199,8 @@ class _ChatbotScreenState extends State<ChatbotScreen> {
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,
+        // Assuming BottomNavigationBarTuristico also adapts to dark mode internally
+        // or you would need to pass theme-related properties to it.
       ),
     );
   }

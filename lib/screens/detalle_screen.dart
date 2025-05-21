@@ -338,7 +338,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                 ),
                 // Botón de Favoritos
                 Positioned(
-                  top: MediaQuery.of(context).padding.top + 8,
+                  top: MediaQuery.of(context).padding.top + 30,
                   right: 8,
                   child: CircleAvatar(
                     backgroundColor: Colors.black.withOpacity(0.4),

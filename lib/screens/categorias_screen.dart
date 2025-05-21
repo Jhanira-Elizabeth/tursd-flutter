@@ -26,9 +26,8 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     {
       'nombre': 'Parroquias',
       'imagen': 'assets/images/ValleHermoso1.jpg',
-      'route': '/parroquias',
+      'route': 'assets/images/ParroquiaNuevo.jpg',
     },
-    
     {
       'nombre': 'Alojamiento',
       'imagen': 'assets/images/HotelRefugio1.jpg',
@@ -52,32 +51,43 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
   ];
 
   void _onTabChange(int index) {
-  setState(() {
-    _currentIndex = index;
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/mapa');
-        break;
-      case 2: // Favoritos
-        Navigator.pushReplacementNamed(context, '/favoritos');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/chatbot');
-        break;
-    }
-  });
-}
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2: // Favoritos
+          Navigator.pushReplacementNamed(context, '/favoritos');
+          break;
+        case 3:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    // Check if the current theme is dark mode
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Define colors based on the current theme
+    final appBarBackgroundColor = isDarkMode ? Colors.grey[900] : Colors.white; // Dark grey for dark mode, white for light
+    final appBarForegroundColor = isDarkMode ? Colors.white : Colors.black; // White text for dark mode, black for light
+    final scaffoldBackgroundColor = isDarkMode ? Colors.black : Colors.white; // Black for dark mode, white for light
+    final gridPaddingColor = isDarkMode ? Colors.grey[850] : Colors.white; // Slightly lighter dark for padding
+
     return Scaffold(
+      backgroundColor: scaffoldBackgroundColor, // Apply dynamic background color to Scaffold
       appBar: AppBar(
         title: const Text('Categorías'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: appBarBackgroundColor, // Apply dynamic background color to AppBar
+        foregroundColor: appBarForegroundColor, // Apply dynamic foreground color to AppBar
+        elevation: 0, // Keep consistent with previous app bars if desired
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(16),
@@ -89,11 +99,11 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
         ),
         itemCount: categorias.length,
         itemBuilder: (context, index) {
-                final categoria = categorias[index];
-                // Generamos un ID único basado en el nombre de la categoría
-                final categoriaId = categoria['nombre'].toString().toLowerCase().replaceAll(' ', '');
+          final categoria = categorias[index];
+          // Generamos un ID único basado en el nombre de la categoría
+          final categoriaId = categoria['nombre'].toString().toLowerCase().replaceAll(' ', '');
 
-                return CustomCard(
+          return CustomCard(
             imageUrl: categoria['imagen'],
             title: categoria['nombre'],
             onTap: () {
@@ -106,6 +116,8 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,
+        // Assuming BottomNavigationBarTuristico also adapts to dark mode internally
+        // If not, you'd need to pass theme-related properties to it here.
       ),
     );
   }

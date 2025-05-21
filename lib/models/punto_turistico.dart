@@ -58,31 +58,15 @@ class PuntoTuristico {
     }
 
     String? assetPath;
-    final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
+    final String? rawImageUrl = json['imagen_url'] as String?;
+    print('DEBUG (MODEL): rawImageUrl from API: $rawImageUrl');
 
     if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
-        // Asegúrate de que no haya prefijos de URL real accidentalmente.
-        // Si el valor es una URL COMPLETA, necesitas extraer solo el nombre del archivo.
-        // Si es SOLO el nombre del archivo (ej. "Bomboli8.jpg"), esta es la forma.
-        
+        // Aquí asumimos que la imagen viene como un nombre de archivo
         // Vamos a asumir que 'imagen_url' viene como el nombre del archivo (ej. "Bomboli8.jpg")
         assetPath = 'assets/images/$rawImageUrl';
 
-        // SI POR ALGÚN CASO SIGUE VINIENDO UNA URL COMPLETA, usa esto:
-        // try {
-        //   Uri uri = Uri.parse(rawImageUrl);
-        //   String fileName = uri.pathSegments.last;
-        //   if (fileName.isNotEmpty) {
-        //     assetPath = 'assets/images/$fileName';
-        //   } else {
-        //     assetPath = 'assets/images/default_placeholder.jpg'; // O un asset por defecto si no hay nombre
-        //   }
-        // } catch (e) {
-        //   // No es una URL válida, tratar como un simple nombre de archivo o default
-        //   assetPath = 'assets/images/$rawImageUrl';
-        //   // Si no funciona, usa default
-        //   if (assetPath == 'assets/images/') assetPath = 'assets/images/default_placeholder.jpg';
-        // }
+      
 
     } else {
       assetPath = 'assets/images/default_placeholder.jpg'; // Imagen por defecto si no hay imagen en la API
@@ -228,6 +212,7 @@ class Parroquia {
 
     String? assetPath;
     final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
+    print('DEBUG (MODEL): rawImageUrl from API: $rawImageUrl');
 
     if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
         assetPath = 'assets/images/$rawImageUrl';
@@ -306,7 +291,8 @@ class LocalTuristico {
     }
 
     String? assetPath;
-    final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
+    final String? rawImageUrl = json['imagen_url'] as String?;
+    print('DEBUG (MODEL): rawImageUrl from API: $rawImageUrl');
 
     if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
         assetPath = 'assets/images/$rawImageUrl';
