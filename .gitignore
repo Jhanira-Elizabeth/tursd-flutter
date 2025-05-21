@@ -148,3 +148,19 @@ Desktop.ini
 
 # Archivos de desarrollo específicos de tu proyecto
 assets/credential_tursd.json  # Ya lo tienes, pero es importante mantenerlo
+
+*.orig               # archivos temporales de merge
+*.rej                # archivos rechazados en parches
+*.swp                # archivos de swap de Vim
+*.swo
+*.bak                # backups comunes
+*.tmp
+
+# Agrega:
+*.orig
+*.rej
+*.swo
+*.tmp
+*.code-workspace
+coverage/
+

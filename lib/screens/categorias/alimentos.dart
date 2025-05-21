@@ -137,8 +137,7 @@ class _AlimentosScreenState extends State<AlimentosScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: nombre,
-                    subtitle: descripcion,
-                    puntoTuristicoId: itemId, // <--- Pasamos el ID aquí
+                    item: alimento, // <--- AHORA PASAS EL OBJETO 'alimento' COMPLETO AQUÍ
                   ),
                 );
               },

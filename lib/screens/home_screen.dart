@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart'; // Importa provider
+import '../providers/theme_provider.dart'; // Importa tu ThemeProvider
 import '../models/punto_turistico.dart';
 import '../widgets/custom_card.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
 import '../services/auth_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:core';
+// Si usas CarouselSlider en Home, asegúrate de tenerlo importado y añadido a pubspec.yaml
+// import 'package:carousel_slider/carousel_slider.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,10 +19,18 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0;
-  // Instancia del servicio de autenticación
   final AuthService _authService = AuthService();
 
-  // IDs recomendados para cada tipo
+  // Controlador para el campo de búsqueda
+  final TextEditingController _searchController = TextEditingController();
+
+  // Listas originales y filtradas
+  final List<PuntoTuristico> puntosRecomendados = [];
+  final List<LocalTuristico> localesRecomendados = [];
+  List<dynamic> _resultadosBusqueda = [];
+  bool _buscando = false;
+
+  // IDs recomendados para cada tipo (No los usamos directamente, pero los mantengo si los necesitas para otra cosa)
   final List<int> idsPuntosRecomendados = [3, 5];
   final List<int> idsLocalesRecomendados = [3, 6];
 
@@ -29,10 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
     'local_4': 'assets/images/afiche_publicitario_balneario_ibiza.jpg',
     'local_16': 'assets/images/VenturaMiniGolf1.jpg',
   };
-
-  // Datos de ejemplo
-  final List<PuntoTuristico> puntosRecomendados = [];
-  final List<LocalTuristico> localesRecomendados = [];
 
   final List<Map<String, dynamic>> categorias = [
     {
@@ -77,6 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _cargarPuntosTuristicos();
     _cargarLocalesRecomendados();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   void _cargarPuntosTuristicos() {
@@ -148,6 +163,62 @@ class _HomeScreenState extends State<HomeScreen> {
           estado: 'activo',
         ),
       ]);
+      print('Locales cargados: ${localesRecomendados.length}');
+      localesRecomendados.forEach((local) {
+        print('Local: ${local.nombre}, tipo: ${local.runtimeType}');
+      });
+    });
+  }
+
+  // Función para normalizar texto (quitar acentos y convertir a minúsculas)
+  String _normalizarTexto(String texto) {
+    final Map<String, String> reemplazos = {
+      'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u',
+      'Á': 'A', 'É': 'E', 'Í': 'I', 'Ó': 'O', 'Ú': 'U',
+      'ü': 'u', 'Ü': 'U', 'ñ': 'n', 'Ñ': 'N',
+    };
+
+    String resultado = texto.toLowerCase();
+
+    reemplazos.forEach((key, value) {
+      resultado = resultado.replaceAll(key, value);
+    });
+
+    return resultado;
+  }
+
+  // Función para realizar la búsqueda
+  void _buscar(String query) {
+    if (query.isEmpty) {
+      setState(() {
+        _buscando = false;
+        _resultadosBusqueda = [];
+      });
+      return;
+    }
+
+    final String queryNormalizado = _normalizarTexto(query);
+
+    final List<PuntoTuristico> puntosFiltrados = puntosRecomendados.where((punto) {
+      final String nombreNormalizado = _normalizarTexto(punto.nombre);
+      return nombreNormalizado.contains(queryNormalizado);
+    }).toList();
+
+    final List<LocalTuristico> localesFiltrados = localesRecomendados.where((local) {
+      final String nombreNormalizado = _normalizarTexto(local.nombre);
+      return nombreNormalizado.contains(queryNormalizado);
+    }).toList();
+
+    final List<dynamic> resultadosCombinados = [...puntosFiltrados, ...localesFiltrados];
+
+    print('Búsqueda: $query');
+    print('Puntos encontrados: ${puntosFiltrados.length}');
+    print('Locales encontrados: ${localesFiltrados.length}');
+    print('Total resultados: ${resultadosCombinados.length}');
+
+    setState(() {
+      _buscando = true;
+      _resultadosBusqueda = resultadosCombinados;
     });
   }
 
@@ -156,7 +227,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _currentIndex = index;
       switch (index) {
         case 0:
-          Navigator.pushReplacementNamed(context, '/home');
+          // Ya estamos en Home
           break;
         case 1:
           Navigator.pushReplacementNamed(context, '/mapa');
@@ -193,13 +264,37 @@ class _HomeScreenState extends State<HomeScreen> {
       ...puntosRecomendados,
       ...localesRecomendados,
     ];
+
+    // Accede al ThemeProvider
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inicio'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        title: Text(
+          'Inicio',
+          // El color del título del AppBar se manejará por theme.appBarTheme.foregroundColor
+        ),
+        // La configuración de backgroundColor y foregroundColor ahora se toma de theme.appBarTheme
         elevation: 0,
         actions: [
+          // Botón de alternar tema (sol/luna)
+          IconButton(
+            icon: Icon(
+              themeProvider.themeMode == ThemeMode.light
+                  ? Icons.wb_sunny // Sol
+                  : Icons.dark_mode, // Luna
+              // El color del icono se tomará de theme.appBarTheme.foregroundColor
+            ),
+            onPressed: () {
+              themeProvider.toggleTheme(); // Llama al método para cambiar el tema
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.category),
+            onPressed: () {
+              Navigator.pushNamed(context, '/categorias');
+            },
+          ),
           if (user != null)
             IconButton(
               icon: const Icon(Icons.logout),
@@ -213,63 +308,93 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Campo de búsqueda funcional
               Container(
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
+                  // Usa el color de la superficie del tema
+                  color: Theme.of(context).colorScheme.surface,
                   borderRadius: BorderRadius.circular(24),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Icon(Icons.search, color: Colors.grey.shade400),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Búsqueda',
-                      style: TextStyle(
-                        color: Colors.grey.shade400,
-                        fontSize: 16,
-                      ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1),
+                      spreadRadius: 1,
+                      blurRadius: 5,
+                      offset: const Offset(0, 3),
                     ),
                   ],
                 ),
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: TextField(
+                  controller: _searchController,
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface), // Color del texto de entrada
+                  decoration: InputDecoration(
+                    hintText: 'Búsqueda',
+                    hintStyle: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), // Color del hint
+                      fontSize: 16,
+                    ),
+                    icon: Icon(Icons.search, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7)),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.only(bottom: 10),
+                  ),
+                  onChanged: _buscar,
+                ),
               ),
               const SizedBox(height: 24),
-              _buildSectionHeader(
-                'Recomendados',
-                onPressed: () {
-                  Navigator.pushNamed(
-                    context,
-                    '/recomendados',
-                    arguments: [...puntosRecomendados, ...localesRecomendados],
-                  );
-                },
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 220,
-                child: recomendados.isEmpty
-                    ? const Center(child: CircularProgressIndicator())
+
+              // Mostrar resultados de búsqueda o contenido normal
+              if (_buscando) ...[
+                Text(
+                  'Resultados de búsqueda',
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        // El color se toma de textTheme.headlineSmall o de colorScheme.onBackground
+                        color: Theme.of(context).colorScheme.onBackground,
+                      ),
+                ),
+                const SizedBox(height: 16),
+                _resultadosBusqueda.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No se encontraron resultados',
+                          style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6)),
+                        ),
+                      )
                     : ListView.builder(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: recomendados.length.clamp(0, 5),
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: _resultadosBusqueda.length,
                         itemBuilder: (context, index) {
-                          final item = recomendados[index];
-                          int itemId = 0;
-                          if (item is PuntoTuristico) {
-                            itemId = item.id;
-                          } else if (item is LocalTuristico) {
-                            itemId = item.id;
-                          }
+                          final item = _resultadosBusqueda[index];
                           return Padding(
-                            padding: EdgeInsets.only(
-                              right: index < recomendados.length - 1 ? 12.0 : 0.0,
-                            ),
-                            child: SizedBox(
-                              width: 160,
-                              child: CustomCard(
-                                imageUrl: _getImageUrl(item),
-                                title: item.nombre,
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: Card(
+                              color: Theme.of(context).colorScheme.surface, // Color de la tarjeta
+                              elevation: 2,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: ListTile(
+                                leading: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    _getImageUrl(item),
+                                    width: 60,
+                                    height: 60,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                title: Text(
+                                  item.nombre,
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface), // Color del texto
+                                ),
+                                subtitle: Text(
+                                  item is PuntoTuristico
+                                      ? 'Punto Turístico'
+                                      : 'Local Turístico',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6)), // Color del subtítulo
+                                ),
                                 onTap: () {
                                   String? detalleImagenUrl;
                                   String key = '';
@@ -278,9 +403,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   } else if (item is LocalTuristico) {
                                     key = 'local_${item.id}';
                                   }
+
                                   if (imagenesRecomendados.containsKey(key)) {
-                                    detalleImagenUrl =
-                                        imagenesRecomendados[key];
+                                    detalleImagenUrl = imagenesRecomendados[key];
                                   } else {
                                     detalleImagenUrl = item.imagenUrl;
                                   }
@@ -294,50 +419,112 @@ class _HomeScreenState extends State<HomeScreen> {
                                     },
                                   );
                                 },
-                                puntoTuristicoId: itemId, // Pasamos el ID aquí
                               ),
                             ),
                           );
                         },
                       ),
-              ),
-              const SizedBox(height: 24),
-              _buildSectionHeader(
-                'Categorías',
-                onPressed: () {
-                  Navigator.pushNamed(context, '/categorias');
-                },
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                height: 220,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: categorias.length,
-                  itemBuilder: (context, index) {
-                    final categoria = categorias[index];
-                    // Generamos un ID único basado en el nombre de la categoría
-                    final categoriaId = categoria['nombre']
-                        .toString()
-                        .toLowerCase()
-                        .replaceAll(' ', '');
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 12.0),
-                      child: SizedBox(
-                        width: 160,
-                        child: CustomCard(
-                          imageUrl: categoria['imagen'],
-                          title: categoria['nombre'],
-                          onTap: () {
-                            Navigator.pushNamed(context, categoria['route']);
-                          },
-                          puntoTuristicoId: categoriaId.hashCode, // Pasamos el hashCode como ID
-                        ),
-                      ),
+              ] else ...[
+                // Contenido original cuando no hay búsqueda
+                _buildSectionHeader(
+                  'Recomendados',
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/recomendados',
+                      arguments: [...puntosRecomendados, ...localesRecomendados],
                     );
                   },
                 ),
-              ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 220,
+                  child: recomendados.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: recomendados.length.clamp(0, 5),
+                          itemBuilder: (context, index) {
+                            final item = recomendados[index];
+                            return Padding(
+                              padding: EdgeInsets.only(
+                                right: index < recomendados.length - 1 ? 12.0 : 0.0,
+                              ),
+                              child: SizedBox(
+                                width: 160,
+                                child: CustomCard(
+                                  imageUrl: _getImageUrl(item),
+                                  title: item.nombre,
+                                  // Asumiendo que PuntoTuristico tiene parroquia y LocalTuristico tiene direccion
+                                  subtitle: item is PuntoTuristico
+                                      ? item.parroquia?.nombre ?? 'Santo Domingo'
+                                      : (item is LocalTuristico ? item.direccion ?? 'Santo Domingo' : ''),
+                                  onTap: () {
+                                    String? detalleImagenUrl;
+                                    String key = '';
+                                    if (item is PuntoTuristico) {
+                                      key = 'punto_${item.id}';
+                                    } else if (item is LocalTuristico) {
+                                      key = 'local_${item.id}';
+                                    }
+                                    if (imagenesRecomendados.containsKey(key)) {
+                                      detalleImagenUrl = imagenesRecomendados[key];
+                                    } else {
+                                      detalleImagenUrl = item.imagenUrl;
+                                    }
+
+                                    Navigator.pushNamed(
+                                      context,
+                                      '/detalles',
+                                      arguments: {
+                                        'item': item,
+                                        'imageUrl': detalleImagenUrl,
+                                      },
+                                    );
+                                  },
+                                  item: item,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                const SizedBox(height: 24),
+                _buildSectionHeader(
+                  'Categorías',
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/categorias');
+                  },
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  height: 220,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: categorias.length,
+                    itemBuilder: (context, index) {
+                      final categoria = categorias[index];
+                      return Padding(
+                        padding: const EdgeInsets.only(right: 12.0),
+                        child: SizedBox(
+                          width: 160,
+                          child: CustomCard(
+                            imageUrl: categoria['imagen'],
+                            title: categoria['nombre'],
+                            onTap: () {
+                              Navigator.pushNamed(context, categoria['route']);
+                            },
+                            item: categoria,
+                            // Si tu CustomCard espera un 'subtitle' para las categorías,
+                            // podrías añadirlo aquí, o modificar CustomCard para ser más flexible.
+                            // Por ahora, lo omitimos si no es necesario para categorías.
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -345,27 +532,28 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,
+        // El color del BottomNavigationBar se tomará de theme.bottomNavigationBarTheme
       ),
     );
   }
 
   Widget _buildSectionHeader(String title, {required VoidCallback onPressed}) {
+    // El color del texto del encabezado se tomará de textTheme o colorScheme.onBackground
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Color.fromARGB(255, 0, 0, 0),
-          ),
+          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.onBackground, // Color del texto
+              ),
         ),
         TextButton(
           onPressed: onPressed,
           child: Text(
             title == 'Categorías' ? 'Ver todos' : 'Ver Todos',
-            style: TextStyle(color: Colors.grey.shade600, fontSize: 14),
+            style: TextStyle(color: Theme.of(context).colorScheme.onBackground.withOpacity(0.6), fontSize: 14), // Color del texto del botón
           ),
         ),
       ],
@@ -376,17 +564,24 @@ class _HomeScreenState extends State<HomeScreen> {
     if (item == null) return 'assets/images/IndioColorado3.jpg';
 
     String key = '';
-    if (item.runtimeType.toString().contains('PuntoTuristico')) {
+    // Usa `is` para verificar el tipo, es más seguro que `runtimeType.toString().contains`
+    if (item is PuntoTuristico) {
       key = 'punto_${item.id}';
-    } else if (item.runtimeType.toString().contains('LocalTuristico')) {
+    } else if (item is LocalTuristico) {
       key = 'local_${item.id}';
+    } else if (item is Map<String, dynamic> && item.containsKey('imagen')) {
+      // Manejar el caso de las categorías
+      return item['imagen'] as String;
     }
+
 
     if (imagenesRecomendados.containsKey(key)) {
       return imagenesRecomendados[key]!;
     }
-    if (item.imagenUrl != null && item.imagenUrl.isNotEmpty) {
-      return item.imagenUrl;
+    // Asegúrate de que item.imagenUrl exista y sea un String antes de usarlo
+    if ((item is PuntoTuristico && item.imagenUrl != null && item.imagenUrl!.isNotEmpty) ||
+        (item is LocalTuristico && item.imagenUrl != null && item.imagenUrl!.isNotEmpty)) {
+      return item.imagenUrl!;
     }
     return 'assets/images/IndioColorado3.jpg';
   }

@@ -95,7 +95,7 @@ class _ParroquiasScreenState extends State<ParroquiasScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: parroquia.nombre,
-                    puntoTuristicoId: parroquia.id,
+                    item: parroquia,
                   ),
                 );
               },

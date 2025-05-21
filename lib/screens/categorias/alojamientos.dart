@@ -98,7 +98,7 @@ class _AlojamientosScreenState extends State<AlojamientosScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: alojamiento.nombre,
-                    puntoTuristicoId: alojamiento.id,
+                    item: alojamiento,
                   ),
                 );
               },

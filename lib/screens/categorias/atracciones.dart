@@ -132,8 +132,8 @@ class _AtraccionesScreenState extends State<AtraccionesScreen> {
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,
-                    title: title,
-                    puntoTuristicoId: puntoId!, // Pasamos el ID
+                    title: atraccion.nombre,
+                    item: atraccion,
                   ),
                 );
               },

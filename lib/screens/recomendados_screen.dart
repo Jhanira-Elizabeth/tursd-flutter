@@ -98,19 +98,19 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
                   }
 
                   return CustomCard(
-                    imageUrl: _getImageUrl(item),
-                    title: item.nombre,
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/detalles',
-                        arguments: {
-                          'item': item,
-                          'imageUrl': _getImageUrl(item),
-                        },
-                      );
-                    },
-                    puntoTuristicoId: puntoTuristicoId, // Pasamos el ID
+                      imageUrl: _getImageUrl(item),
+                      title: item.nombre,
+                      onTap: () {
+                        Navigator.pushNamed(
+                          context,
+                          '/detalles',
+                          arguments: {
+                            'item': item,
+                            'imageUrl': _getImageUrl(item), // Usamos la misma función para la imagen
+                          },
+                        );
+                      },
+                      item: item,
                   );
                 },
               ),

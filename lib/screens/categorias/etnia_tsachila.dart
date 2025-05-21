@@ -181,7 +181,7 @@ class _EtniaTsachilaScreenState extends State<EtniaTsachilaScreen> {
                   title: title,
                   subtitle: subtitle,
                   onTap: onTap,
-                  puntoTuristicoId: puntoId!, // Pasamos el ID, asegurándonos que no sea nulo
+                  item: item, // Pasamos el ID, asegurándonos que no sea nulo
                 );
               },
             );

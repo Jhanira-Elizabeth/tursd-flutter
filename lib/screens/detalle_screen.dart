@@ -4,13 +4,15 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../models/punto_turistico.dart';
 import '../../services/api_service.dart';
 import '../../widgets/bottom_navigation_bar_turistico.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../../services/favorite_service.dart'; // Import FavoriteService
 
 class DetallesScreen extends StatefulWidget {
   final Map<String, dynamic>? itemData;
   final String? imageUrl;
 
   const DetallesScreen({Key? key, this.itemData, this.imageUrl})
-    : super(key: key);
+      : super(key: key);
 
   @override
   _DetallesScreenState createState() => _DetallesScreenState();
@@ -23,11 +25,13 @@ class _DetallesScreenState extends State<DetallesScreen>
   dynamic _item;
   late String _imageUrl;
   final ApiService _apiService = ApiService();
+  final FavoriteService _favoriteService = FavoriteService(); // Initialize FavoriteService
   late Future<List<HorarioAtencion>> _horariosFuture;
   late Future<List<Servicio>> _serviciosFuture;
   late Future<List<Actividad>> _actividadesFuture;
   String? _barrioSector;
   String? _dueno;
+  bool _isFavorite = false; // New state variable for favorite status
 
   @override
   void initState() {
@@ -40,6 +44,7 @@ class _DetallesScreenState extends State<DetallesScreen>
       _horariosFuture = _fetchHorarios();
       _serviciosFuture = _fetchServicios();
       _actividadesFuture = _fetchActividades();
+      _checkFavoriteStatus(); // Check favorite status on init
     } else {
       _horariosFuture = Future.value([]);
       _serviciosFuture = Future.value([]);
@@ -49,25 +54,82 @@ class _DetallesScreenState extends State<DetallesScreen>
     _simulateDueno();
   }
 
-  void _onTabChange(int index) {
-  setState(() {
-    _currentIndex = index;
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/mapa');
-        break;
-      case 2: // Favoritos
-        Navigator.pushReplacementNamed(context, '/favoritos');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/chatbot');
-        break;
+  // Method to check if the item is a favorite
+  void _checkFavoriteStatus() async {
+    if (_item == null) return;
+
+    bool favorite = false;
+    if (_item is PuntoTuristico) {
+      favorite = await _favoriteService.isPuntoTuristicoFavorite(_item.id);
+    } else if (_item is LocalTuristico) {
+      favorite = await _favoriteService.isLocalTuristicoFavorite(_item.id);
     }
-  });
-}
+
+    setState(() {
+      _isFavorite = favorite;
+    });
+  }
+
+  // Method to toggle favorite status
+  void _toggleFavorite() async {
+    if (_item == null) return;
+
+    bool success = false;
+    if (_item is PuntoTuristico) {
+      if (_isFavorite) {
+        await _favoriteService.removePuntoTuristicoFromFavorites(_item.id);
+      } else {
+        await _favoriteService.addPuntoTuristicoToFavorites(_item.id);
+      }
+      success = true; // Assuming the operations are always successful for now
+    } else if (_item is LocalTuristico) {
+      if (_isFavorite) {
+        await _favoriteService.removeLocalTuristicoFromFavorites(_item.id);
+      } else {
+        await _favoriteService.addLocalTuristicoToFavorites(_item.id);
+      }
+      success = true; // Assuming the operations are always successful for now
+    }
+
+    if (success) {
+      setState(() {
+        _isFavorite = !_isFavorite;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isFavorite
+              ? 'Añadido a favoritos'
+              : 'Eliminado de favoritos'),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No se pudo actualizar el estado de favoritos.'),
+        ),
+      );
+    }
+  }
+
+  void _onTabChange(int index) {
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2: // Favoritos
+          Navigator.pushReplacementNamed(context, '/favoritos');
+          break;
+        case 3:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
 
   Future<List<HorarioAtencion>> _fetchHorarios() async {
     if (_item is LocalTuristico) {
@@ -152,22 +214,38 @@ class _DetallesScreenState extends State<DetallesScreen>
   @override
   Widget build(BuildContext context) {
     final args = ModalRoute.of(context)!.settings.arguments as Map;
-  final categoriaManual = args['categoria'] as String?;
-  String categoriaMostrar = _getCategoryName(_item);
-  if (categoriaMostrar == 'Desconocida' && categoriaManual != null && categoriaManual.isNotEmpty) {
-    categoriaMostrar = categoriaManual;
-  }
+    final categoriaManual = args['categoria'] as String?;
+    String categoriaMostrar = _getCategoryName(_item);
+    if (categoriaMostrar == 'Desconocida' &&
+        categoriaManual != null &&
+        categoriaManual.isNotEmpty) {
+      categoriaMostrar = categoriaManual;
+    }
     String nombre =
         (_item != null && _item.nombre != null) ? _item.nombre : 'Detalles';
 
+    // Obtener la altura total de la pantalla
+    final screenHeight = MediaQuery.of(context).size.height;
+    // Calcular la altura exacta para que ocupe la mitad de la pantalla
+    final imageHeight = screenHeight * 0.5;
+
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final textColor = isDarkMode ? Colors.white : Colors.black;
+    final secondaryTextColor = isDarkMode ? Colors.white70 : Colors.black54;
+    final backgroundColor = isDarkMode ? Colors.grey[900] : Colors.grey[200];
+    final cardColor = isDarkMode ? Colors.grey[800] : Colors.white;
+    final dragIndicatorColor = isDarkMode ? Colors.grey[600] : Colors.grey[300];
+    final tabColor = isDarkMode ? Colors.greenAccent : Colors.green;
+
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: backgroundColor,
       body: Stack(
         children: [
           // Cabecera con imagen y título
           SizedBox(
             width: double.infinity,
-            height: 250,
+            height:
+                imageHeight, // Usar la altura calculada en lugar de valor fijo
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -178,6 +256,25 @@ class _DetallesScreenState extends State<DetallesScreen>
                     return const SizedBox.shrink();
                   },
                 ),
+                // Añadir un gradiente para mejorar la visibilidad del texto sobre la imagen
+                Positioned.fill(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.transparent,
+                          Colors.black.withOpacity(0.3),
+                          Colors.black.withOpacity(0.7),
+                        ],
+                        stops: const [0.0, 0.5, 0.7, 0.8, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
                 Positioned(
                   left: 20,
                   bottom: 40,
@@ -185,38 +282,45 @@ class _DetallesScreenState extends State<DetallesScreen>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Nombre principal con borde blanco
-                      Text(
-                        nombre,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              blurRadius: 8,
-                              color: Colors.black.withOpacity(0.7),
-                              offset: Offset(2, 2),
-                            ),
-                          ],
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width *
+                            0.85, // Limita el ancho al 85% de la pantalla
+                        child: Text(
+                          nombre,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 8,
+                                color: Colors.black.withOpacity(0.7),
+                                offset: const Offset(2, 2),
+                              ),
+                            ],
+                          ),
+                          maxLines: 2, // Permite hasta 2 líneas
+                          overflow: TextOverflow
+                              .ellipsis, // Agrega "..." si el texto es más largo
                         ),
                       ),
                       // Subcategoría (por ejemplo, "Tsáchila")
-if (categoriaMostrar != 'Desconocida')
-  Text(
-    categoriaMostrar,
-    style: TextStyle(
-      fontSize: 18,
-      color: Colors.white70,
-      fontWeight: FontWeight.w500,
-      shadows: [
-        Shadow(
-          blurRadius: 6,
-          color: Colors.black.withOpacity(0.6),
-          offset: Offset(1, 1),
-        ),
-      ],
-    ),
-  ),
+                      if (categoriaMostrar != 'Desconocida')
+                        Text(
+                          categoriaMostrar,
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.white70,
+                            fontWeight: FontWeight.w500,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 6,
+                                color: Colors.black.withOpacity(0.6),
+                                offset: const Offset(1, 1),
+                              ),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
@@ -232,22 +336,48 @@ if (categoriaMostrar != 'Desconocida')
                     ),
                   ),
                 ),
+                // Botón de Favoritos
+                Positioned(
+                  top: MediaQuery.of(context).padding.top + 8,
+                  right: 8,
+                  child: CircleAvatar(
+                    backgroundColor: Colors.black.withOpacity(0.4),
+                    child: IconButton(
+                      icon: Icon(
+                        _isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: _isFavorite ? Colors.redAccent : Colors.white,
+                      ),
+                      onPressed: _toggleFavorite, // Call the toggle method
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
           // Contenido desplazable sobre la imagen
           DraggableScrollableSheet(
-            initialChildSize: 0.7,
-            minChildSize: 0.7,
+            initialChildSize: 0.5, // Iniciar en la mitad de la pantalla
+            minChildSize: 0.5, // Mínimo ocupará el 50%
             maxChildSize: 0.95,
             builder: (context, scrollController) {
               return Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(0)),
+                decoration: BoxDecoration(
+                  color: cardColor,
+                  borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(20)), // Añadir bordes redondeados
                 ),
                 child: Column(
                   children: [
+                    // Indicador visual de arrastre
+                    Container(
+                      margin: const EdgeInsets.symmetric(vertical: 8),
+                      width: 40,
+                      height: 5,
+                      decoration: BoxDecoration(
+                        color: dragIndicatorColor,
+                        borderRadius: BorderRadius.circular(2.5),
+                      ),
+                    ),
                     // Título y tabs
                     Padding(
                       padding: const EdgeInsets.only(
@@ -257,9 +387,9 @@ if (categoriaMostrar != 'Desconocida')
                       ),
                       child: TabBar(
                         controller: _tabController,
-                        labelColor: Colors.green,
-                        unselectedLabelColor: Colors.black54,
-                        indicatorColor: Colors.green,
+                        labelColor: tabColor,
+                        unselectedLabelColor: secondaryTextColor,
+                        indicatorColor: tabColor,
                         tabs: const [
                           Tab(text: 'Información'),
                           Tab(text: 'Actividades'),
@@ -281,52 +411,61 @@ if (categoriaMostrar != 'Desconocida')
                                 children: [
                                   const SizedBox(height: 8),
                                   Text(
-  'Categoría: $categoriaMostrar',
-  style: TextStyle(
-    color: Colors.green.shade300,
-    fontWeight: FontWeight.bold,
-  ),
-),
+                                    'Categoría: $categoriaMostrar',
+                                    style: TextStyle(
+                                      color:
+                                          textColor, // Use textColor here for consistency with dark mode
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                   const SizedBox(height: 16),
-                                  const Text(
+                                  Text(
                                     'Descripción',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: textColor,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
                                   Text(
                                     _item?.descripcion ??
                                         'No hay descripción disponible.',
+                                    style: TextStyle(color: textColor),
                                   ),
                                   const SizedBox(height: 16),
-                                  const Text(
+                                  Text(
                                     'Más Información',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: textColor,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
-                                  Text('Dueño: $_dueno'),
+                                  Text('Dueño: $_dueno',
+                                      style: TextStyle(color: textColor)),
                                   if (_item is LocalTuristico) ...[
                                     if ((_item as LocalTuristico).email != null)
                                       Text(
                                         'Email: ${(_item as LocalTuristico).email}',
+                                        style: TextStyle(color: textColor),
                                       ),
                                     if ((_item as LocalTuristico).telefono !=
                                         null)
                                       Text(
                                         'Teléfono: ${(_item as LocalTuristico).telefono}',
+                                        style: TextStyle(color: textColor),
                                       ),
                                     if ((_item as LocalTuristico).direccion !=
                                         null)
                                       Text(
                                         'Dirección: ${(_item as LocalTuristico).direccion}',
+                                        style: TextStyle(color: textColor),
                                       ),
                                   ],
-                                  Text('Ubicación: $_barrioSector'),
+                                  Text('Ubicación: $_barrioSector',
+                                      style: TextStyle(color: textColor)),
                                 ],
                               ),
                             ),
@@ -340,11 +479,12 @@ if (categoriaMostrar != 'Desconocida')
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (_item is LocalTuristico) ...[
-                                    const Text(
+                                    Text(
                                       'Servicios',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
+                                        color: textColor,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -357,47 +497,49 @@ if (categoriaMostrar != 'Desconocida')
                                         } else if (snapshot.hasError) {
                                           return Text(
                                             'Error al cargar servicios: ${snapshot.error}',
+                                            style: TextStyle(color: textColor),
                                           );
                                         } else if (!snapshot.hasData ||
                                             snapshot.data!.isEmpty) {
-                                          return const Text(
+                                          return Text(
                                             'No hay servicios disponibles.',
+                                            style: TextStyle(color: textColor),
                                           );
                                         } else {
-                                          final serviciosFiltrados =
-                                              snapshot.data!
-                                                  .where(
-                                                    (servicio) =>
-                                                        servicio.idLocal ==
-                                                        _item.id,
-                                                  )
-                                                  .toList();
+                                          final serviciosFiltrados = snapshot
+                                              .data!
+                                              .where((servicio) =>
+                                                  servicio.idLocal == _item.id)
+                                              .toList();
                                           if (serviciosFiltrados.isEmpty) {
-                                            return const Text(
+                                            return Text(
                                               'No hay servicios disponibles para este local.',
+                                              style:
+                                                  TextStyle(color: textColor),
                                             );
                                           }
                                           return Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
-                                            children:
-                                                serviciosFiltrados.map((
-                                                  servicio,
-                                                ) {
-                                                  return Text(
-                                                    '- ${servicio.servicio}',
-                                                  );
-                                                }).toList(),
+                                            children: serviciosFiltrados
+                                                .map((servicio) {
+                                              return Text(
+                                                '- ${servicio.servicio}',
+                                                style:
+                                                    TextStyle(color: textColor),
+                                              );
+                                            }).toList(),
                                           );
                                         }
                                       },
                                     ),
                                     const SizedBox(height: 16),
-                                    const Text(
+                                    Text(
                                       'Horarios de atención',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
+                                        color: textColor,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -410,11 +552,13 @@ if (categoriaMostrar != 'Desconocida')
                                         } else if (snapshot.hasError) {
                                           return Text(
                                             'Error al cargar horarios: ${snapshot.error}',
+                                            style: TextStyle(color: textColor),
                                           );
                                         } else if (!snapshot.hasData ||
                                             snapshot.data!.isEmpty) {
-                                          return const Text(
+                                          return Text(
                                             'No hay horarios de atención disponibles.',
+                                            style: TextStyle(color: textColor),
                                           );
                                         } else {
                                           return Column(
@@ -422,20 +566,23 @@ if (categoriaMostrar != 'Desconocida')
                                                 CrossAxisAlignment.start,
                                             children:
                                                 snapshot.data!.map((horario) {
-                                                  return Text(
-                                                    '${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}',
-                                                  );
-                                                }).toList(),
+                                              return Text(
+                                                '${horario.diaSemana}: ${horario.horaInicio} - ${horario.horaFin}',
+                                                style:
+                                                    TextStyle(color: textColor),
+                                              );
+                                            }).toList(),
                                           );
                                         }
                                       },
                                     ),
                                   ] else if (_item is PuntoTuristico) ...[
-                                    const Text(
+                                    Text(
                                       'Actividades',
                                       style: TextStyle(
                                         fontSize: 18,
                                         fontWeight: FontWeight.bold,
+                                        color: textColor,
                                       ),
                                     ),
                                     const SizedBox(height: 8),
@@ -448,22 +595,26 @@ if (categoriaMostrar != 'Desconocida')
                                         } else if (snapshot.hasError) {
                                           return Text(
                                             'Error al cargar actividades: ${snapshot.error}',
+                                            style: TextStyle(color: textColor),
                                           );
                                         } else if (!snapshot.hasData ||
                                             snapshot.data!.isEmpty) {
-                                          return const Text(
+                                          return Text(
                                             'No hay actividades disponibles.',
+                                            style: TextStyle(color: textColor),
                                           );
                                         } else {
                                           return Column(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
-                                            children:
-                                                snapshot.data!.map((actividad) {
-                                                  return Text(
-                                                    '- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}',
-                                                  );
-                                                }).toList(),
+                                            children: snapshot.data!
+                                                .map((actividad) {
+                                              return Text(
+                                                '- ${actividad.nombre} ${actividad.precio != null ? '(${actividad.precio} USD)' : ''}',
+                                                style:
+                                                    TextStyle(color: textColor),
+                                              );
+                                            }).toList(),
                                           );
                                         }
                                       },
@@ -471,9 +622,10 @@ if (categoriaMostrar != 'Desconocida')
                                   ],
                                   if (_item is! LocalTuristico &&
                                       _item is! PuntoTuristico)
-                                    const Center(
+                                    Center(
                                       child: Text(
                                         'No hay información de actividades disponible.',
+                                        style: TextStyle(color: textColor),
                                       ),
                                     ),
                                 ],
@@ -488,11 +640,12 @@ if (categoriaMostrar != 'Desconocida')
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Text(
+                                  Text(
                                     'Ubicación en el Mapa',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: textColor,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -538,21 +691,29 @@ if (categoriaMostrar != 'Desconocida')
                                       ),
                                     )
                                   else
-                                    const Text('Ubicación no disponible.'),
+                                    Text('Ubicación no disponible.',
+                                        style: TextStyle(color: textColor)),
                                   if (_item?.latitud != null &&
                                       _item?.longitud != null)
                                     ElevatedButton(
                                       onPressed: () {
                                         _openMap(_item.latitud, _item.longitud);
                                       },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor:
+                                            tabColor, // Color del botón
+                                        foregroundColor: Colors
+                                            .white, // Color del texto del botón
+                                      ),
                                       child: const Text('Abrir en Google Maps'),
                                     ),
                                   const SizedBox(height: 16),
-                                  const Text(
+                                  Text(
                                     'Dirección',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
+                                      color: textColor,
                                     ),
                                   ),
                                   const SizedBox(height: 8),
@@ -561,6 +722,7 @@ if (categoriaMostrar != 'Desconocida')
                                         ? (_item as LocalTuristico).direccion ??
                                             'Dirección no disponible.'
                                         : 'Dirección no disponible.',
+                                    style: TextStyle(color: textColor),
                                   ),
                                 ],
                               ),
@@ -574,23 +736,14 @@ if (categoriaMostrar != 'Desconocida')
               );
             },
           ),
-          // Botón de regreso
-          Positioned(
-            top: MediaQuery.of(context).padding.top + 8,
-            left: 8,
-            child: CircleAvatar(
-              backgroundColor: Colors.black.withOpacity(0.4),
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.white),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ),
         ],
       ),
       bottomNavigationBar: BottomNavigationBarTuristico(
         currentIndex: _currentIndex,
         onTabChange: _onTabChange,
+        // Asegúrate de que BottomNavigationBarTuristico también se adapte al modo oscuro
+        // Si es un widget personalizado, necesitarás pasarle los colores adecuados o hacer que
+        // consulte el tema de forma interna.
       ),
     );
   }

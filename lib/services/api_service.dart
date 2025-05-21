@@ -298,6 +298,4 @@ Future<List<Actividad>> fetchActividadesByPuntoId(int puntoId) async {
   final todas = await _handleListResponse(response, (json) => Actividad.fromJson(json));
   return todas.where((a) => a.idPuntoTuristico == puntoId).toList();
 }
-
-
 }

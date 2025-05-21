@@ -127,9 +127,8 @@ class _RiosScreenState extends State<RiosScreen> {
                   ),
                   child: CustomCard(
                     imageUrl: imageUrl,
-                    title: nombre,
-                    subtitle: descripcion,
-                    puntoTuristicoId: itemId, // Pasamos el ID aquí
+                    title: rio.nombre,
+                    item: rio,
                   ),
                 );
               },

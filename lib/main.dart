@@ -2,7 +2,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'services/auth_service.dart'; // Asegúrate de crear este archivo
+import 'services/auth_service.dart';
 import 'models/punto_turistico.dart';
 import 'services/api_service.dart';
 import '../widgets/bottom_navigation_bar_turistico.dart';
@@ -11,7 +11,7 @@ import 'screens/splash_screen.dart';
 import 'screens/recomendados_screen.dart';
 import 'screens/chatbot_screen.dart' as chatbot;
 import 'screens/mapa_screen.dart';
-import '../widgets/custom_card.dart';
+import '../widgets/custom_card.dart'; // Aunque CustomCard no necesita estar aquí, no molesta.
 import 'screens/categorias_screen.dart';
 import 'screens/categorias/parques.dart';
 import 'screens/categorias/atracciones.dart';
@@ -22,12 +22,14 @@ import 'screens/categorias/rios.dart';
 import 'screens/categorias/alimentos.dart';
 import 'screens/detalle_screen.dart';
 import 'screens/detalle_parroquia_screen.dart';
-import 'screens/login_screen.dart'; // Crea esta pantalla
+import 'screens/login_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart' show User;
 import 'dart:io';
 import 'firebase_options.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'screens/favorites_screen.dart';
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,17 +37,23 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider( // Envuelve toda la app con ThemeProvider
+      create: (context) => ThemeProvider(),
+      child: const AppRoot(), // Cambia a un nuevo widget raíz que contendrá MaterialApp
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+// Nuevo widget AppRoot que ahora contendrá el MaterialApp
+class AppRoot extends StatefulWidget {
+  const AppRoot({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<AppRoot> createState() => _AppRootState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _AppRootState extends State<AppRoot> {
   bool _showSplash = true;
   final AuthService _auth = AuthService();
 
@@ -72,22 +80,15 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Ahora, este context SIEMPRE tendrá disponible ThemeProvider
+    final themeProvider = Provider.of<ThemeProvider>(context);
+
     return MaterialApp(
       title: 'Turismo IA',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color.fromARGB(255, 80, 18, 215),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color.fromARGB(255, 80, 18, 215),
-          primary: const Color.fromARGB(255, 80, 18, 215),
-        ),
-        scaffoldBackgroundColor: const Color.fromARGB(255, 255, 255, 255),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Colors.black,
-          elevation: 0,
-        ),
-      ),
+      theme: ThemeProvider.lightTheme(), // Usa el tema claro definido
+      darkTheme: ThemeProvider.darkTheme(), // Usa el tema oscuro definido
+      themeMode: themeProvider.themeMode, // Controla el tema actual
       initialRoute: '/',
       routes: {
         '/': (context) => _showSplash
@@ -100,8 +101,8 @@ class _MyAppState extends State<MyApp> {
               ),
         '/home': (context) => const HomeScreen(),
         '/categorias': (context) => CategoriasScreen(),
-        '/recomendados': (context) => const RecomendadosScreen(), // Usando la clase existente
-        '/mapa': (context) => const MapaScreen(), // Usando la clase existente
+        '/recomendados': (context) => const RecomendadosScreen(),
+        '/mapa': (context) => const MapaScreen(),
         '/chatbot': (context) => chatbot.ChatbotScreen(),
         '/etniatsachila': (context) => const EtniaTsachilaScreen(),
         '/parroquias': (context) => const ParroquiasScreen(),
@@ -121,6 +122,13 @@ class _MyAppState extends State<MyApp> {
     );
   }
 }
+
+// Mantenemos MyApp como estaba para simplificar, renombrándola a AppRoot
+// y las otras clases (MapaPage, RecomendadosPage) no necesitan cambios ya que
+// obtendrán el tema del contexto de su padre (MaterialApp).
+
+// Tu MapaPage y RecomendadosPage (u otras clases) no necesitan cambios aquí.
+// Simplemente se asegura que el tema esté disponible en el árbol de widgets.
 
 class MapaPage extends StatefulWidget {
   const MapaPage({super.key});
@@ -142,23 +150,25 @@ class _MapaPageState extends State<MapaPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Aquí puedes acceder al tema sin problemas
+    final theme = Theme.of(context); //
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mapa Turístico'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface, // Adapta al tema
+        foregroundColor: theme.appBarTheme.foregroundColor ?? theme.colorScheme.onSurface, // Adapta al tema
         elevation: 0,
       ),
       body: FutureBuilder<List<PuntoTuristico>>(
         future: _puntosFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
+            return Center(child: CircularProgressIndicator(color: theme.colorScheme.primary)); // Adapta al tema
           } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(child: Text('Error: ${snapshot.error}', style: TextStyle(color: theme.colorScheme.error))); // Adapta al tema
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(
-              child: Text('No hay puntos turísticos disponibles'),
+            return Center(
+              child: Text('No hay puntos turísticos disponibles', style: TextStyle(color: theme.colorScheme.onBackground)), // Adapta al tema
             );
           } else {
             final puntos = snapshot.data!;
@@ -192,7 +202,7 @@ class _MapaPageState extends State<MapaPage> {
                         '/detalles',
                         arguments: {
                           'item': punto,
-                        }, // Envuelve el PuntoTuristico en un mapa
+                        },
                       );
                     },
                   ),
@@ -218,24 +228,26 @@ class _MapaPageState extends State<MapaPage> {
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.colorScheme.surface, // Adapta al tema
                       borderRadius: BorderRadius.circular(30),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
+                          color: theme.colorScheme.shadow.withOpacity(0.1), // Adapta al tema
                           spreadRadius: 1,
                           blurRadius: 5,
                           offset: const Offset(0, 3),
                         ),
                       ],
                     ),
-                    child: const TextField(
+                    child: TextField(
                       decoration: InputDecoration(
                         hintText: 'Buscar en el mapa',
-                        prefixIcon: Icon(Icons.search),
+                        hintStyle: TextStyle(color: theme.colorScheme.onSurface.withOpacity(0.6)), // Adapta al tema
+                        prefixIcon: Icon(Icons.search, color: theme.colorScheme.onSurface.withOpacity(0.8)), // Adapta al tema
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 0),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 0),
                       ),
+                      style: TextStyle(color: theme.colorScheme.onSurface), // Adapta al tema
                     ),
                   ),
                 ),
@@ -244,19 +256,7 @@ class _MapaPageState extends State<MapaPage> {
           }
         },
       ),
-      bottomNavigationBar: BottomNavigationBarTuristico(
-        currentIndex: _currentIndex,
-        onTabChange: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-          if (index == 0) {
-            Navigator.pushReplacementNamed(context, '/home');
-          } else if (index == 2) {
-            Navigator.pushReplacementNamed(context, '/chatbot');
-          }
-        },
-      ),
+      // No necesitas el BottomNavigationBar aquí si MapaScreen ya es la página con su propio BottomNavigationBar
     );
   }
 }
@@ -274,24 +274,24 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
   int _currentIndex = 0;
 
   void _onTabChange(int index) {
-  setState(() {
-    _currentIndex = index;
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, '/home');
-        break;
-      case 1:
-        Navigator.pushReplacementNamed(context, '/mapa');
-        break;
-      case 2: // Favoritos
-        Navigator.pushReplacementNamed(context, '/favoritos');
-        break;
-      case 3:
-        Navigator.pushReplacementNamed(context, '/chatbot');
-        break;
-    }
-  });
-}
+    setState(() {
+      _currentIndex = index;
+      switch (index) {
+        case 0:
+          Navigator.pushReplacementNamed(context, '/home');
+          break;
+        case 1:
+          Navigator.pushReplacementNamed(context, '/mapa');
+          break;
+        case 2: // Favoritos
+          Navigator.pushReplacementNamed(context, '/favoritos');
+          break;
+        case 3:
+          Navigator.pushReplacementNamed(context, '/chatbot');
+          break;
+      }
+    });
+  }
 
   @override
   void initState() {
@@ -301,13 +301,14 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<PuntoTuristico> puntos =
-        ModalRoute.of(context)!.settings.arguments as List<PuntoTuristico>;
+    final theme = Theme.of(context); //
+    final List<dynamic> puntos =
+        ModalRoute.of(context)!.settings.arguments as List<dynamic>;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Recomendados'),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
+        backgroundColor: theme.appBarTheme.backgroundColor ?? theme.colorScheme.surface, // Adapta al tema
+        foregroundColor: theme.appBarTheme.foregroundColor ?? theme.colorScheme.onSurface, // Adapta al tema
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
@@ -315,8 +316,8 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
         ),
       ),
       body: puntos.isEmpty
-          ? const Center(
-              child: Text('No hay puntos turísticos disponibles.'),
+          ? Center(
+              child: Text('No hay puntos turísticos disponibles.', style: TextStyle(color: theme.colorScheme.onBackground)), // Adapta al tema
             )
           : GridView.builder(
               padding: const EdgeInsets.all(16),
@@ -328,21 +329,37 @@ class _RecomendadosPageState extends State<RecomendadosPage> {
               ),
               itemCount: puntos.length,
               itemBuilder: (context, index) {
-  final punto = puntos[index];
-  return CustomCard(
-    imageUrl:
-        punto.imagenUrl ?? 'https://via.placeholder.com/181x147',
-    title: punto.nombre,
-    onTap: () {
-     Navigator.pushNamed(
-        context,
-        '/detalles',
-        arguments: {
-          'item': punto,
-        }, // Envuelve el PuntoTuristico en un mapa
+                final item = puntos[index];
+                String imageUrl = 'https://via.placeholder.com/181x147';
+                String title = 'Desconocido';
+                String subtitle = '';
+
+                if (item is PuntoTuristico) {
+                  imageUrl = item.imagenUrl ?? 'https://via.placeholder.com/181x147';
+                  title = item.nombre;
+                  subtitle = item.parroquia?.nombre ?? 'Santo Domingo';
+                } else if (item is LocalTuristico) {
+                  imageUrl = item.imagenUrl ?? 'https://via.placeholder.com/181x147';
+                  title = item.nombre;
+                  subtitle = item.direccion ?? 'Santo Domingo';
+                } else {
+                  print('Tipo de item desconocido en RecomendadosPage: ${item.runtimeType}');
+                }
+
+                return CustomCard(
+                  imageUrl: imageUrl,
+                  title: title,
+                  subtitle: subtitle,
+                  onTap: () {
+                    Navigator.pushNamed(
+                      context,
+                      '/detalles',
+                      arguments: {
+                        'item': item,
+                      },
                     );
                   },
-                  puntoTuristicoId: punto.id, // ¡Aquí agregamos el ID!
+                  item: item, // ¡Aquí pasamos el objeto completo!
                 );
               },
             ),

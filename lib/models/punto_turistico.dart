@@ -57,6 +57,38 @@ class PuntoTuristico {
       parroquia = Parroquia.fromJson(json['parroquia']);
     }
 
+    String? assetPath;
+    final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
+
+    if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
+        // Asegúrate de que no haya prefijos de URL real accidentalmente.
+        // Si el valor es una URL COMPLETA, necesitas extraer solo el nombre del archivo.
+        // Si es SOLO el nombre del archivo (ej. "Bomboli8.jpg"), esta es la forma.
+        
+        // Vamos a asumir que 'imagen_url' viene como el nombre del archivo (ej. "Bomboli8.jpg")
+        assetPath = 'assets/images/$rawImageUrl';
+
+        // SI POR ALGÚN CASO SIGUE VINIENDO UNA URL COMPLETA, usa esto:
+        // try {
+        //   Uri uri = Uri.parse(rawImageUrl);
+        //   String fileName = uri.pathSegments.last;
+        //   if (fileName.isNotEmpty) {
+        //     assetPath = 'assets/images/$fileName';
+        //   } else {
+        //     assetPath = 'assets/images/default_placeholder.jpg'; // O un asset por defecto si no hay nombre
+        //   }
+        // } catch (e) {
+        //   // No es una URL válida, tratar como un simple nombre de archivo o default
+        //   assetPath = 'assets/images/$rawImageUrl';
+        //   // Si no funciona, usa default
+        //   if (assetPath == 'assets/images/') assetPath = 'assets/images/default_placeholder.jpg';
+        // }
+
+    } else {
+      assetPath = 'assets/images/default_placeholder.jpg'; // Imagen por defecto si no hay imagen en la API
+    }
+
+
     return PuntoTuristico(
       id: json['id'] ?? json['punto_turistico_id'],
       nombre: json['nombre'] ?? json['nombre_punto_turistico'],
@@ -72,7 +104,7 @@ class PuntoTuristico {
           json['longitud'] != null
               ? double.parse(json['longitud'].toString())
               : 0.0,
-      imagenUrl: json['imagen_url'],
+      imagenUrl: assetPath,
       creadoPor: json['creado_por'] ?? json['punto_turistico_creado_por'],
       editadoPor: json['editado_por'] ?? json['punto_turistico_editado_por'],
       fechaCreacion:
@@ -194,6 +226,15 @@ class Parroquia {
           0.0; // Intenta parsear, si falla usa 0.0
     }
 
+    String? assetPath;
+    final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
+
+    if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
+        assetPath = 'assets/images/$rawImageUrl';
+    } else {
+      assetPath = 'assets/images/default_placeholder.jpg'; // O un asset por defecto
+    }
+
     return Parroquia(
       id: json['id'] ?? json['parroquia_id'] ?? 0,
       nombre: json['nombre'] ?? json['nombre_parroquia'] ?? '',
@@ -201,7 +242,7 @@ class Parroquia {
       poblacion: json['poblacion'] != null ? int.parse(json['poblacion'].toString()) : 0,
       temperaturaPromedio: temperatura,
       estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
-      imagenUrl: json['imagen_url'],
+      imagenUrl: assetPath,
     );
   }
 }
@@ -264,6 +305,15 @@ class LocalTuristico {
               .toList();
     }
 
+    String? assetPath;
+    final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
+
+    if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
+        assetPath = 'assets/images/$rawImageUrl';
+    } else {
+      assetPath = 'assets/images/default_placeholder.jpg'; // O un asset por defecto
+    }
+
     return LocalTuristico(
       id: json['id'] ?? json['local_turistico_id'] ?? 0,
       nombre: json['nombre'] ?? '',
@@ -281,7 +331,7 @@ class LocalTuristico {
       email: json['email'],
       sitioweb: json['sitioweb'],
       estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
-      imagenUrl: json['imagen_url'],
+      imagenUrl: assetPath,
       horarios: horarios,
       etiquetas: etiquetas,
       servicios: servicios,

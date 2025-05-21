@@ -99,7 +99,7 @@ class _ParquesScreenState extends State<ParquesScreen> {
                   child: CustomCard(
                     imageUrl: imageUrl,
                     title: parque.nombre,
-                    puntoTuristicoId: parque.id,
+                    item: parque,
                   ),
                 );
               },

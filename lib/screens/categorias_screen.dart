@@ -94,13 +94,13 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
                 final categoriaId = categoria['nombre'].toString().toLowerCase().replaceAll(' ', '');
 
                 return CustomCard(
-                  imageUrl: categoria['imagen'],
-                  title: categoria['nombre'],
-                  onTap: () {
-                    Navigator.pushNamed(context, categoria['route']);
-                  },
-                  puntoTuristicoId: categoriaId.hashCode, // Usamos el hashCode del string como ID (solo para esta pantalla)
-                );
+            imageUrl: categoria['imagen'],
+            title: categoria['nombre'],
+            onTap: () {
+              Navigator.pushNamed(context, categoria['route']);
+            },
+            item: categoria, // <--- CAMBIO CLAVE: Pasamos el mapa 'categoria' como el 'item'
+          );
         },
       ),
       bottomNavigationBar: BottomNavigationBarTuristico(
