@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:tursd/services/favorite_service.dart';
 import 'package:tursd/models/punto_turistico.dart';
-import 'package:provider/provider.dart'; 
-import '../providers/theme_provider.dart'; 
-
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class CustomCard extends StatefulWidget {
   final String imageUrl;
   final String title;
   final String? subtitle;
   final Function()? onTap;
-  final dynamic item; // <--- CAMBIO IMPORTANTE: Ahora es dynamic y se llama 'item'
+  final dynamic
+      item; // <--- CAMBIO IMPORTANTE: Ahora es dynamic y se llama 'item'
 
   const CustomCard({
     super.key,
@@ -44,12 +44,13 @@ class _CustomCardState extends State<CustomCard>
     // Ajusta la elevación y la posición de la animación para ser sutil
     _elevationAnimation = Tween<double>(
       begin: 4, // Elevación inicial más consistente
-      end: 8,  // Aumenta un poco la elevación al pasar el mouse
+      end: 8, // Aumenta un poco la elevación al pasar el mouse
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _positionAnimation = Tween<Offset>(
       begin: Offset.zero,
-      end: const Offset(0, -0.01), // Mueve ligeramente hacia arriba (1% de la altura)
+      end: const Offset(
+          0, -0.01), // Mueve ligeramente hacia arriba (1% de la altura)
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     _checkIsFavorite();
@@ -89,7 +90,8 @@ class _CustomCardState extends State<CustomCard>
   Widget build(BuildContext context) {
     // Accede al tema actual para adaptar los colores
     final theme = Theme.of(context);
-    final bool canBeFavorite = widget.item is PuntoTuristico || widget.item is LocalTuristico;
+    final bool canBeFavorite =
+        widget.item is PuntoTuristico || widget.item is LocalTuristico;
 
     return MouseRegion(
       onEnter: (_) => _controller.forward(),
@@ -100,15 +102,20 @@ class _CustomCardState extends State<CustomCard>
           animation: _controller,
           builder: (context, _) {
             return Transform.translate(
-              offset: _positionAnimation.value * MediaQuery.of(context).size.height,
-              child: Card( // Usamos directamente Card en lugar de Container con BoxDecoration
-                color: theme.colorScheme.surface, // Color de fondo de la tarjeta según el tema
+              offset:
+                  _positionAnimation.value * MediaQuery.of(context).size.height,
+              child: Card(
+                // Usamos directamente Card en lugar de Container con BoxDecoration
+                color: theme.colorScheme
+                    .surface, // Color de fondo de la tarjeta según el tema
                 elevation: _elevationAnimation.value, // Elevación animada
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                clipBehavior: Clip.antiAlias, // Para que la imagen respete los bordes redondeados
-                child: Stack( // Usamos Stack para superponer el botón de favoritos
+                clipBehavior: Clip
+                    .antiAlias, // Para que la imagen respete los bordes redondeados
+                child: Stack(
+                  // Usamos Stack para superponer el botón de favoritos
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -122,11 +129,13 @@ class _CustomCardState extends State<CustomCard>
                             errorBuilder: (context, error, stackTrace) {
                               // Adapta el color de fondo para la imagen de error
                               return Container(
-                                color: theme.colorScheme.surfaceVariant, // Un color que se adapta al tema
+                                color: theme.colorScheme
+                                    .surfaceVariant, // Un color que se adapta al tema
                                 alignment: Alignment.center,
                                 child: Icon(
                                   Icons.image_not_supported,
-                                  color: theme.colorScheme.onSurfaceVariant, // Color del icono que contrasta
+                                  color: theme.colorScheme
+                                      .onSurfaceVariant, // Color del icono que contrasta
                                   size: 50,
                                 ),
                               );
@@ -143,17 +152,20 @@ class _CustomCardState extends State<CustomCard>
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,
                                 style: theme.textTheme.titleMedium?.copyWith(
-                                  color: theme.colorScheme.onSurface, // Color del título según el tema
+                                  color: theme.colorScheme
+                                      .onSurface, // Color del título según el tema
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
-                              if (widget.subtitle != null && widget.subtitle!.isNotEmpty)
+                              if (widget.subtitle != null &&
+                                  widget.subtitle!.isNotEmpty)
                                 Text(
                                   widget.subtitle!,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurface.withOpacity(0.7), // Color del subtítulo según el tema
+                                    color: theme.colorScheme.onSurface.withOpacity(
+                                        0.7), // Color del subtítulo según el tema
                                   ),
                                 ),
                             ],
@@ -166,22 +178,29 @@ class _CustomCardState extends State<CustomCard>
                       Positioned(
                         top: 8,
                         right: 8,
-                        child: GestureDetector( // Usamos GestureDetector para tener más control sobre el tap
+                        child: GestureDetector(
+                          // Usamos GestureDetector para tener más control sobre el tap
                           onTap: () async {
                             // Lógica para añadir/eliminar de favoritos
                             if (widget.item is PuntoTuristico) {
-                              final puntoId = widget.item.id;
                               if (_isFavorite) {
-                                await _favoriteService.removePuntoTuristicoFromFavorites(puntoId);
+                                await _favoriteService
+                                    .removePuntoTuristicoFromFavorites(
+                                        widget.item.toMap());
                               } else {
-                                await _favoriteService.addPuntoTuristicoToFavorites(puntoId);
+                                await _favoriteService
+                                    .addPuntoTuristicoToFavorites(
+                                        widget.item.toMap());
                               }
                             } else if (widget.item is LocalTuristico) {
-                              final localId = widget.item.id;
                               if (_isFavorite) {
-                                await _favoriteService.removeLocalTuristicoFromFavorites(localId);
+                                await _favoriteService
+                                    .removeLocalTuristicoFromFavorites(
+                                        widget.item.toMap());
                               } else {
-                                await _favoriteService.addLocalTuristicoToFavorites(localId);
+                                await _favoriteService
+                                    .addLocalTuristicoToFavorites(
+                                        widget.item.toMap());
                               }
                             }
                             if (mounted) {
@@ -190,15 +209,22 @@ class _CustomCardState extends State<CustomCard>
                               });
                             }
                           },
-                          child: Container( // Envuelve el icono en un Container para el fondo circular
+                          child: Container(
+                            // Envuelve el icono en un Container para el fondo circular
                             padding: const EdgeInsets.all(4),
                             decoration: BoxDecoration(
-                              color: theme.colorScheme.surface.withOpacity(0.8), // Fondo semitransparente que se adapta al tema
+                              color: theme.colorScheme.surface.withOpacity(
+                                  0.8), // Fondo semitransparente que se adapta al tema
                               shape: BoxShape.circle,
                             ),
                             child: Icon(
-                              _isFavorite ? Icons.favorite : Icons.favorite_border,
-                              color: _isFavorite ? Colors.red : theme.colorScheme.onSurface.withOpacity(0.7), // Color del corazón
+                              _isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: _isFavorite
+                                  ? Colors.red
+                                  : theme.colorScheme.onSurface
+                                      .withOpacity(0.7), // Color del corazón
                               size: 24,
                             ),
                           ),

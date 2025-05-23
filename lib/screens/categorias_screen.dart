@@ -28,7 +28,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
     {
       'nombre': 'Parroquias',
       'imagen': 'assets/images/ValleHermoso1.jpg',
-      'route': 'assets/images/ParroquiaNuevo.jpg', // Este es el que debe corregirse al navegar
+      'route': 'parroquias', 
     },
     {
       'nombre': 'Alojamiento',
@@ -140,12 +140,7 @@ class _CategoriasScreenState extends State<CategoriasScreen> {
             imageUrl: categoria['imagen'],
             title: categoria['nombre'],
             onTap: () {
-              // Corrección para la ruta de Parroquias si era un error y debe ser una ruta
-              if (categoria['route'] == 'assets/images/ParroquiaNuevo.jpg') {
-                Navigator.pushNamed(context, '/parroquias'); // Asume que '/parroquias' es la ruta correcta
-              } else {
-                Navigator.pushNamed(context, categoria['route']);
-              }
+              Navigator.pushNamed(context, categoria['route']);
             },
             item: categoria,
           );

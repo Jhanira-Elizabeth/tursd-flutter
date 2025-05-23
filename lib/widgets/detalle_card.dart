@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/** import 'package:flutter/material.dart';
 import '../models/punto_turistico.dart';
 import '../services/api_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -164,4 +164,4 @@ class _DetalleCardState extends State<DetalleCard> with SingleTickerProviderStat
       ],
     );
   }
-}
+}*/

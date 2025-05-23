@@ -75,20 +75,21 @@ class _DetallesScreenState extends State<DetallesScreen>
 
     bool success = false;
     if (_item is PuntoTuristico) {
-      if (_isFavorite) {
-        await _favoriteService.removePuntoTuristicoFromFavorites(_item.id);
-      } else {
-        await _favoriteService.addPuntoTuristicoToFavorites(_item.id);
-      }
-      success = true;
-    } else if (_item is LocalTuristico) {
-      if (_isFavorite) {
-        await _favoriteService.removeLocalTuristicoFromFavorites(_item.id);
-      } else {
-        await _favoriteService.addLocalTuristicoToFavorites(_item.id);
-      }
-      success = true; 
-    }
+  if (_isFavorite) {
+    await _favoriteService.removePuntoTuristicoFromFavorites(_item.toMap());
+  } else {
+    await _favoriteService.addPuntoTuristicoToFavorites(_item.toMap());
+  }
+  success = true;
+} else if (_item is LocalTuristico) {
+  if (_isFavorite) {
+    await _favoriteService.removeLocalTuristicoFromFavorites(_item.toMap());
+  } else {
+    await _favoriteService.addLocalTuristicoToFavorites(_item.toMap());
+  }
+  success = true;
+}
+
 
     if (success) {
       setState(() {
@@ -519,7 +520,7 @@ class _DetallesScreenState extends State<DetallesScreen>
                                             children: serviciosFiltrados
                                                 .map((servicio) {
                                               return Text(
-                                                '- ${servicio.servicio}',
+                                                '- ${servicio.servicioNombre}',
                                                 style:
                                                     TextStyle(color: textColor),
                                               );

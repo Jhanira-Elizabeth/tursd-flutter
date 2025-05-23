@@ -1,89 +1,127 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart'; // Importa Provider
-import '../widgets/bottom_navigation_bar_turistico.dart';
-import '../services/favorite_service.dart';
-import '../services/api_service.dart';
-import '../models/punto_turistico.dart';
-import '../widgets/custom_card.dart';
-import '../providers/theme_provider.dart'; // Importa tu ThemeProvider
+import '../../widgets/bottom_navigation_bar_turistico.dart';
+import '../../services/favorite_service.dart';
+import '../../widgets/custom_card.dart';
+import '../../models/punto_turistico.dart';
 
 class FavoritesScreen extends StatefulWidget {
   const FavoritesScreen({super.key});
 
   @override
-  State<FavoritesScreen> createState() => _FavoritesScreenState();
+  _FavoritesScreenState createState() => _FavoritesScreenState();
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  int _currentIndex = 2;
+  int _currentIndex = 2; // Favoritos tab
   final FavoriteService _favoriteService = FavoriteService();
-  final ApiService _apiService = ApiService();
-  late Future<List<dynamic>> _favoriteItemsFuture;
+  late Future<List<dynamic>> _favoritesFuture;
+  
+  // Lista de imágenes por defecto para cuando no hay imagen específica
+  final List<String> _defaultImageUrls = [
+    'assets/images/Marias2.jpg',
+    'assets/images/afiche_publicitario_balneario_ibiza.jpg',
+    'assets/images/Elpalmar.jpg',
+    'assets/images/Cucardas4.jpg',
+    'assets/images/Otonga2.jpg',
+    'assets/images/DCarlos3.jpg',
+    'assets/images/Ventura5.jpg',
+    'assets/images/ElPulpo3.jpg',
+    'assets/images/GorilaPark1.jpg',
+    'assets/images/BalnearioEspanola5.jpg',
+    'assets/images/SantaRosa1.jpg',
+    'assets/images/Agachaditos2.jpg',
+    'assets/images/CasaHornado1.jpg',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _fetchFavoriteItems();
+    _favoritesFuture = _fetchFavorites();
   }
 
-  // Se asegura de que la lista de favoritos se recargue cuando la pantalla se vuelve a enfocar
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Podemos agregar un listener al Route para recargar cuando volvemos
-    // o simplemente llamar a _fetchFavoriteItems en un initState o didChangeDependencies
-    // si sabemos que el estado puede haber cambiado.
-    // La lógica de .then((_) { _fetchFavoriteItems(); }); en onTap ya ayuda mucho.
+  Future<List<dynamic>> _fetchFavorites() async {
+    try {
+      // Obtener puntos turísticos favoritos como maps
+      final favoritePuntosRaw = await _favoriteService.getFavoritePuntos();
+      print('Puntos favoritos raw: $favoritePuntosRaw');
+      
+      // Obtener locales turísticos favoritos como maps
+      final favoriteLocalesRaw = await _favoriteService.getFavoriteLocales();
+      print('Locales favoritos raw: $favoriteLocalesRaw');
+
+      // Crear una lista mixta que incluya tanto los objetos como información de tipo
+      List<dynamic> allFavorites = [];
+      
+      // Agregar puntos turísticos
+      for (var puntoMap in favoritePuntosRaw) {
+        try {
+          final punto = PuntoTuristico.fromJson(puntoMap);
+          allFavorites.add(punto);
+        } catch (e) {
+          print('Error al parsear punto turístico: $e');
+          // Si hay error al parsear, agregamos el map raw con un tipo identificador
+          puntoMap['_tipo'] = 'PuntoTuristico';
+          allFavorites.add(puntoMap);
+        }
+      }
+      
+      // Agregar locales turísticos
+      for (var localMap in favoriteLocalesRaw) {
+        try {
+          final local = LocalTuristico.fromJson(localMap);
+          allFavorites.add(local);
+        } catch (e) {
+          print('Error al parsear local turístico: $e');
+          // Si hay error al parsear, agregamos el map raw con un tipo identificador
+          localMap['_tipo'] = 'LocalTuristico';
+          allFavorites.add(localMap);
+        }
+      }
+
+      print('Total de favoritos: ${allFavorites.length}');
+      return allFavorites;
+    } catch (e) {
+      print('Error al cargar favoritos: $e');
+      return [];
+    }
   }
 
-  Future<void> _fetchFavoriteItems() async {
-    setState(() {
-      _favoriteItemsFuture = _getAndProcessFavoriteItems();
-    });
-  }
-
-  Future<List<dynamic>> _getAndProcessFavoriteItems() async {
-    print('--- Inciando _getAndProcessFavoriteItems ---');
-
-    // 1. Obtener los IDs de favoritos almacenados localmente
-    final favoritePuntoIds = await _favoriteService.getFavoritePuntoIds();
-    final favoriteLocalIds = await _favoriteService.getFavoriteLocalIds();
-
-    print('IDs de Puntos Favoritos: $favoritePuntoIds');
-    print('IDs de Locales Favoritos: $favoriteLocalIds');
-
-    // 2. Obtener TODOS los puntos y locales de la API (con etiquetas)
-    final allPuntos = await _apiService.fetchPuntosConEtiquetas();
-    final allLocales = await _apiService.fetchLocalesConEtiquetas();
-
-    print('Total de Puntos de la API: ${allPuntos.length}');
-    print('Total de Locales de la API: ${allLocales.length}');
-
-    // 3. Filtrar los puntos turísticos que son favoritos
-    final favoritePuntos = allPuntos
-        .where((punto) => favoritePuntoIds.contains(punto.id))
-        .toList();
-    print('Puntos Favoritos filtrados: ${favoritePuntos.map((p) => p.nombre).toList()}');
-
-    // 4. Filtrar los locales turísticos que son favoritos
-    final favoriteLocales = allLocales
-        .where((local) => favoriteLocalIds.contains(local.id))
-        .toList();
-    print('Locales Favoritos filtrados: ${favoriteLocales.map((l) => l.nombre).toList()}');
-
-    // Combina ambas listas.
-    final combinedList = [...favoritePuntos, ...favoriteLocales];
-    print('Lista combinada final (Puntos y Locales): ${combinedList.map((item) {
-          if (item is PuntoTuristico) {
-              return item.nombre;
-          } else if (item is LocalTuristico) {
-              return item.nombre;
-          }
-          return 'Unknown Type';
-      }).toList()}');
-    print('--- Fin _getAndProcessFavoriteItems ---');
-
-    return combinedList;
+  String _getImageUrl(dynamic item, int index) {
+    String? imageUrl;
+    
+    // Manejar diferentes tipos de items
+    if (item is PuntoTuristico) {
+      imageUrl = item.imagenUrl;
+    } else if (item is LocalTuristico) {
+      imageUrl = item.imagenUrl;
+    } else if (item is Map<String, dynamic>) {
+      // Si es un map raw, intentar obtener la imagen directamente
+      imageUrl = item['imagenUrl'] as String?;
+    }
+    
+    // Debug: Imprimir para verificar qué imagen se está obteniendo
+    String itemName = '';
+    if (item is PuntoTuristico) {
+      itemName = item.nombre;
+    } else if (item is LocalTuristico) {
+      itemName = item.nombre;
+    } else if (item is Map<String, dynamic>) {
+      itemName = item['nombre'] as String? ?? 'Sin nombre';
+    }
+    
+    print('Item: $itemName');
+    print('ImageUrl obtenida: $imageUrl');
+    
+    // Si no hay imagen específica o es null, usar una imagen por defecto
+    if (imageUrl == null || imageUrl.isEmpty || imageUrl == 'null') {
+      final imageIndex = index % _defaultImageUrls.length;
+      final defaultImage = _defaultImageUrls[imageIndex];
+      print('Usando imagen por defecto: $defaultImage');
+      return defaultImage;
+    }
+    
+    print('Usando imagen específica: $imageUrl');
+    return imageUrl;
   }
 
   void _onTabChange(int index) {
@@ -96,8 +134,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         case 1:
           Navigator.pushReplacementNamed(context, '/mapa');
           break;
-        case 2: // Favoritos
-          // Si ya estamos en favoritos, no navegamos de nuevo
+        case 2: // Favoritos - ya estamos aquí
           break;
         case 3:
           Navigator.pushReplacementNamed(context, '/chatbot');
@@ -106,50 +143,60 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     });
   }
 
+  // Método para refrescar la lista de favoritos
+  Future<void> _refreshFavorites() async {
+    setState(() {
+      _favoritesFuture = _fetchFavorites();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context); // Obtén el tema actual
-    final themeProvider = Provider.of<ThemeProvider>(context); // Para acceder al toggleTheme
-
     return Scaffold(
-      backgroundColor: theme.colorScheme.background, // Usa el color de fondo del tema
       appBar: AppBar(
-        title: Text(
-          'Favoritos',
-          style: theme.appBarTheme.titleTextStyle, // Usa el estilo de texto del AppBarTheme
-        ),
-        backgroundColor: theme.appBarTheme.backgroundColor, // Usa el color de fondo del AppBarTheme
-        foregroundColor: theme.appBarTheme.foregroundColor, // Color de los iconos/texto del AppBarTheme
-        elevation: theme.appBarTheme.elevation, // O un valor que prefieras para la elevación
+        title: const Text('Mis Favoritos'),
         actions: [
-          // Botón para cambiar el tema (opcional, pero útil para pruebas)
           IconButton(
-            icon: Icon(
-              themeProvider.themeMode == ThemeMode.dark ? Icons.wb_sunny : Icons.nightlight_round,
-              color: theme.appBarTheme.iconTheme?.color,
-            ),
-            onPressed: () {
-              themeProvider.toggleTheme();
-            },
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshFavorites,
+            tooltip: 'Actualizar favoritos',
           ),
         ],
       ),
       body: FutureBuilder<List<dynamic>>(
-        future: _favoriteItemsFuture,
+        future: _favoritesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(
-                color: theme.colorScheme.primary, // Color del indicador de carga
-              ),
+            return const Center(
+              child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasError) {
             return Center(
-              child: Text(
-                'Error al cargar favoritos: ${snapshot.error}',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: theme.colorScheme.error, // Color para mensajes de error
-                ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Error al cargar favoritos',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '${snapshot.error}',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _refreshFavorites,
+                    child: const Text('Reintentar'),
+                  ),
+                ],
               ),
             );
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
@@ -159,74 +206,83 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 children: [
                   Icon(
                     Icons.favorite_border,
-                    size: 80,
-                    color: theme.colorScheme.onBackground.withOpacity(0.5), // Color del icono adaptable
+                    size: 64,
+                    color: Theme.of(context).colorScheme.outline,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Aún no tienes favoritos.',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      color: theme.colorScheme.onBackground.withOpacity(0.7), // Color del texto adaptable
-                    ),
+                    'No tienes favoritos aún',
+                    style: Theme.of(context).textTheme.titleLarge,
                   ),
+                  const SizedBox(height: 8),
                   Text(
-                    'Marca el corazón en tus puntos o locales turísticos preferidos.',
+                    'Explora lugares y añádelos a tus favoritos',
+                    style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: theme.colorScheme.onBackground.withOpacity(0.6), // Color del texto adaptable
-                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () => Navigator.pushReplacementNamed(context, '/home'),
+                    child: const Text('Explorar lugares'),
                   ),
                 ],
               ),
             );
           } else {
-            final List<dynamic> favoriteItems = snapshot.data!;
-            print('--- Items recibidos por GridView.builder ---');
-            print('Cantidad de items en GridView: ${favoriteItems.length}');
-            favoriteItems.forEach((item) {
-              if (item is PuntoTuristico) {
-                print('GV Item (Punto): ${item.nombre} (ID: ${item.id})');
-              } else if (item is LocalTuristico) {
-                print('GV Item (Local): ${item.nombre} (ID: ${item.id})');
-              } else {
-                print('GV Item (Desconocido): $item');
-              }
-            });
-            print('------------------------------------------');
+            final favorites = snapshot.data!;
+            return RefreshIndicator(
+              onRefresh: _refreshFavorites,
+              child: GridView.builder(
+                padding: const EdgeInsets.all(12),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 0.75,
+                ),
+                itemCount: favorites.length,
+                itemBuilder: (context, index) {
+                  final favorite = favorites[index];
+                  final imageUrl = _getImageUrl(favorite, index);
+                  
+                  String nombre;
+                  String? descripcion;
+                  
+                  if (favorite is PuntoTuristico) {
+                    nombre = favorite.nombre;
+                    descripcion = favorite.descripcion;
+                  } else if (favorite is LocalTuristico) {
+                    nombre = favorite.nombre;
+                    descripcion = favorite.descripcion;
+                  } else if (favorite is Map<String, dynamic>) {
+                    // Manejar maps raw
+                    nombre = favorite['nombre'] as String? ?? 'Sin nombre';
+                    descripcion = favorite['descripcion'] as String?;
+                  } else {
+                    nombre = 'Elemento desconocido';
+                    descripcion = null;
+                  }
 
-            return GridView.builder(
-              padding: const EdgeInsets.all(16),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 3 / 4,
+                  return CustomCard(
+                    imageUrl: imageUrl,
+                    title: nombre,
+                    subtitle: descripcion != null && descripcion.length > 50
+                        ? '${descripcion.substring(0, 50)}...'
+                        : descripcion,
+                    item: favorite,
+                    onTap: () {
+                      Navigator.pushNamed(
+                        context,
+                        '/detalles',
+                        arguments: {
+                          'item': favorite,
+                          'imageUrl': imageUrl,
+                        },
+                      );
+                    },
+                  );
+                },
               ),
-              itemCount: favoriteItems.length,
-              itemBuilder: (context, index) {
-                final item = favoriteItems[index];
-
-                return CustomCard(
-                  // Para imageUrl y title, ya estás usando propiedades que deberían venir en ambos tipos
-                  imageUrl: (item.imagenUrl != null && item.imagenUrl.isNotEmpty) ? item.imagenUrl : 'assets/images/default_placeholder.jpg',
-                  title: item.nombre,
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/detalles',
-                      arguments: {
-                        'item': item,
-                        'type': (item is PuntoTuristico ? 'punto' : 'local'),
-                      },
-                    ).then((_) {
-                      // Vuelve a cargar los favoritos cuando regreses de la pantalla de detalles,
-                      // en caso de que el usuario haya marcado/desmarcado un favorito.
-                      _fetchFavoriteItems();
-                    });
-                  },
-                  item: item,
-                );
-              },
             );
           }
         },

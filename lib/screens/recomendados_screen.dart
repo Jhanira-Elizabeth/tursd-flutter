@@ -55,7 +55,7 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
   }
 
   String _getImageUrl(dynamic item) {
-    if (item == null) return 'assets/images/default_placeholder.jpg';
+    if (item == null) return 'assets/images/viejo4.jpg';
     String key = '';
     if (item.runtimeType.toString().contains('PuntoTuristico')) {
       key = 'punto_${item.id}';
@@ -75,7 +75,7 @@ class _RecomendadosScreenState extends State<RecomendadosScreen> {
     if (item.imagenUrl != null && item.imagenUrl.isNotEmpty) {
       return item.imagenUrl;
     }
-    return 'assets/images/default_placeholder.jpg';
+    return 'assets/images/viejo5.jpg';
   }
 
   @override

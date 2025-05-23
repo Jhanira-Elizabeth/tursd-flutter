@@ -7,51 +7,57 @@ class FavoriteService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final Logger _logger = Logger();
 
-  // Nombre de la colección de usuarios (ajústalo si es diferente)
   final String _usersCollection = 'users';
 
-  // Nombres de los campos donde guardaremos los IDs de los favoritos
   final String _favoritePuntosField = 'favoritePuntosTuristicos';
-  final String _favoriteLocalesField = 'favoriteLocalesTuristicos'; // <-- Nuevo campo para locales
+  final String _favoriteLocalesField = 'favoriteLocalesTuristicos';
 
-  // ----------------------------------------------------
-  // Métodos para PUNTOS TURÍSTICOS
-  // ----------------------------------------------------
-
-  // Renombrado para mayor claridad y para que coincida con FavoritesScreen
-  Future<List<int>> getFavoritePuntoIds() async { // <-- Nuevo nombre
+  // Obtener puntos favoritos (objetos completos)
+  Future<List<Map<String, dynamic>>> getFavoritePuntos() async {
     try {
       final User? user = _auth.currentUser;
       if (user != null) {
-        final DocumentSnapshot userDoc =
-            await _firestore.collection(_usersCollection).doc(user.uid).get();
-
-        if (userDoc.exists && userDoc.data() != null) {
-          final data = userDoc.data() as Map<String, dynamic>;
-          // Usamos el nuevo nombre de campo _favoritePuntosField
-          final favorites = data[_favoritePuntosField] as List<dynamic>?;
-          return favorites?.map((item) => item as int).toList() ?? [];
+        final doc = await _firestore.collection(_usersCollection).doc(user.uid).get();
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data() as Map<String, dynamic>;
+          final favoritos = data[_favoritePuntosField] as List<dynamic>?;
+          return favoritos?.map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
         }
       }
       return [];
     } catch (e) {
-      _logger.e('Error al obtener IDs de puntos favoritos', error: e);
+      _logger.e('Error al obtener puntos favoritos', error: e);
       return [];
     }
   }
 
-  Future<bool> isPuntoTuristicoFavorite(int puntoTuristicoId) async {
-    final favorites = await getFavoritePuntoIds(); // Usamos el nuevo nombre del método
-    return favorites.contains(puntoTuristicoId);
+  // Obtener locales favoritos (objetos completos)
+  Future<List<Map<String, dynamic>>> getFavoriteLocales() async {
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        final doc = await _firestore.collection(_usersCollection).doc(user.uid).get();
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data() as Map<String, dynamic>;
+          final favoritos = data[_favoriteLocalesField] as List<dynamic>?;
+          return favoritos?.map((e) => Map<String, dynamic>.from(e)).toList() ?? [];
+        }
+      }
+      return [];
+    } catch (e) {
+      _logger.e('Error al obtener locales favoritos', error: e);
+      return [];
+    }
   }
 
-  Future<void> addPuntoTuristicoToFavorites(int puntoTuristicoId) async {
+  // Agregar punto turístico (objeto completo)
+  Future<void> addPuntoTuristicoToFavorites(Map<String, dynamic> puntoData) async {
     try {
       final User? user = _auth.currentUser;
       if (user != null) {
         final userRef = _firestore.collection(_usersCollection).doc(user.uid);
         await userRef.update({
-          _favoritePuntosField: FieldValue.arrayUnion([puntoTuristicoId]), // Usamos el nuevo nombre de campo
+          _favoritePuntosField: FieldValue.arrayUnion([puntoData]),
         });
       }
     } catch (e) {
@@ -59,13 +65,14 @@ class FavoriteService {
     }
   }
 
-  Future<void> removePuntoTuristicoFromFavorites(int puntoTuristicoId) async {
+  // Eliminar punto turístico (objeto completo)
+  Future<void> removePuntoTuristicoFromFavorites(Map<String, dynamic> puntoData) async {
     try {
       final User? user = _auth.currentUser;
       if (user != null) {
         final userRef = _firestore.collection(_usersCollection).doc(user.uid);
         await userRef.update({
-          _favoritePuntosField: FieldValue.arrayRemove([puntoTuristicoId]), // Usamos el nuevo nombre de campo
+          _favoritePuntosField: FieldValue.arrayRemove([puntoData]),
         });
       }
     } catch (e) {
@@ -73,43 +80,14 @@ class FavoriteService {
     }
   }
 
-  // ----------------------------------------------------
-  // Métodos para LOCALES TURÍSTICOS (NUEVOS)
-  // ----------------------------------------------------
-
-  Future<List<int>> getFavoriteLocalIds() async { // <-- Nuevo método
-    try {
-      final User? user = _auth.currentUser;
-      if (user != null) {
-        final DocumentSnapshot userDoc =
-            await _firestore.collection(_usersCollection).doc(user.uid).get();
-
-        if (userDoc.exists && userDoc.data() != null) {
-          final data = userDoc.data() as Map<String, dynamic>;
-          // Usamos el nuevo campo _favoriteLocalesField
-          final favorites = data[_favoriteLocalesField] as List<dynamic>?;
-          return favorites?.map((item) => item as int).toList() ?? [];
-        }
-      }
-      return [];
-    } catch (e) {
-      _logger.e('Error al obtener IDs de locales favoritos', error: e);
-      return [];
-    }
-  }
-
-  Future<bool> isLocalTuristicoFavorite(int localTuristicoId) async { // <-- Nuevo método
-    final favorites = await getFavoriteLocalIds();
-    return favorites.contains(localTuristicoId);
-  }
-
-  Future<void> addLocalTuristicoToFavorites(int localTuristicoId) async { // <-- Nuevo método
+  // Agregar local turístico (objeto completo)
+  Future<void> addLocalTuristicoToFavorites(Map<String, dynamic> localData) async {
     try {
       final User? user = _auth.currentUser;
       if (user != null) {
         final userRef = _firestore.collection(_usersCollection).doc(user.uid);
         await userRef.update({
-          _favoriteLocalesField: FieldValue.arrayUnion([localTuristicoId]), // Usamos el nuevo campo
+          _favoriteLocalesField: FieldValue.arrayUnion([localData]),
         });
       }
     } catch (e) {
@@ -117,17 +95,30 @@ class FavoriteService {
     }
   }
 
-  Future<void> removeLocalTuristicoFromFavorites(int localTuristicoId) async { // <-- Nuevo método
+  // Eliminar local turístico (objeto completo)
+  Future<void> removeLocalTuristicoFromFavorites(Map<String, dynamic> localData) async {
     try {
       final User? user = _auth.currentUser;
       if (user != null) {
         final userRef = _firestore.collection(_usersCollection).doc(user.uid);
         await userRef.update({
-          _favoriteLocalesField: FieldValue.arrayRemove([localTuristicoId]), // Usamos el nuevo campo
+          _favoriteLocalesField: FieldValue.arrayRemove([localData]),
         });
       }
     } catch (e) {
       _logger.e('Error al eliminar local de favoritos', error: e);
     }
+  }
+
+  // Opcional: Métodos para verificar si un punto o local es favorito,
+  // podrías hacerlo buscando si algún favorito tiene el mismo 'id' en la lista.
+  Future<bool> isPuntoTuristicoFavorite(int puntoId) async {
+    final favoritos = await getFavoritePuntos();
+    return favoritos.any((element) => element['id'] == puntoId);
+  }
+
+  Future<bool> isLocalTuristicoFavorite(int localId) async {
+    final favoritos = await getFavoriteLocales();
+    return favoritos.any((element) => element['id'] == localId);
   }
 }

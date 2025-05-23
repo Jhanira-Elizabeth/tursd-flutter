@@ -112,7 +112,7 @@ class _HomeScreenState extends State<HomeScreen> {
         PuntoTuristico(
           id: 5,
           nombre: 'Zoológico La Isla del Tapir',
-          imagenUrl: 'assets/images/tapir5.jpg',
+          imagenUrl: 'assets/images/Tapir5.jpg',
           descripcion:
               'Es un lugar ecológico y recreativo.\nproyectado a la conservación de la Flora y Fauna.',
           latitud: -0.117760,

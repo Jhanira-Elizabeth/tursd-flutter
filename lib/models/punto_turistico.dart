@@ -38,18 +38,16 @@ class PuntoTuristico {
   factory PuntoTuristico.fromJson(Map<String, dynamic> json) {
     List<Actividad> actividades = [];
     if (json['actividades'] != null) {
-      actividades =
-          (json['actividades'] as List)
-              .map((actividad) => Actividad.fromJson(actividad))
-              .toList();
+      actividades = (json['actividades'] as List)
+          .map((actividad) => Actividad.fromJson(actividad))
+          .toList();
     }
 
     List<Etiqueta> etiquetas = [];
     if (json['etiquetas'] != null) {
-      etiquetas =
-          (json['etiquetas'] as List)
-              .map((etiqueta) => Etiqueta.fromJson(etiqueta))
-              .toList();
+      etiquetas = (json['etiquetas'] as List)
+          .map((etiqueta) => Etiqueta.fromJson(etiqueta))
+          .toList();
     }
 
     Parroquia? parroquia;
@@ -57,53 +55,69 @@ class PuntoTuristico {
       parroquia = Parroquia.fromJson(json['parroquia']);
     }
 
-    String? assetPath;
-    final String? rawImageUrl = json['imagen_url'] as String?;
-    print('DEBUG (MODEL): rawImageUrl from API: $rawImageUrl');
+    String? assetPath; // Ahora puede ser null
+    final String? rawImageUrl = json['imagenUrl'] ?? json['imagen_url'];
 
     if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
-        // Aquí asumimos que la imagen viene como un nombre de archivo
-        // Vamos a asumir que 'imagen_url' viene como el nombre del archivo (ej. "Bomboli8.jpg")
+      // Si la URL ya empieza con 'assets/', la usamos directamente.
+      // De lo contrario, asumimos que es solo el nombre del archivo y construimos la ruta completa.
+      if (rawImageUrl.startsWith('assets/')) {
+        assetPath = rawImageUrl;
+      } else {
         assetPath = 'assets/images/$rawImageUrl';
-
-      
-
-    } else {
-      assetPath = 'assets/images/default_placeholder.jpg'; // Imagen por defecto si no hay imagen en la API
+      }
     }
-
+    // *** ELIMINADO: No hay bloque else aquí. Si rawImageUrl es null o vacío, assetPath se queda como null. ***
 
     return PuntoTuristico(
-      id: json['id'] ?? json['punto_turistico_id'],
-      nombre: json['nombre'] ?? json['nombre_punto_turistico'],
-      descripcion:
-          json['descripcion'] ?? json['descripcion_punto_turistico'] ?? '',
-      idParroquia: json['id_parroquia'] ?? 0,
+      id: json['id'] ?? json['punto_turistico_id'] ?? 0,
+      nombre: json['nombre'] ?? json['nombre_punto_turistico'] ?? '',
+      descripcion: json['descripcion'] ?? json['descripcion_punto_turistico'] ?? '',
+      idParroquia: json['idParroquia'] ?? json['id_parroquia'] ?? 0,
       estado: json['estado'] ?? json['estado_punto_turistico'] ?? 'activo',
-      latitud:
-          json['latitud'] != null
-              ? double.parse(json['latitud'].toString())
-              : 0.0,
-      longitud:
-          json['longitud'] != null
-              ? double.parse(json['longitud'].toString())
-              : 0.0,
-      imagenUrl: assetPath,
-      creadoPor: json['creado_por'] ?? json['punto_turistico_creado_por'],
-      editadoPor: json['editado_por'] ?? json['punto_turistico_editado_por'],
-      fechaCreacion:
-          json['fecha_creacion'] != null
-              ? DateTime.parse(json['fecha_creacion'])
-              : null,
-      fechaUltimaEdicion:
-          json['fecha_ultima_edicion'] != null
-              ? DateTime.parse(json['fecha_ultima_edicion'])
-              : null,
+      latitud: (json['latitud'] != null)
+          ? double.parse(json['latitud'].toString())
+          : 0.0,
+      longitud: (json['longitud'] != null)
+          ? double.parse(json['longitud'].toString())
+          : 0.0,
+      imagenUrl: assetPath, // Ahora será la ruta completa o null
+      creadoPor: json['creadoPor'] ?? json['creado_por'] ?? json['punto_turistico_creado_por'],
+      editadoPor: json['editadoPor'] ?? json['editado_por'] ?? json['punto_turistico_editado_por'],
+      fechaCreacion: (json['fechaCreacion'] != null && json['fechaCreacion'] is String)
+          ? DateTime.parse(json['fechaCreacion'])
+          : null,
+      fechaUltimaEdicion: (json['fechaUltimaEdicion'] != null && json['fechaUltimaEdicion'] is String)
+          ? DateTime.parse(json['fechaUltimaEdicion'])
+          : null,
       actividades: actividades,
       etiquetas: etiquetas,
       parroquia: parroquia,
       esRecomendado: json['esRecomendado'] ?? false,
     );
+  }
+
+  // Método para convertir PuntoTuristico a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'idParroquia': idParroquia,
+      'estado': estado,
+      'latitud': latitud,
+      'longitud': longitud,
+      'imagenUrl': imagenUrl,
+      'creadoPor': creadoPor,
+      'editadoPor': editadoPor,
+      'fechaCreacion': fechaCreacion?.toIso8601String(), // Convierte DateTime a String ISO 8601
+      'fechaUltimaEdicion': fechaUltimaEdicion?.toIso8601String(), // Convierte DateTime a String ISO 8601
+      // Mapea listas de objetos anidados a sus Mapas correspondientes
+      'actividades': actividades.map((a) => a.toMap()).toList(),
+      'etiquetas': etiquetas.map((e) => e.toMap()).toList(),
+      'parroquia': parroquia?.toMap(), // Mapea el objeto parroquia si no es nulo
+      'esRecomendado': esRecomendado,
+    };
   }
 }
 
@@ -134,24 +148,35 @@ class Actividad {
     return Actividad(
       id: json['id'] ?? json['actividad_punto_turistico_id'] ?? 0,
       nombre: json['actividad'] ?? json['nombre_actividad'] ?? '',
-      idPuntoTuristico:
-          json['id_punto_turistico'] ?? json['apt_id_punto_turistico'] ?? 0,
-      precio:
-          json['precio'] != null
-              ? double.parse(json['precio'].toString())
-              : 0.0,
+      idPuntoTuristico: json['idPuntoTuristico'] ?? json['id_punto_turistico'] ?? json['apt_id_punto_turistico'] ?? 0,
+      precio: (json['precio'] != null)
+          ? double.parse(json['precio'].toString())
+          : 0.0,
       estado: json['estado'] ?? json['estado_actividad'] ?? '',
-      creadoPor: json['creado_por'] ?? json['actividad_creado_por'],
-      editadoPor: json['editado_por'] ?? json['actividad_editado_por'],
-      fechaCreacion:
-          json['fecha_creacion'] != null
-              ? DateTime.parse(json['fecha_creacion'])
-              : null,
-      fechaUltimaEdicion:
-          json['fecha_ultima_edicion'] != null
-              ? DateTime.parse(json['fecha_ultima_edicion'])
-              : null,
+      creadoPor: json['creadoPor'] ?? json['creado_por'] ?? json['actividad_creado_por'],
+      editadoPor: json['editadoPor'] ?? json['editado_por'] ?? json['actividad_editado_por'],
+      fechaCreacion: (json['fechaCreacion'] != null && json['fechaCreacion'] is String)
+          ? DateTime.parse(json['fechaCreacion'])
+          : null,
+      fechaUltimaEdicion: (json['fechaUltimaEdicion'] != null && json['fechaUltimaEdicion'] is String)
+          ? DateTime.parse(json['fechaUltimaEdicion'])
+          : null,
     );
+  }
+
+  // Método para convertir Actividad a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'idPuntoTuristico': idPuntoTuristico,
+      'precio': precio,
+      'estado': estado,
+      'creadoPor': creadoPor,
+      'editadoPor': editadoPor,
+      'fechaCreacion': fechaCreacion?.toIso8601String(),
+      'fechaUltimaEdicion': fechaUltimaEdicion?.toIso8601String(),
+    };
   }
 }
 
@@ -172,10 +197,19 @@ class Etiqueta {
     return Etiqueta(
       id: json['id'] ?? json['etiqueta_turistica_id'] ?? 0,
       nombre: json['nombre'] ?? json['nombre_etiqueta_turistica'] ?? '',
-      descripcion:
-          json['descripcion'] ?? json['descripcion_etiqueta_turistica'] ?? '',
+      descripcion: json['descripcion'] ?? json['descripcion_etiqueta_turistica'] ?? '',
       estado: json['estado'] ?? json['estado_etiqueta_turistica'] ?? 'activo',
     );
+  }
+
+  // Método para convertir Etiqueta a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'estado': estado,
+    };
   }
 }
 
@@ -200,35 +234,48 @@ class Parroquia {
 
   factory Parroquia.fromJson(Map<String, dynamic> json) {
     double temperatura = 0.0;
-    if (json['temperatura_promedio'] != null) {
-      final tempString = json['temperatura_promedio'].toString().replaceAll(
-        '°C',
-        '',
-      );
-      temperatura =
-          double.tryParse(tempString) ??
-          0.0; // Intenta parsear, si falla usa 0.0
+    if (json['temperaturaPromedio'] != null) {
+      final tempString = json['temperaturaPromedio'].toString().replaceAll('°C', '');
+      temperatura = double.tryParse(tempString) ?? 0.0;
+    } else if (json['temperatura_promedio'] != null) {
+      final tempString = json['temperatura_promedio'].toString().replaceAll('°C', '');
+      temperatura = double.tryParse(tempString) ?? 0.0;
     }
 
-    String? assetPath;
-    final String? rawImageUrl = json['imagen_url'] as String?; // Esto debería ser el nombre del archivo
-    print('DEBUG (MODEL): rawImageUrl from API: $rawImageUrl');
+    String? assetPath; // Ahora puede ser null
+    final String? rawImageUrl = json['imagenUrl'] ?? json['imagen_url'];
 
     if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
+      if (rawImageUrl.startsWith('assets/')) {
+        assetPath = rawImageUrl;
+      } else {
         assetPath = 'assets/images/$rawImageUrl';
-    } else {
-      assetPath = 'assets/images/default_placeholder.jpg'; // O un asset por defecto
+      }
     }
+    // *** ELIMINADO: No hay bloque else aquí. Si rawImageUrl es null o vacío, assetPath se queda como null. ***
 
     return Parroquia(
       id: json['id'] ?? json['parroquia_id'] ?? 0,
       nombre: json['nombre'] ?? json['nombre_parroquia'] ?? '',
       descripcion: json['descripcion'] ?? json['descripcion_parroquia'] ?? '',
-      poblacion: json['poblacion'] != null ? int.parse(json['poblacion'].toString()) : 0,
+      poblacion: (json['poblacion'] != null) ? int.parse(json['poblacion'].toString()) : 0,
       temperaturaPromedio: temperatura,
       estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
-      imagenUrl: assetPath,
+      imagenUrl: assetPath, // Ahora será la ruta completa o null
     );
+  }
+
+  // Método para convertir Parroquia a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'poblacion': poblacion,
+      'temperaturaPromedio': temperaturaPromedio,
+      'estado': estado,
+      'imagenUrl': imagenUrl,
+    };
   }
 }
 
@@ -268,60 +315,78 @@ class LocalTuristico {
   factory LocalTuristico.fromJson(Map<String, dynamic> json) {
     List<HorarioAtencion> horarios = [];
     if (json['horarios'] != null) {
-      horarios =
-          (json['horarios'] as List)
-              .map((horario) => HorarioAtencion.fromJson(horario))
-              .toList();
+      horarios = (json['horarios'] as List)
+          .map((horario) => HorarioAtencion.fromJson(horario))
+          .toList();
     }
 
     List<Etiqueta> etiquetas = [];
     if (json['etiquetas'] != null) {
-      etiquetas =
-          (json['etiquetas'] as List)
-              .map((etiqueta) => Etiqueta.fromJson(etiqueta))
-              .toList();
+      etiquetas = (json['etiquetas'] as List)
+          .map((etiqueta) => Etiqueta.fromJson(etiqueta))
+          .toList();
     }
 
     List<Servicio> servicios = [];
     if (json['servicios'] != null) {
-      servicios =
-          (json['servicios'] as List)
-              .map((servicio) => Servicio.fromJson(servicio))
-              .toList();
+      servicios = (json['servicios'] as List)
+          .map((servicio) => Servicio.fromJson(servicio))
+          .toList();
     }
 
-    String? assetPath;
-    final String? rawImageUrl = json['imagen_url'] as String?;
-    print('DEBUG (MODEL): rawImageUrl from API: $rawImageUrl');
+    String? assetPath; // Ahora puede ser null
+    final String? rawImageUrl = json['imagenUrl'] ?? json['imagen_url'];
 
     if (rawImageUrl != null && rawImageUrl.isNotEmpty) {
+      if (rawImageUrl.startsWith('assets/')) {
+        assetPath = rawImageUrl;
+      } else {
         assetPath = 'assets/images/$rawImageUrl';
-    } else {
-      assetPath = 'assets/images/default_placeholder.jpg'; // O un asset por defecto
+      }
     }
+    // *** ELIMINADO: No hay bloque else aquí. Si rawImageUrl es null o vacío, assetPath se queda como null. ***
 
     return LocalTuristico(
       id: json['id'] ?? json['local_turistico_id'] ?? 0,
       nombre: json['nombre'] ?? '',
       descripcion: json['descripcion'] ?? '',
       direccion: json['direccion'] ?? '',
-      latitud:
-          json['latitud'] != null
-              ? double.parse(json['latitud'].toString())
-              : 0.0,
-      longitud:
-          json['longitud'] != null
-              ? double.parse(json['longitud'].toString())
-              : 0.0,
+      latitud: (json['latitud'] != null)
+          ? double.parse(json['latitud'].toString())
+          : 0.0,
+      longitud: (json['longitud'] != null)
+          ? double.parse(json['longitud'].toString())
+          : 0.0,
       telefono: json['telefono'],
       email: json['email'],
       sitioweb: json['sitioweb'],
       estado: json['estado'] ?? json['estado_parroquia'] ?? 'activo',
-      imagenUrl: assetPath,
+      imagenUrl: assetPath, // Ahora será la ruta completa o null
       horarios: horarios,
       etiquetas: etiquetas,
       servicios: servicios,
     );
+  }
+
+  // Método para convertir LocalTuristico a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'nombre': nombre,
+      'descripcion': descripcion,
+      'direccion': direccion,
+      'latitud': latitud,
+      'longitud': longitud,
+      'telefono': telefono,
+      'email': email,
+      'sitioweb': sitioweb,
+      'estado': estado,
+      'imagenUrl': imagenUrl,
+      // Mapea listas de objetos anidados a sus Mapas correspondientes
+      'horarios': horarios.map((h) => h.toMap()).toList(),
+      'etiquetas': etiquetas.map((e) => e.toMap()).toList(),
+      'servicios': servicios.map((s) => s.toMap()).toList(),
+    };
   }
 }
 
@@ -345,27 +410,61 @@ class HorarioAtencion {
   factory HorarioAtencion.fromJson(Map<String, dynamic> json) {
     return HorarioAtencion(
       id: json['id'] ?? json['horario_id'] ?? 0,
-      horaInicio: json['hora_inicio'] ?? '',
-      horaFin: json['hora_fin'] ?? '',
-      diaSemana: json['dia_semana'] ?? '',
-      idLocal: json['id_local'] ?? 0,
+      horaInicio: json['horaInicio'] ?? json['hora_inicio'] ?? '',
+      horaFin: json['horaFin'] ?? json['hora_fin'] ?? '',
+      diaSemana: json['diaSemana'] ?? json['dia_semana'] ?? '',
+      idLocal: json['idLocal'] ?? json['id_local'] ?? 0,
       estado: json['estado'] ?? json['estado_horario'] ?? 'activo',
     );
+  }
+
+  // Método para convertir HorarioAtencion a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'horaInicio': horaInicio,
+      'horaFin': horaFin,
+      'diaSemana': diaSemana,
+      'idLocal': idLocal,
+      'estado': estado,
+    };
   }
 }
 
 class Servicio {
   final int id;
   final int idLocal;
-  final String servicio;
+  final String servicioNombre; // Renombrado para mayor claridad
+  final double precio; // Cambiado a double para manejo numérico
 
-  Servicio({required this.id, required this.idLocal, required this.servicio});
+  Servicio({
+    required this.id,
+    required this.idLocal,
+    required this.servicioNombre,
+    required this.precio, // Ahora es requerido
+  });
 
   factory Servicio.fromJson(Map<String, dynamic> json) {
+    // Asegurarse de que 'precio' se parsee a double, incluso si es String
+    final double parsedPrecio = (json['precio'] != null)
+        ? double.tryParse(json['precio'].toString()) ?? 0.0
+        : 0.0;
+
     return Servicio(
       id: json['id'] ?? json['servicio_local_id'] ?? 0,
-      idLocal: json['id_local'] ?? 0,
-      servicio: json['servicio'] ?? '',
+      idLocal: json['id_local'] ?? 0, // Usamos 'id_local' directamente del JSON
+      servicioNombre: json['servicio'] ?? '', // Mapeamos 'servicio' del JSON
+      precio: parsedPrecio,
     );
+  }
+
+  // Método para convertir Servicio a Map
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'idLocal': idLocal,
+      'servicioNombre': servicioNombre,
+      'precio': precio,
+    };
   }
 }
