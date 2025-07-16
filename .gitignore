@@ -1,0 +1,166 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.build/
+.buildlog/
+.history
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# IntelliJ related
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+# Flutter/Dart/Pub related
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+
+# Symbolication related
+app.*.symbols
+
+# Obfuscation related
+app.*.map.json
+
+# Android Studio will place build artifacts here
+/android/app/debug
+/android/app/profile
+/android/app/release
+.env
+/android/app/src/main/AndroidManifest.xml
+assets/credential_tursd.json
+assets\credential_tursd.json
+android/app/google-services.json
+android\app\upload-keystore.jks
+android\app\upload-keystore.jks
+android\key.properties
+android/key.properties
+android/app/upload-keystore.jks
+
+android/.gradle
+android/.idea/caches
+android/.idea/libraries
+android/.idea/modules.xml
+android/.idea/workspace.xml
+android/build
+
+ios/xcuserdata/
+ios/*.mode1v3
+ios/*.modev3
+ios/*.perspectivev3
+ios/Runner.xcodeproj/xcuserdata/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Podfile.lock
+
+macos/build
+macos/Flutter/ephemeral/.symlinks
+macos/Flutter/ephemeral/FlutterMacOS.podspec.json
+macos/*.xcodeproj/xcuserdata/
+macos/*.xcworkspace/xcuserdata/
+macos/Podfile.lock
+
+web/build
+
+android/local.properties
+
+*.g.dart
+*.freezed.dart
+
+*.savehistory
+*.autosave
+
+xcuserdata
+*.moved-aside
+*.xcuserstate
+Otros:
+
+Thumbs.db
+ehthumbs.db
+
+# Archivos específicos de Flutter/Dart
+.fvm/
+.flutter/
+flutter_*.json
+*.lock
+pubspec.lock  # Aunque es útil para desarrollo, algunos prefieren ignorarlo
+
+# Archivos generados por build runners
+*.g.dart
+*.freezed.dart
+*.part
+*.inject.summary
+*.inject.dart
+
+# Configuraciones de Firebase (ya que estás usando Firebase)
+firebase_options.dart  # Si contiene claves sensibles
+**/google-services.json
+**/GoogleService-Info.plist
+
+# Archivos de entorno y credenciales
+*.env*
+*.secret*
+secrets.dart
+credentials.json
+*.key
+*.cer
+*.p12
+
+# Archivos de usuario de IDEs
+.vscode/  # Descomenta esta línea si no quieres compartir configuraciones de VSCode
+.idea/workspace.xml
+.idea/modules.xml
+.idea/tasks.xml
+.idea/libraries/
+
+# Archivos temporales y de sistema
+*.tmp
+*.bak
+*.backup
+*.sublime-workspace
+*.sublime-project
+*.log
+
+# Archivos de macOS
+.DS_Store
+._*
+
+# Archivos de Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Archivos de desarrollo específicos de tu proyecto
+assets/credential_tursd.json  # Ya lo tienes, pero es importante mantenerlo
+
+*.orig               # archivos temporales de merge
+*.rej                # archivos rechazados en parches
+*.swp                # archivos de swap de Vim
+*.swo
+*.bak                # backups comunes
+*.tmp
+
+# Agrega:
+*.orig
+*.rej
+*.swo
+*.tmp
+*.code-workspace
+coverage/
+
