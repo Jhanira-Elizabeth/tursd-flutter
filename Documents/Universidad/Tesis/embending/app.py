@@ -1,5 +1,3 @@
-# --- Utilidad para quitar tildes ---
-# --- 1. Importaciones ---
 import os
 import sys
 import subprocess
